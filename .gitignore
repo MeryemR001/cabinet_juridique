@@ -1,0 +1,18 @@
+# Fichiers Python compilés
+*.pyc
+__pycache__/
+
+# Base de données locale
+db.sqlite3
+
+# Dossier virtuel
+venv/
+
+# Logs
+*.log
+
+# Fichiers statiques collectés
+/staticfiles/
+
+# Fichiers système
+.DS_Store
