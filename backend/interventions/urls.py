@@ -1,6 +1,6 @@
-# exemple: factures/urls.py
 from django.urls import path
+from .views import ajouter_intervention
 
 urlpatterns = [
-    # tu peux laisser vide pour l’instant
+    path('ajouter/', ajouter_intervention, name='ajouter_intervention'),
 ]

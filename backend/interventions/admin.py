@@ -1,3 +1,8 @@
 from django.contrib import admin
+from .models import Intervention
 
-# Register your models here.
+@admin.register(Intervention)
+class InterventionAdmin(admin.ModelAdmin):
+    list_display = ('titre', 'date', 'dossier')
+    list_filter = ('date', 'dossier')
+    search_fields = ('titre', 'description')

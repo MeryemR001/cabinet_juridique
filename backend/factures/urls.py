@@ -1,9 +1,6 @@
 from django.urls import path
+from . import views
 
 urlpatterns = [
-    # exemple de pattern, ou vide si pas encore de vues
-    # path('', views.facture_list, name='facture_list'),
+    path('', views.liste_factures, name='liste_factures'),
 ]
-
-# si tu n'as pas encore de vues :
-urlpatterns = []

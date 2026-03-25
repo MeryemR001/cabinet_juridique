@@ -1,3 +1,6 @@
 from django.shortcuts import render
+from .models import Facture
 
-# Create your views here.
+def liste_factures(request):
+    factures = Facture.objects.all()
+    return render(request, 'factures/facture_list.html', {'factures': factures})

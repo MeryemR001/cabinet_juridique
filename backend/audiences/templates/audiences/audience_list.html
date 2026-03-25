@@ -1,0 +1,33 @@
+<h1>Liste des audiences</h1>
+
+<a href="{% url 'ajouter_audience' %}">Ajouter une audience</a>
+
+<br><br>
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>Titre</th>
+            <th>Date</th>
+            <th>Heure</th>
+            <th>Lieu</th>
+            <th>Dossier</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for audience in audiences %}
+        <tr>
+            <td>{{ audience.titre }}</td>
+            <td>{{ audience.date }}</td>
+            <td>{{ audience.heure }}</td>
+            <td>{{ audience.lieu }}</td>
+            <td>{{ audience.dossier }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5">Aucune audience trouvée</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
