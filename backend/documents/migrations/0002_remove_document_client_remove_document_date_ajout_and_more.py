@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('documents', '0001_initial'),
         ('dossiers', '0001_initial'),
-        ('employes', '0001_initial'),
+        
     ]
 
     operations = [

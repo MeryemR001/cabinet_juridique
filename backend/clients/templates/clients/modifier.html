@@ -1,0 +1,10 @@
+<h1>Modifier client</h1>
+
+<form method="post">
+    {% csrf_token %}
+    <input type="text" name="nom" value="{{ client.nom }}"><br>
+    <input type="text" name="prenom" value="{{ client.prenom }}"><br>
+    <input type="text" name="telephone" value="{{ client.telephone }}"><br>
+    <input type="email" name="email" value="{{ client.email }}"><br>
+    <button type="submit">Modifier</button>
+</form>

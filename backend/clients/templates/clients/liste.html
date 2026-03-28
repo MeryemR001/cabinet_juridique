@@ -1,0 +1,14 @@
+<h1>Liste des clients</h1>
+
+<a href="{% url 'ajouter_client' %}">Ajouter un client</a>
+
+<ul>
+    {% for client in clients %}
+        <li>
+            {{ client.nom }} {{ client.prenom }} - {{ client.telephone }}
+
+            <a href="{% url 'modifier_client' client.id %}">Modifier</a>
+            <a href="{% url 'supprimer_client' client.id %}">Supprimer</a>
+        </li>
+    {% endfor %}
+</ul>

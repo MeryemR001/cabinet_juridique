@@ -1,0 +1,10 @@
+<h1>Ajouter un client</h1>
+
+<form method="post">
+    {% csrf_token %}
+    <input type="text" name="nom" placeholder="Nom"><br>
+    <input type="text" name="prenom" placeholder="Prénom"><br>
+    <input type="text" name="telephone" placeholder="Téléphone"><br>
+    <input type="email" name="email" placeholder="Email"><br>
+    <button type="submit">Ajouter</button>
+</form>

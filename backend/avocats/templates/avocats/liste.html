@@ -1,0 +1,26 @@
+{% load static %}
+<h1>Liste des avocats</h1>
+<a href="{% url 'ajouter_avocat' %}">Ajouter un avocat</a>
+<table border="1" cellpadding="5">
+    <tr>
+        <th>Nom</th>
+        <th>Prénom</th>
+        <th>Email</th>
+        <th>Téléphone</th>
+        <th>Actions</th>
+    </tr>
+    {% for avocat in avocats %}
+    <tr>
+        <td>{{ avocat.nom }}</td>
+        <td>{{ avocat.prenom }}</td>
+        <td>{{ avocat.email }}</td>
+        <td>{{ avocat.telephone }}</td>
+        <td>
+            <a href="{% url 'modifier_avocat' avocat.id %}">Modifier</a> |
+            <a href="{% url 'supprimer_avocat' avocat.id %}">Supprimer</a>
+        </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="5">Aucun avocat trouvé.</td></tr>
+    {% endfor %}
+</table>

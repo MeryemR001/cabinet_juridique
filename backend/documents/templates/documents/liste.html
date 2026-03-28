@@ -1,0 +1,13 @@
+<h1>Liste des documents</h1>
+
+<a href="{% url 'ajouter_document' %}">Ajouter un document</a>
+
+<ul>
+    {% for doc in documents %}
+        <li>
+            Dossier: {{ doc.dossier.nom }} -
+            <a href="{{ doc.fichier.url }}">Voir fichier</a>
+            <a href="{% url 'supprimer_document' doc.id %}">Supprimer</a>
+        </li>
+    {% endfor %}
+</ul>

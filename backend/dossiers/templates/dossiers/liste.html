@@ -1,0 +1,14 @@
+<h1>Liste des dossiers</h1>
+
+<a href="{% url 'ajouter_dossier' %}">Ajouter un dossier</a>
+
+<ul>
+    {% for dossier in dossiers %}
+        <li>
+            {{ dossier.nom }} - Client : {{ dossier.client.nom }} {{ dossier.client.prenom }}
+
+            <a href="{% url 'modifier_dossier' dossier.id %}">Modifier</a>
+            <a href="{% url 'supprimer_dossier' dossier.id %}">Supprimer</a>
+        </li>
+    {% endfor %}
+</ul>

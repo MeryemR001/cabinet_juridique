@@ -1,9 +1,10 @@
 from django.contrib import admin
 from .models import Audience
 
-@admin.register(Audience)
 class AudienceAdmin(admin.ModelAdmin):
-    list_display = ('titre', 'date', 'heure', 'lieu', 'dossier')
-    list_filter = ('date', 'lieu')
-    search_fields = ('titre', 'lieu')
-    ordering = ('-date',)
+    # Remplace 'nom' par des champs existants comme client, dossier, avocat
+    list_display = ('client', 'dossier', 'avocat', 'date_audience', 'statut')
+    list_filter = ('statut', 'date_audience')
+    search_fields = ('client__nom', 'dossier__nom', 'avocat__nom')
+
+admin.site.register(Audience, AudienceAdmin)

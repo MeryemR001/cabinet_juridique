@@ -24,10 +24,12 @@ urlpatterns = [
     path('clients/', include('clients.urls')),
     path('dossiers/', include('dossiers.urls')),
     path('documents/', include('documents.urls')),
-    path('employes/', include('employes.urls')),
+    path('avocats/', include('avocats.urls')),
     path('factures/', include('factures.urls')),
     path('interventions/', include('interventions.urls')),
-    path('rendez_vous/', include('rendez_vous.urls')),
+     path('audiences/', include('audiences.urls')),
+     path('dashboard/', include('dashboard.urls')),
+     
 ]
 
 urlpatterns+=static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

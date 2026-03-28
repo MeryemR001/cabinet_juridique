@@ -1,0 +1,239 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>LexGuard - Dashboard</title>
+  <link rel="stylesheet" href="{% static 'dashboard/styles.css' %}">
+  <style>
+    /* ===== RESET ET BASE ===== */
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Segoe UI',sans-serif; background:#f0f2f5; display:flex; height:100vh; overflow:hidden; }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      width:220px; background:#0f1f3d; color:#fff;
+      display:flex; flex-direction:column; flex-shrink:0;
+    }
+    .logo-area { padding:20px; border-bottom:1px solid rgba(255,255,255,0.1); display:flex; align-items:center; gap:10px; }
+    .logo-icon { font-size:26px; }
+    .logo-text { font-size:16px; font-weight:700; }
+    .logo-sub { font-size:9px; color:#a0b0c8; letter-spacing:1px; text-transform:uppercase; }
+    .nav { padding:16px 0; flex:1; }
+    .nav a {
+      display:flex; align-items:center; gap:10px;
+      padding:11px 20px; font-size:13px; color:#a0b0c8;
+      text-decoration:none; transition:0.2s;
+    }
+    .nav a:hover { color:#fff; background:rgba(255,255,255,0.07); }
+    .nav a.active { color:#fff; background:rgba(255,255,255,0.12); border-left:3px solid #c9a86a; }
+
+    /* ===== MAIN ===== */
+    .main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+
+    /* TOPBAR */
+    .topbar { background:#fff; padding:12px 24px; display:flex; align-items:center; gap:12px; border-bottom:1px solid #e5e7eb; }
+    .search { flex:1; display:flex; align-items:center; gap:8px; background:#f5f6fa; border-radius:8px; padding:9px 14px; }
+    .search input { border:none; background:none; outline:none; font-size:13px; color:#333; width:100%; }
+    .topbar-right { display:flex; align-items:center; gap:10px; }
+    .avatar { width:34px; height:34px; border-radius:50%; background:#c9a86a; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#fff; cursor:pointer; }
+
+    /* CONTENT */
+    .content { flex:1; display:flex; gap:18px; padding:18px; overflow:hidden; }
+    .left-col { flex:1; display:flex; flex-direction:column; gap:16px; min-width:0; }
+
+    /* STAT CARDS */
+    .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+    .stat-card { border-radius:10px; padding:16px; display:flex; justify-content:space-between; align-items:center; }
+    .stat-card.blue  { background:#1e4a8a; color:#fff; }
+    .stat-card.navy  { background:#0f1f3d; color:#fff; }
+    .stat-card.light { background:#fff; color:#0f1f3d; border:1px solid #e5e7eb; }
+    .stat-card.gold  { background:#fdf6e8; border:1px solid #f0d9a0; }
+    .stat-label { font-size:11px; margin-bottom:5px; opacity:0.75; }
+    .stat-val   { font-size:24px; font-weight:700; }
+    .stat-card.gold .stat-label { color:#8a6a20; }
+    .stat-card.gold .stat-val   { color:#5a3e0a; }
+
+    /* CASES TABLE */
+    .cases-card { background:#fff; border-radius:10px; border:1px solid #e5e7eb; flex:1; overflow:auto; }
+    .card-header { padding:14px 18px; border-bottom:1px solid #f0f0f0; display:flex; justify-content:space-between; align-items:center; }
+    .card-title { font-size:14px; font-weight:600; color:#1a202c; }
+    table { width:100%; border-collapse:collapse; font-size:13px; }
+    th { text-align:left; padding:10px 18px; color:#888; font-weight:500; border-bottom:1px solid #f0f0f0; font-size:11px; text-transform:uppercase; letter-spacing:.5px; }
+    td { padding:11px 18px; border-bottom:1px solid #f8f8f8; color:#444; }
+    td:first-child { font-weight:600; color:#1a202c; }
+    .badge { display:inline-block; padding:4px 12px; border-radius:20px; font-size:11px; font-weight:600; }
+    .badge.ongoing  { background:#e6f4ea; color:#2e7d32; }
+    .badge.progress { background:#fff8e1; color:#f57f17; }
+    .badge.closed   { background:#fdecea; color:#c62828; }
+
+    /* TASKS */
+    .tasks-card { background:#fff; border-radius:10px; border:1px solid #e5e7eb; padding:14px 18px; }
+    .task-item { display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid #f5f5f5; font-size:13px; color:#444; }
+    .task-item:last-child { border-bottom:none; }
+    .check-circle { width:20px; height:20px; border-radius:50%; background:#e6f4ea; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; color:#2e7d32; }
+
+    /* RIGHT COLUMN */
+    .right-col { width:210px; display:flex; flex-direction:column; gap:16px; flex-shrink:0; }
+    .calendar-card { background:#fff; border-radius:10px; border:1px solid #e5e7eb; padding:14px; }
+    .cal-month { text-align:center; font-size:12px; font-weight:600; color:#0f1f3d; margin-bottom:10px; }
+    .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); text-align:center; }
+    .cal-grid span { font-size:10px; color:#999; padding:3px 0; }
+    .cal-day-grid { display:grid; grid-template-columns:repeat(7,1fr); text-align:center; gap:1px; }
+    .cal-day { font-size:11px; padding:5px 2px; color:#555; border-radius:4px; cursor:pointer; }
+    .cal-day:hover { background:#f0f0f0; }
+    .cal-day.today  { background:#0f1f3d; color:#fff; border-radius:50%; }
+    .cal-day.faded  { color:#ccc; }
+    .event-dot { width:4px; height:4px; border-radius:50%; background:#c9a86a; margin:0 auto; }
+    .court-img { border-radius:10px; border:1px solid #e5e7eb; background:#f5f0e8; height:105px; display:flex; align-items:center; justify-content:center; }
+    .court-label { font-size:11px; color:#c9a86a; font-weight:600; margin-top:6px; text-align:center; }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo-area">
+    <div class="logo-icon">⚖️</div>
+    <div>
+      <div class="logo-text">LexGuard</div>
+      <div class="logo-sub">Legal Services</div>
+    </div>
+  </div>
+  <nav class="nav">
+    <a href="{% url 'dashboard' %}" class="active">🏠 Dashboard</a>
+    <a href="{% url 'liste_clients' %}">👤 Clients</a>
+     <a href="{% url 'liste_avocats' %}">👤 Avocats</a>
+    <a href="{% url 'liste_dossiers' %}">📁 Dossiers</a>
+    <a href="{% url 'liste_documents' %}">📄 Documents</a>
+    <a href="{% url 'liste_audiences' %}">📅 Audiences</a>
+    
+  </nav>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="search">🔍 <input type="text" placeholder="Rechercher un dossier, client..."></div>
+    <div class="topbar-right">
+      <span>✉️</span>
+      <span>🔔</span>
+      <div class="avatar">{{ request.user.username|slice:":2"|upper }}</div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- LEFT COL -->
+    <div class="left-col">
+
+      <!-- STATS -->
+      <div class="stats">
+        <div class="stat-card blue">
+          <div><div class="stat-label">Dossiers actifs</div><div class="stat-val">{{ total_dossiers_actifs }}</div></div>
+          <span style="font-size:28px;opacity:0.3">📁</span>
+        </div>
+        <div class="stat-card navy">
+          <div><div class="stat-label">Dossiers clôturés</div><div class="stat-val">{{ total_dossiers_clos }}</div></div>
+          <span style="font-size:28px;opacity:0.3">📂</span>
+        </div>
+        <div class="stat-card light">
+          <div><div class="stat-label">Total Clients</div><div class="stat-val">{{ total_clients }}</div></div>
+          <span style="font-size:28px;opacity:0.2">👥</span>
+        </div>
+        <div class="stat-card gold">
+          <div><div class="stat-label">Rendez-vous à venir</div><div class="stat-val">{{ total_rdv }}</div></div>
+          <span style="font-size:28px;color:#c9a86a;opacity:0.6">📅</span>
+        </div>
+      </div>
+
+      <!-- DOSSIERS RÉCENTS -->
+      <div class="cases-card">
+        <div class="card-header">
+          <span class="card-title">Dossiers récents</span>
+          <a href="{% url 'liste_dossiers' %}" style="font-size:12px;color:#c9a86a;text-decoration:none">Voir tout →</a>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Client</th>
+              <th>Type d'affaire</th>
+              <th>Statut</th>
+              <th>Prochaine audience</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for dossier in dossiers_recents %}
+            <tr>
+              <td>{{ dossier.client }}</td>
+              <td>{{ dossier.type_affaire }}</td>
+              <td>
+                {% if dossier.statut == "en_cours" %}
+                  <span class="badge ongoing">En cours</span>
+                {% elif dossier.statut == "en_attente" %}
+                  <span class="badge progress">En attente</span>
+                {% else %}
+                  <span class="badge closed">Clôturé</span>
+                {% endif %}
+              </td>
+              <td>{{ dossier.prochaine_audience }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4">Aucun dossier récent.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- TASKS -->
+      <div class="tasks-card">
+        <div class="card-header" style="padding:0 0 10px">
+          <span class="card-title">Tâches du jour</span>
+        </div>
+        {% for tache in tasks %}
+        <div class="task-item"><div class="check-circle">✓</div> {{ tache.description }}</div>
+        {% empty %}
+        <div class="task-item">Aucune tâche pour aujourd'hui.</div>
+        {% endfor %}
+      </div>
+
+    </div><!-- /left-col -->
+
+    <!-- RIGHT COL -->
+    <div class="right-col">
+
+      <!-- CALENDAR -->
+      <div class="calendar-card">
+        <div class="card-title" style="margin-bottom:10px">Calendrier</div>
+        <div class="cal-month">{{ current_month }}</div>
+        <div class="cal-grid">
+          <span>D</span><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span>
+        </div>
+        <div class="cal-day-grid">
+          {% for day in calendar_days %}
+            <div class="cal-day {% if day.is_today %}today{% elif day.is_other_month %}faded{% endif %}">
+              {{ day.day_number }}
+              {% if day.has_event %}<div class="event-dot"></div>{% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- COURT IMAGE -->
+      <div class="court-img">
+        <div>
+          <div style="font-size:40px;text-align:center">🏛️</div>
+          <div class="court-label">Palais de Justice</div>
+        </div>
+      </div>
+
+    </div><!-- /right-col -->
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+</body>
+</html>

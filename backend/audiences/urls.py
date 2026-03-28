@@ -4,4 +4,6 @@ from . import views
 urlpatterns = [
     path('', views.liste_audiences, name='liste_audiences'),
     path('ajouter/', views.ajouter_audience, name='ajouter_audience'),
+    path('modifier/<int:pk>/', views.modifier_audience, name='modifier_audience'),
+    path('supprimer/<int:pk>/', views.supprimer_audience, name='supprimer_audience'),
 ]

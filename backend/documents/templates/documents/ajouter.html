@@ -1,0 +1,17 @@
+<h1>Ajouter un document</h1>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <select name="dossier">
+        {% for dossier in dossiers %}
+            <option value="{{ dossier.id }}">
+                {{ dossier.nom }}
+            </option>
+        {% endfor %}
+    </select><br><br>
+
+    <input type="file" name="fichier"><br><br>
+
+    <button type="submit">Ajouter</button>
+</form>

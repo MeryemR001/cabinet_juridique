@@ -44,9 +44,9 @@ INSTALLED_APPS = [
     'home',
     'dossiers',
     'documents',
-    'rendez_vous',
     'factures',
-    'employes',
+    'dashboard',
+    'avocats'
     
 ]
 
