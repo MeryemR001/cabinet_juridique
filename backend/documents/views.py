@@ -1,32 +1,63 @@
-from django.shortcuts import render, redirect
-from .models import Document
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.http import FileResponse, Http404
+from utilisateurs.decorators import role_required
 from dossiers.models import Dossier
-
-# 📄 Liste documents
-def liste_documents(request):
-    documents = Document.objects.all()
-    return render(request, 'documents/liste.html', {'documents': documents})
+from .models import Document
+from .forms import DocumentForm
+import os
 
 
-# ➕ Ajouter document
-def ajouter_document(request):
-    dossiers = Dossier.objects.all()
+@login_required
+def liste_documents(request, dossier_pk):
+    dossier = get_object_or_404(Dossier, pk=dossier_pk)
+    documents = Document.objects.filter(dossier=dossier)
+    return render(request, 'documents/liste.html', {
+        'dossier': dossier,
+        'documents': documents,
+    })
 
+
+@login_required
+def upload_document(request, dossier_pk):
+    dossier = get_object_or_404(Dossier, pk=dossier_pk)
     if request.method == 'POST':
-        dossier_id = request.POST.get('dossier')
-        fichier = request.FILES.get('fichier')
+        form = DocumentForm(request.POST, request.FILES)
+        if form.is_valid():
+            document = form.save(commit=False)
+            document.uploade_par = request.user
+            document.dossier = dossier
+            document.save()
+            return redirect('dossiers:detail', pk=dossier_pk)
+    else:
+        form = DocumentForm(initial={'dossier': dossier})
+    return render(request, 'documents/upload.html', {
+        'form': form,
+        'dossier': dossier,
+    })
 
-        dossier = Dossier.objects.get(id=dossier_id)
 
-        Document.objects.create(
-            dossier=dossier,
-            fichier=fichier
+@login_required
+def telecharger_document(request, pk):
+    document = get_object_or_404(Document, pk=pk)
+    try:
+        response = FileResponse(
+            open(document.fichier.path, 'rb'),
+            as_attachment=True,
+            filename=os.path.basename(document.fichier.name)
         )
-        return redirect('liste_documents')
+        return response
+    except FileNotFoundError:
+        raise Http404("Fichier introuvable.")
 
-    return render(request, 'documents/ajouter.html', {'dossiers': dossiers})
-def supprimer_document(request, id):
-    document = get_object_or_404(Document, id=id)
-    document.delete()  # supprime le fichier de la base
-    return redirect('liste_documents')
+
+@login_required
+@role_required('admin', 'assistante')
+def supprimer_document(request, pk):
+    document = get_object_or_404(Document, pk=pk)
+    dossier_pk = document.dossier.pk
+    # Supprime le fichier physique
+    if document.fichier and os.path.isfile(document.fichier.path):
+        os.remove(document.fichier.path)
+    document.delete()
+    return redirect('dossiers:detail', pk=dossier_pk)

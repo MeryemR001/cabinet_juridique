@@ -1,37 +1,60 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from utilisateurs.decorators import role_required
 from .models import Audience
 from .forms import AudienceForm
 
-# Liste des audiences
+
+@login_required
 def liste_audiences(request):
-    audiences = Audience.objects.all()
+    if request.user.role == 'avocat':
+        # Avocat voit seulement ses audiences
+        audiences = Audience.objects.filter(avocat=request.user).order_by('date_audience')
+    else:
+        # Admin et assistante voient tout
+        audiences = Audience.objects.all().order_by('date_audience')
     return render(request, 'audiences/liste.html', {'audiences': audiences})
 
-# Ajouter une audience
-def ajouter_audience(request):
-    if request.method == "POST":
-        form = AudienceForm(request.POST)
+
+@login_required
+def detail_audience(request, pk):
+    audience = get_object_or_404(Audience, pk=pk)
+    return render(request, 'audiences/detail.html', {'audience': audience})
+
+
+@login_required
+@role_required('admin', 'avocat')
+def creer_audience(request):
+    if request.method == 'POST':
+        form = AudienceForm(request.POST, user=request.user)
         if form.is_valid():
             form.save()
-            return redirect('liste_audiences')
+            return redirect('audiences:liste')
     else:
-        form = AudienceForm()
-    return render(request, 'audiences/ajouter.html', {'form': form})
+        form = AudienceForm(user=request.user)
+    return render(request, 'audiences/creer.html', {'form': form})
 
-# Modifier une audience
+
+@login_required
+@role_required('admin', 'avocat')
 def modifier_audience(request, pk):
     audience = get_object_or_404(Audience, pk=pk)
-    if request.method == "POST":
-        form = AudienceForm(request.POST, instance=audience)
+    if request.method == 'POST':
+        form = AudienceForm(request.POST, instance=audience, user=request.user)
         if form.is_valid():
             form.save()
-            return redirect('liste_audiences')
+            return redirect('audiences:detail', pk=pk)
     else:
-        form = AudienceForm(instance=audience)
-    return render(request, 'audiences/modifier.html', {'form': form, 'audience': audience})
+        form = AudienceForm(instance=audience, user=request.user)
+    return render(request, 'audiences/creer.html', {
+        'form': form,
+        'audience': audience,
+    })
 
-# Supprimer une audience
+
+@login_required
+@role_required('admin')
 def supprimer_audience(request, pk):
     audience = get_object_or_404(Audience, pk=pk)
     audience.delete()
-    return redirect('liste_audiences')
+    return redirect('audiences:liste')

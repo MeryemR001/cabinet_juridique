@@ -1,9 +1,12 @@
 from django.urls import path
 from . import views
 
+app_name = 'audiences'
+
 urlpatterns = [
-    path('', views.liste_audiences, name='liste_audiences'),
-    path('ajouter/', views.ajouter_audience, name='ajouter_audience'),
-    path('modifier/<int:pk>/', views.modifier_audience, name='modifier_audience'),
-    path('supprimer/<int:pk>/', views.supprimer_audience, name='supprimer_audience'),
+    path('', views.liste_audiences, name='liste'),
+    path('<int:pk>/', views.detail_audience, name='detail'),
+    path('creer/', views.creer_audience, name='creer'),
+    path('<int:pk>/modifier/', views.modifier_audience, name='modifier'),
+    path('<int:pk>/supprimer/', views.supprimer_audience, name='supprimer'),
 ]

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<title>Intervention</title>
+</head>
+
+<body class="bg-gray-100">
+
+<!-- SIDEBAR -->
+<aside class="h-screen w-64 fixed left-0 top-0 bg-[#05152B] text-white p-6">
+    <h1 class="text-2xl mb-10">Lex Juris</h1>
+
+    <nav class="space-y-3">
+        <a href="{% url 'dossiers:liste' %}" class="block text-yellow-400">Dossiers</a>
+        <a href="{% url 'dossiers:liste_clients' %}" class="block hover:text-yellow-400">Clients</a>
+    </nav>
+</aside>
+
+<!-- MAIN -->
+<main class="ml-64 p-10">
+
+<h2 class="text-3xl font-bold mb-4">Ajouter une intervention</h2>
+
+<p class="mb-6 text-gray-600">
+    Dossier : <span class="font-bold">{{ dossier.titre }}</span>
+</p>
+
+<div class="bg-white p-8 rounded shadow max-w-xl">
+
+<form method="post">
+    {% csrf_token %}
+
+    {{ form.as_p }}
+
+    <div class="flex gap-4 mt-4">
+        <button class="bg-[#05152B] text-white px-6 py-2 rounded">
+            Ajouter
+        </button>
+
+        <a href="{% url 'dossiers:detail' dossier.id %}" 
+           class="bg-gray-300 px-6 py-2 rounded">
+           Annuler
+        </a>
+    </div>
+
+</form>
+
+</div>
+
+</main>
+
+</body>
+</html>

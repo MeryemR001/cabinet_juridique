@@ -1,33 +1,40 @@
 from django import forms
 from .models import Audience
+from utilisateurs.models import User
 from dossiers.models import Dossier
-from avocats.models import Avocat
+
 
 class AudienceForm(forms.ModelForm):
     class Meta:
         model = Audience
-        fields = ['client', 'dossier', 'avocat', 'date_audience', 'statut']
+        fields = [
+            'dossier', 'avocat', 'date_audience',
+            'tribunal', 'statut', 'observations', 'resultat'
+        ]
         widgets = {
-            'client': forms.Select(attrs={'class': 'form-control', 'id': 'client-select'}),
-            'dossier': forms.Select(attrs={'class': 'form-control', 'id': 'dossier-select'}),
-            'avocat': forms.Select(attrs={'class': 'form-control'}),
-            'date_audience': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'statut': forms.Select(attrs={'class': 'form-control'}),
+            'dossier': forms.Select(),
+            'avocat': forms.Select(),
+            'date_audience': forms.DateTimeInput(
+                attrs={'type': 'datetime-local'},
+                format='%Y-%m-%dT%H:%M'
+            ),
+            'tribunal': forms.TextInput(attrs={'placeholder': 'Ex: Tribunal de Commerce Casablanca'}),
+            'statut': forms.Select(),
+            'observations': forms.Textarea(attrs={'placeholder': 'Observations...', 'rows': 3}),
+            'resultat': forms.Textarea(attrs={'placeholder': 'Résultat de l audience...', 'rows': 3}),
         }
 
-    def clean(self):
-        cleaned_data = super().clean()
-        client = cleaned_data.get('client')
-        dossier = cleaned_data.get('dossier')
-        avocat = cleaned_data.get('avocat')
-
-        # Vérifie que le dossier appartient bien au client
-        if dossier and client and dossier.client != client:
-            self.add_error('dossier', 'Ce dossier n’appartient pas au client sélectionné.')
-
-        # Vérifie que l’avocat est bien assigné au dossier
-        if dossier and avocat:
-            if dossier.avocat != avocat:
-                self.add_error('avocat', 'Cet avocat n’est pas assigné au dossier sélectionné.')
-
-        return cleaned_data
+    def __init__(self, *args, **kwargs):
+        # On peut passer l'avocat connecté pour filtrer
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        # Seulement les avocats dans le select
+        self.fields['avocat'].queryset = User.objects.filter(role='avocat')
+        # Si c'est un avocat connecté → on préselectionne son nom
+        if self.user and self.user.role == 'avocat':
+            self.fields['avocat'].initial = self.user
+            self.fields['avocat'].queryset = User.objects.filter(pk=self.user.pk)
+            # Seulement ses dossiers
+            self.fields['dossier'].queryset = Dossier.objects.filter(
+                avocat_responsable=self.user
+            )

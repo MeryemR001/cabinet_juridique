@@ -1,18 +1,66 @@
 from django.db import models
-from clients.models import Client
-from avocats.models import Avocat  # <- Assure-toi que l'app 'avocats' est installée dans INSTALLED_APPS
+from utilisateurs.models import User
 
-class Dossier(models.Model):
-    nom = models.CharField(max_length=200, verbose_name="Nom du dossier")
-    client = models.ForeignKey(Client, on_delete=models.CASCADE, verbose_name="Client associé")
-    avocat = models.ForeignKey(Avocat, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Avocat assigné")
-    date_creation = models.DateField(auto_now_add=True, verbose_name="Date de création")
-    statut = models.CharField(
-        max_length=100, 
-        choices=[('En cours', 'En cours'), ('Clôturé', 'Clôturé')], 
-        default='En cours',
-        verbose_name="Statut"
-    )
+
+class Client(models.Model):
+    nom = models.CharField(max_length=150)
+    prenom = models.CharField(max_length=150)
+    telephone = models.CharField(max_length=20, blank=True)
+    email = models.EmailField(blank=True)
+    adresse = models.TextField(blank=True)
+    cin = models.CharField(max_length=20, blank=True)
+    date_creation = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.nom} - {self.client.nom} - {self.avocat.nom if self.avocat else 'Sans avocat'}"
+        return f"{self.nom} {self.prenom}"
+
+
+class Dossier(models.Model):
+    STATUTS = [
+        ('ouvert', 'Ouvert'),
+        ('en_cours', 'En cours'),
+        ('clos', 'Clos'),
+    ]
+
+    reference = models.CharField(max_length=50, unique=True)
+    titre = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    client = models.ForeignKey(
+        Client,
+        on_delete=models.PROTECT,
+        related_name='dossiers'
+    )
+    
+    avocat_responsable = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        null=True,
+        limit_choices_to={'role': 'avocat'},
+        related_name='dossiers'
+    )
+    statut = models.CharField(max_length=20, choices=STATUTS, default='ouvert')
+    date_ouverture = models.DateField(auto_now_add=True)
+    date_cloture = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.reference} — {self.titre}"
+
+
+class Intervention(models.Model):
+    dossier = models.ForeignKey(
+        Dossier,
+        on_delete=models.CASCADE,
+        related_name='interventions'
+    )
+    avocat = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        limit_choices_to={'role': 'avocat'},
+        related_name='interventions'
+    )
+    description = models.TextField()
+    heures_travaillees = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Intervention de {self.avocat} sur {self.dossier}"

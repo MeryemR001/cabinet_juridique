@@ -38,15 +38,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'clients',
     'audiences',
-    'interventions',
     'home',
     'dossiers',
     'documents',
     'factures',
     'dashboard',
-    'avocats'
+    'utilisateurs',
     
 ]
 
@@ -133,5 +131,11 @@ STATIC_URL = 'static/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL='/media/'
+AUTH_USER_MODEL = 'utilisateurs.User'  # ← obligatoire
+
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/'
+# settings.py
+
 
 

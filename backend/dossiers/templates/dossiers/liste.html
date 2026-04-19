@@ -1,14 +1,240 @@
-<h1>Liste des dossiers</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<a href="{% url 'ajouter_dossier' %}">Ajouter un dossier</a>
+<title>Dossiers</title>
 
-<ul>
-    {% for dossier in dossiers %}
-        <li>
-            {{ dossier.nom }} - Client : {{ dossier.client.nom }} {{ dossier.client.prenom }}
+<script src="https://cdn.tailwindcss.com"></script>
 
-            <a href="{% url 'modifier_dossier' dossier.id %}">Modifier</a>
-            <a href="{% url 'supprimer_dossier' dossier.id %}">Supprimer</a>
-        </li>
-    {% endfor %}
-</ul>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader&family=Public+Sans&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+
+<style>
+body{
+  margin:0;
+  font-family:'Public Sans',sans-serif;
+  background:#f9f9f9;
+}
+
+.material-symbols-outlined{
+  font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;
+  vertical-align:middle;
+  font-size:20px;
+}
+.dark body {
+  background: #0f1929 !important;
+  color: #e2e8f0 !important;
+}
+
+.dark .bg-white {
+  background: #1a2740 !important;
+}
+
+.dark .text-gray-500,
+.dark .text-gray-600 {
+  color: #94a3b8 !important;
+}
+
+.dark table {
+  color: #e2e8f0;
+}
+
+.dark th {
+  background: #162035 !important;
+  color: #94a3b8 !important;
+}
+
+.dark td {
+  border-color: #2d3f5a !important;
+}
+/* 🔥 FIX UNIQUEMENT ICI */
+#sidebar{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 240px;
+  height: 100vh;
+  flex-shrink: 0;
+  transition: width .25s ease;
+  overflow: hidden;
+}
+
+/* MAIN FIX */
+#main{
+  margin-left: 240px;
+  padding: 40px;
+  min-height: 100vh;
+}
+
+/* TU GARDES EXACTEMENT TON STYLE */
+#sidebar.collapsed{width:0;}
+
+.headline{font-family:'Newsreader',serif;}
+
+.avatar{
+  width:40px;height:40px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:13px;
+}
+
+/* nav-item inchangé */
+.nav-item{
+  display:flex;align-items:center;padding:11px 20px;
+  color:rgba(255,255,255,.6);
+  transition:all .2s;
+  font-size:11px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  font-weight:500;
+  text-decoration:none;
+}
+.nav-item .material-symbols-outlined{margin-right:10px;font-size:18px;}
+.nav-item:hover{color:#fff;background:rgba(255,255,255,.05);}
+.nav-item.active{
+  color:#FED255;
+  background:rgba(255,255,255,.1);
+  border-left:3px solid #FED255;
+}
+</style>
+</head>
+
+<body>
+
+<!-- ================= SIDEBAR (100% IDENTIQUE) ================= -->
+<aside id="sidebar" style="background:#1B2A41;display:flex;flex-direction:column;height:100vh;">
+
+  <div style="padding:20px 18px 14px;border-bottom:0.5px solid rgba(255,255,255,.08);">
+    <div style="display:flex;align-items:center;gap:9px;">
+      <span class="material-symbols-outlined" style="color:#FED255;font-size:20px;">balance</span>
+      <div>
+        <div class="headline" style="color:#fff;font-size:17px;font-weight:700;">Lex Juris</div>
+        <div style="color:rgba(254,210,85,.7);font-size:9px;letter-spacing:.2em;text-transform:uppercase;">
+          Distilled Authority
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <nav style="flex:1;padding:6px 0;overflow-y:auto;">
+
+    {% if request.user.role == 'admin' %}
+    <a href="{% url 'dashboard:admin' %}" class="nav-item">
+      <span class="material-symbols-outlined">dashboard</span>Dashboard
+    </a>
+    {% elif request.user.role == 'avocat' %}
+    <a href="{% url 'dashboard:avocat' %}" class="nav-item">
+      <span class="material-symbols-outlined">dashboard</span>Dashboard
+    </a>
+    {% else %}
+    <a href="{% url 'dashboard:assistante' %}" class="nav-item">
+      <span class="material-symbols-outlined">dashboard</span>Dashboard
+    </a>
+    {% endif %}
+
+    <a href="{% url 'utilisateurs:liste' %}" class="nav-item">
+      <span class="material-symbols-outlined">badge</span>Utilisateurs
+    </a>
+
+    <a href="{% url 'dossiers:liste_clients' %}" class="nav-item">
+      <span class="material-symbols-outlined">group</span>Clients
+    </a>
+
+    <a href="{% url 'dossiers:liste' %}" class="nav-item">
+      <span class="material-symbols-outlined">folder_shared</span>Dossiers
+    </a>
+
+    <a href="{% url 'audiences:liste' %}" class="nav-item">
+      <span class="material-symbols-outlined">gavel</span>Audiences
+    </a>
+
+  </nav>
+
+   <div style="padding:12px 10px;border-top:0.5px solid rgba(255,255,255,.08);">
+    <button onclick="toggleDark()" style="width:100%;background:rgba(255,255,255,.08);border:0.5px solid rgba(255,255,255,.12);color:#fff;border-radius:8px;padding:7px;font-size:11px;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:10px;font-family:'Public Sans',sans-serif;">
+      <span class="material-symbols-outlined" id="theme-ico" style="font-size:16px;">dark_mode</span>
+      <span id="theme-lbl">Dark Mode</span>
+    </button>
+    <div style="display:flex;align-items:center;gap:9px;padding-top:9px;border-top:0.5px solid rgba(255,255,255,.08);">
+      <div class="avatar" style="background:#c9a227;color:#fff;width:30px;height:30px;font-size:11px;">
+        {{ request.user.first_name|first }}{{ request.user.last_name|first }}
+      </div>
+      <div>
+        <div style="color:#fff;font-size:12px;font-weight:600;">{{ request.user.get_full_name }}</div>
+        <div style="color:rgba(255,255,255,.45);font-size:10px;text-transform:uppercase;letter-spacing:.07em;">Administrateur</div>
+      </div>
+    </div>
+    <a href="{% url 'utilisateurs:logout' %}" style="display:flex;align-items:center;gap:7px;margin-top:10px;color:rgba(255,255,255,.5);font-size:11px;text-decoration:none;padding:6px;border-radius:6px;transition:background .2s;"
+       onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+      <span class="material-symbols-outlined" style="font-size:16px;">logout</span>Déconnexion
+    </a>
+  </div>
+
+</aside>
+
+<!-- ================= MAIN ================= -->
+<main id="main">
+
+<h2 class="text-3xl font-bold mb-6">Liste des dossiers</h2>
+
+<a href="{% url 'dossiers:creer' %}" 
+   class="bg-[#05152B] text-white px-4 py-2 rounded mb-6 inline-block">
+   + Nouveau dossier
+</a>
+
+<div class="bg-white rounded shadow p-6">
+
+<table class="w-full">
+<thead>
+<tr class="border-b">
+<th>ID</th>
+<th>Titre</th>
+<th>Client</th>
+<th>Avocat</th>
+<th>Actions</th>
+</tr>
+</thead>
+
+<tbody>
+{% for dossier in dossiers %}
+<tr class="border-b">
+<td>{{ dossier.id }}</td>
+<td>{{ dossier.titre }}</td>
+<td>{{ dossier.client }}</td>
+<td>{{ dossier.avocat_responsable }}</td>
+<td>
+<a href="{% url 'dossiers:detail' dossier.id %}" class="text-blue-500">Voir</a> |
+<a href="{% url 'dossiers:modifier' dossier.id %}" class="text-yellow-500">Modifier</a>|
+<a href="{% url 'dossiers:supprimer' dossier.id %}" class="text-yellow-500">supprimer</a>
+</td>
+</tr>
+{% empty %}
+<tr>
+<td colspan="5" class="text-center p-4 text-gray-500">
+Aucun dossier trouvé
+</td>
+</tr>
+{% endfor %}
+</tbody>
+
+</table>
+
+</div>
+
+</main>
+
+<script>
+document.querySelectorAll('.nav-item').forEach(function(link){
+  if(link.href && link.href.includes(window.location.pathname)){
+    link.classList.add('active');
+  }
+});
+
+function toggleDark(){
+  document.documentElement.classList.toggle('dark');
+}
+</script>
+
+</body>
+</html>
