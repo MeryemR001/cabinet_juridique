@@ -48,10 +48,19 @@ class InterventionForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         # On passe l'avocat connecté depuis la vue
         self.avocat = kwargs.pop('avocat', None)
+        self.dossier = kwargs.pop('dossier', None)
         super().__init__(*args, **kwargs)
+
+        # Le dossier est fixe dans la vue d'ajout ; on le cache et on évite une erreur "champ requis".
+        if self.dossier:
+            self.fields['dossier'].required = False
+            self.fields['dossier'].initial = self.dossier.pk
+            self.fields['dossier'].queryset = Dossier.objects.filter(pk=self.dossier.pk)
 
     def save(self, commit=True):
         instance = super().save(commit=False)
+        if self.dossier:
+            instance.dossier = self.dossier
         if self.avocat:
             instance.avocat = self.avocat
         if commit:

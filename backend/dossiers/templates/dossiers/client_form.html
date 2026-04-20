@@ -1,255 +1,224 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Public+Sans:wght@100..900&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-
-<title>Client</title>
-</head>
+<title>Lex Juris | {% if form.instance.pk %}Modifier{% else %}Nouveau{% endif %} Client</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Public+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+tailwind.config = {
+  darkMode: "class",
+  theme: { extend: { colors: { "primary":"#05152b","primary-container":"#1b2a41","secondary":"#755b00","secondary-container":"#fed255","surface":"#f9f9f9","surface-container-lowest":"#ffffff","surface-container-low":"#f3f3f3","surface-container":"#eeeeee","surface-container-high":"#e8e8e8","outline-variant":"#c5c6ce","on-surface":"#1a1c1c","on-surface-variant":"#44474d","outline":"#75777e" }, fontFamily:{"headline":["Newsreader","serif"],"body":["Public Sans","sans-serif"],"label":["Public Sans","sans-serif"]} } }
+}
+</script>
 <style>
- body{margin:0;font-family:'Public Sans',sans-serif;background:#f9f9f9;}
-.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;vertical-align:middle;font-size:20px;}
-#app{display:flex;height:100vh;}
-#sidebar{
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 240px;
-  height: 100vh;
-  position: fixed;
-height: 100vh;
-}
-#sidebar.collapsed{width:0;}
-.headline{font-family:'Newsreader',serif;}
-.avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; padding: 0; }
+.material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+.app-layout { display: flex; height: 100vh; overflow: hidden; }
+#sidebar { width: 240px; flex-shrink: 0; height: 100vh; background: #1B2A41; display: flex; flex-direction: column; overflow: hidden; transition: width .25s; }
+#sidebar.collapsed { width: 0; }
+.headline { font-family: 'Newsreader', serif; }
+.nav-item { display: flex; align-items: center; padding: 11px 20px; color: rgba(255,255,255,.6); transition: all .2s; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; font-weight: 500; text-decoration: none; gap: 10px; }
+.nav-item .material-symbols-outlined { font-size: 18px; }
+.nav-item:hover { color: #fff; background: rgba(255,255,255,.05); }
+.nav-item.active { color: #FED255 !important; background: rgba(255,255,255,.1) !important; border-left: 3px solid #FED255 !important; }
+.avatar { border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+#main-content { flex: 1; overflow-y: auto; background: #f9f9f9; }
 
-/* nav-item : on retire cursor:pointer pour les vrais liens */
-.nav-item{
-  display:flex;align-items:center;padding:11px 20px;
-  color:rgba(255,255,255,.6);transition:all .2s;
-  font-size:11px;letter-spacing:.08em;text-transform:uppercase;
-  font-weight:500;text-decoration:none;
+/* ── Ghost inputs ─── */
+.ghost-field { position: relative; margin-bottom: 8px; }
+.ghost-field label { font-family: 'Public Sans', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: #75777e; display: block; margin-bottom: 4px; }
+.ghost-field input, .ghost-field select, .ghost-field textarea {
+  width: 100%; background: transparent; border: 0;
+  border-bottom: 2px solid rgba(197,198,206,.35);
+  padding: 10px 0; font-family: 'Newsreader', serif; font-size: 1.1rem;
+  color: #05152b; outline: none; transition: border-color .25s;
+  border-radius: 0; box-shadow: none !important;
 }
-.nav-item .material-symbols-outlined{margin-right:10px;font-size:18px;}
-.nav-item:hover{color:#fff;background:rgba(255,255,255,.05);}
-.nav-item.active{color:#FED255;background:rgba(255,255,255,.1);border-left:3px solid #FED255;}
-.dark body {
-  background: #0f1929 !important;
-  color: #e2e8f0 !important;
-}
+.ghost-field input:focus, .ghost-field select:focus, .ghost-field textarea:focus { border-bottom-color: #755b00; }
+.ghost-field textarea { font-family: 'Public Sans', sans-serif; font-size: .95rem; background: #f3f3f3; border: 0; border-radius: 10px; padding: 14px 16px; resize: none; }
+.ghost-field textarea:focus { background: rgba(243,243,243,.7); }
+.ghost-field select { appearance: none; cursor: pointer; }
+.select-wrap::after { content: 'expand_more'; font-family: 'Material Symbols Outlined'; position: absolute; right: 0; bottom: 10px; color: #44474d; pointer-events: none; font-size: 1.1rem; }
 
-.dark .bg-white {
-  background: #1a2740 !important;
+/* ── Django form overrides ─── */
+.ghost-field p { margin: 0; }
+.ghost-field p input, .ghost-field p select, .ghost-field p textarea {
+  width: 100%; background: transparent; border: 0;
+  border-bottom: 2px solid rgba(197,198,206,.35);
+  padding: 10px 0; font-family: 'Newsreader', serif; font-size: 1.1rem;
+  color: #05152b; outline: none; transition: border-color .25s;
+  border-radius: 0; box-shadow: none !important;
 }
+.ghost-field p input:focus, .ghost-field p select:focus { border-bottom-color: #755b00; }
+.ghost-field p textarea { font-family: 'Public Sans', sans-serif; font-size:.95rem; background:#f3f3f3; border:0; border-radius:10px; padding:14px 16px; resize:none; }
 
-.dark .text-gray-500,
-.dark .text-gray-600 {
-  color: #94a3b8 !important;
-}
+/* errorlist */
+.errorlist { list-style: none; margin: 4px 0 0; padding: 0; }
+.errorlist li { font-size: 11px; color: #ba1a1a; }
 
-.dark table {
-  color: #e2e8f0;
-}
-
-.dark th {
-  background: #162035 !important;
-  color: #94a3b8 !important;
-}
-
-.dark td {
-  border-color: #2d3f5a !important;
-}
-/* main */
-#main{
- margin-left: 240px;
-  min-height: 100vh;
-  overflow-y: auto;
-   padding-left: 32px;
-}
-input,select{width:100%;padding:8px;border:1px solid #ddd;border-radius:8px;font-family:'Public Sans',sans-serif;}
-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#75777e;display:block;margin-bottom:4px;}
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
-            vertical-align: middle;
-        }
-        body { font-family: 'Public Sans', sans-serif; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-        .field-wrapper input,
-        .field-wrapper select {
-            width: 100%;
-            background: transparent;
-            border: 0;
-            border-bottom: 2px solid rgba(197, 198, 206, 0.35);
-            padding: 0.75rem 0;
-            font-family: 'Newsreader', serif;
-            font-size: 1.25rem;
-            color: #05152b;
-            outline: none;
-            transition: border-color 0.3s;
-            border-radius: 0;
-            box-shadow: none !important;
-        }
-        .field-wrapper input:focus,
-        .field-wrapper select:focus {
-            border-bottom-color: #755b00;
-            box-shadow: none !important;
-        }
-        .field-wrapper textarea {
-            width: 100%;
-            font-family: 'Public Sans', sans-serif;
-            font-size: 1rem;
-            color: #05152b;
-            background: #f3f3f3;
-            border: 0;
-            border-radius: 0.75rem;
-            padding: 1.5rem;
-            resize: none;
-            outline: none;
-            transition: background 0.3s;
-            box-shadow: none !important;
-        }
-        .field-wrapper textarea:focus { background: rgba(243,243,243,0.6); }
-        .field-wrapper select { appearance: none; cursor: pointer; }
-        .select-wrap { position: relative; }
-        .select-wrap::after {
-            content: 'expand_more';
-            font-family: 'Material Symbols Outlined';
-            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
-            position: absolute; right: 0; bottom: 0.75rem;
-            color: #44474d; pointer-events: none; font-size: 1.2rem;
-        }
-        body{margin:0;font-family:'Public Sans',sans-serif;background:#f9f9f9;}
-.material-symbols-outlined{font-size:20px;vertical-align:middle;}
-
-#app{
-  display:flex;
-  height:100vh;
-}
+.dark #main-content { background: #0f1929 !important; }
 </style>
-<body class="bg-gray-100">
-<div style="display: flex; min-height: 100vh;">
-<!-- SIDEBAR -->
- <div id="app" >
-<aside id="sidebar" style="background:#1B2A41;display:flex;flex-direction:column;height:100vh;">
+</head>
+<body class="font-body text-on-surface">
+<div class="app-layout">
 
-  <div style="padding:20px 18px 14px;border-bottom:0.5px solid rgba(255,255,255,.08);">
-    <div style="display:flex;align-items:center;gap:9px;">
-      <span class="material-symbols-outlined" style="color:#FED255;font-size:20px;">balance</span>
-      <div>
-        <div class="headline" style="color:#fff;font-size:17px;font-weight:700;">Lex Juris</div>
-        <div style="color:rgba(254,210,85,.7);font-size:9px;letter-spacing:.2em;text-transform:uppercase;">Distilled Authority</div>
+  <!-- ══════════ SIDEBAR ══════════ -->
+  <aside id="sidebar">
+    <div style="padding:20px 18px 14px;border-bottom:0.5px solid rgba(255,255,255,.08);">
+      <div style="display:flex;align-items:center;gap:9px;">
+        <span class="material-symbols-outlined" style="color:#FED255;font-size:20px;">balance</span>
+        <div>
+          <div class="headline" style="color:#fff;font-size:17px;font-weight:700;">Lex Juris</div>
+          <div style="color:rgba(254,210,85,.7);font-size:9px;letter-spacing:.2em;text-transform:uppercase;">Distilled Authority</div>
+        </div>
       </div>
     </div>
-  </div>
-
-  <nav style="flex:1;padding:6px 0;overflow-y:auto;">
-    {% if request.user.role == 'admin' %}
-    <a href="{% url 'dashboard:admin' %}" class="nav-item">
-      <span class="material-symbols-outlined">dashboard</span>Dashboard
-    </a>
-    {% elif request.user.role == 'avocat' %}
-    <a href="{% url 'dashboard:avocat' %}" class="nav-item">
-      <span class="material-symbols-outlined">dashboard</span>Dashboard
-    </a>
-    {% else %}
-    <a href="{% url 'dashboard:assistante' %}" class="nav-item">
-      <span class="material-symbols-outlined">dashboard</span>Dashboard
-    </a>
-    {% endif %}
-
-    <a href="{% url 'utilisateurs:liste' %}" class="nav-item">
-      <span class="material-symbols-outlined">badge</span>Utilisateurs
-    </a>
-    
-     <a href="{% url 'dossiers:liste_clients' %}" class="nav-item">
-      <span class="material-symbols-outlined">group</span>Clients
-    </a>
-    <a href="{% url 'dossiers:liste' %}" class="nav-item">
-      <span class="material-symbols-outlined">folder_shared</span>Dossiers
-    </a>
-    
-    <a href="{% url 'audiences:liste' %}" class="nav-item">
-      <span class="material-symbols-outlined">gavel</span>Audiences
-    </a>
-  </nav>
-
-  <div style="padding:12px 10px;border-top:0.5px solid rgba(255,255,255,.08);">
-    <button onclick="toggleDark()" style="width:100%;background:rgba(255,255,255,.08);border:0.5px solid rgba(255,255,255,.12);color:#fff;border-radius:8px;padding:7px;font-size:11px;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:10px;font-family:'Public Sans',sans-serif;">
-      <span class="material-symbols-outlined" id="theme-ico" style="font-size:16px;">dark_mode</span>
-      <span id="theme-lbl">Dark Mode</span>
-    </button>
-    <div style="display:flex;align-items:center;gap:9px;padding-top:9px;border-top:0.5px solid rgba(255,255,255,.08);">
-      <div class="avatar" style="background:#c9a227;color:#fff;width:30px;height:30px;font-size:11px;">
-        {{ request.user.first_name|first }}{{ request.user.last_name|first }}
+    <nav style="flex:1;padding:6px 0;overflow-y:auto;">
+      {% if request.user.role == 'admin' %}
+      <a href="{% url 'dashboard:admin' %}" class="nav-item"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+      {% elif request.user.role == 'avocat' %}
+      <a href="{% url 'dashboard:avocat' %}" class="nav-item"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+      {% else %}
+      <a href="{% url 'dashboard:assistante' %}" class="nav-item"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+      {% endif %}
+      <a href="{% url 'utilisateurs:liste' %}" class="nav-item"><span class="material-symbols-outlined">badge</span>Utilisateurs</a>
+      <a href="{% url 'dossiers:liste_clients' %}" class="nav-item"><span class="material-symbols-outlined">group</span>Clients</a>
+      <a href="{% url 'dossiers:liste' %}" class="nav-item"><span class="material-symbols-outlined">folder_shared</span>Dossiers</a>
+      <a href="{% url 'audiences:liste' %}" class="nav-item"><span class="material-symbols-outlined">gavel</span>Audiences</a>
+    </nav>
+    <div style="padding:12px 10px;border-top:0.5px solid rgba(255,255,255,.08);">
+      <button onclick="toggleDark()" style="width:100%;background:rgba(255,255,255,.08);border:0.5px solid rgba(255,255,255,.12);color:#fff;border-radius:8px;padding:7px;font-size:11px;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:10px;font-family:'Public Sans',sans-serif;">
+        <span class="material-symbols-outlined" id="theme-ico" style="font-size:16px;">dark_mode</span>
+        <span id="theme-lbl">Dark Mode</span>
+      </button>
+      <div style="display:flex;align-items:center;gap:9px;padding-top:9px;border-top:0.5px solid rgba(255,255,255,.08);">
+        <div class="avatar" style="background:#c9a227;color:#fff;width:30px;height:30px;font-size:11px;">{{ request.user.first_name|first }}{{ request.user.last_name|first }}</div>
+        <div>
+          <div style="color:#fff;font-size:12px;font-weight:600;">{{ request.user.get_full_name }}</div>
+          <div style="color:rgba(255,255,255,.45);font-size:10px;text-transform:uppercase;letter-spacing:.07em;">{{ request.user.role|capfirst }}</div>
+        </div>
       </div>
-      <div>
-        <div style="color:#fff;font-size:12px;font-weight:600;">{{ request.user.get_full_name }}</div>
-        <div style="color:rgba(255,255,255,.45);font-size:10px;text-transform:uppercase;letter-spacing:.07em;">Administrateur</div>
+      <a href="{% url 'utilisateurs:logout' %}" style="display:flex;align-items:center;gap:7px;margin-top:10px;color:rgba(255,255,255,.5);font-size:11px;text-decoration:none;padding:6px;border-radius:6px;transition:background .2s;" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+        <span class="material-symbols-outlined" style="font-size:16px;">logout</span>Déconnexion
+      </a>
+    </div>
+  </aside>
+
+  <!-- ══════════ MAIN ══════════ -->
+  <main id="main-content">
+    <div style="max-width:860px;margin:0 auto;padding:48px 40px 80px;">
+
+      <!-- Breadcrumb -->
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:32px;">
+        <a href="{% url 'dossiers:liste_clients' %}" style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#75777e;text-decoration:none;transition:color .2s;" onmouseover="this.style.color='#05152b'" onmouseout="this.style.color='#75777e'">Clients</a>
+        <span class="material-symbols-outlined" style="font-size:14px;color:#c5c6ce;">chevron_right</span>
+        <span style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#05152b;">{% if form.instance.pk %}Modifier{% else %}Nouveau{% endif %}</span>
       </div>
+
+      <!-- Page title -->
+      <div style="margin-bottom:40px;position:relative;">
+        <span class="material-symbols-outlined" style="position:absolute;left:-8px;top:-10px;font-size:120px;color:#05152b;opacity:.03;pointer-events:none;font-variation-settings:'wght' 100;">person</span>
+        <h2 class="headline" style="font-size:2.8rem;color:#05152b;font-weight:600;line-height:1.1;position:relative;">
+          {% if form.instance.pk %}Modifier le Client{% else %}Nouveau Client{% endif %}
+        </h2>
+        <p style="font-size:13px;color:#75777e;margin-top:8px;position:relative;">Remplissez les informations du client. Les champs marqués sont requis.</p>
+      </div>
+
+      <!-- Form card -->
+      <form method="post">
+        {% csrf_token %}
+
+        <div style="background:#fff;border-radius:16px;padding:40px;box-shadow:0 2px 16px rgba(5,21,43,.07);border:1px solid rgba(197,198,206,.15);margin-bottom:24px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:32px;padding-bottom:20px;border-bottom:1px solid #eeeeee;">
+            <span style="height:1px;width:28px;background:#fed255;display:inline-block;"></span>
+            <h3 style="font-family:'Public Sans',sans-serif;font-size:10px;font-weight:800;letter-spacing:.3em;text-transform:uppercase;color:#05152b;">Identité &amp; Contact</h3>
+          </div>
+
+          <!-- Grid 2 cols -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 40px;">
+
+            <!-- Nom -->
+            <div class="ghost-field">
+              <label>{{ form.nom.label }}</label>
+              {{ form.nom }}
+              {% if form.nom.errors %}<ul class="errorlist">{% for e in form.nom.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <!-- Prénom -->
+            <div class="ghost-field">
+              <label>{{ form.prenom.label }}</label>
+              {{ form.prenom }}
+              {% if form.prenom.errors %}<ul class="errorlist">{% for e in form.prenom.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <!-- Email -->
+            <div class="ghost-field">
+              <label>{{ form.email.label }}</label>
+              {{ form.email }}
+              {% if form.email.errors %}<ul class="errorlist">{% for e in form.email.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <!-- Téléphone -->
+            <div class="ghost-field">
+              <label>{{ form.telephone.label }}</label>
+              {{ form.telephone }}
+              {% if form.telephone.errors %}<ul class="errorlist">{% for e in form.telephone.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <!-- CIN -->
+            <div class="ghost-field">
+              <label>{{ form.cin.label }}</label>
+              {{ form.cin }}
+              {% if form.cin.errors %}<ul class="errorlist">{% for e in form.cin.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+          </div>
+
+          <!-- Adresse (full width) -->
+          <div class="ghost-field" style="margin-top:16px;">
+            <label>{{ form.adresse.label }}</label>
+            {{ form.adresse }}
+            {% if form.adresse.errors %}<ul class="errorlist">{% for e in form.adresse.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+          </div>
+
+        </div>
+
+        <!-- Action footer -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding-top:8px;">
+          <a href="{% url 'dossiers:liste_clients' %}"
+             style="font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#75777e;text-decoration:underline;text-underline-offset:5px;text-decoration-color:rgba(197,198,206,.5);transition:color .2s;"
+             onmouseover="this.style.color='#05152b'" onmouseout="this.style.color='#75777e'">
+            Annuler
+          </a>
+          <button type="submit"
+            style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#05152b,#1b2a41);color:#fff;padding:13px 32px;border-radius:12px;font-family:'Public Sans',sans-serif;font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;border:none;cursor:pointer;box-shadow:0 6px 20px rgba(5,21,43,.25);transition:transform .2s,box-shadow .2s;"
+            onmouseover="this.style.transform='scale(1.04)';this.style.boxShadow='0 10px 28px rgba(5,21,43,.32)'"
+            onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 6px 20px rgba(5,21,43,.25)'">
+            <span class="material-symbols-outlined" style="font-size:16px;">{% if form.instance.pk %}save{% else %}person_add{% endif %}</span>
+            {% if form.instance.pk %}Enregistrer les modifications{% else %}Créer le Client{% endif %}
+            <span class="material-symbols-outlined" style="font-size:16px;">arrow_forward</span>
+          </button>
+        </div>
+
+      </form>
     </div>
-    <a href="{% url 'utilisateurs:logout' %}" style="display:flex;align-items:center;gap:7px;margin-top:10px;color:rgba(255,255,255,.5);font-size:11px;text-decoration:none;padding:6px;border-radius:6px;transition:background .2s;"
-       onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
-      <span class="material-symbols-outlined" style="font-size:16px;">logout</span>Déconnexion
-    </a>
-  </div>
-
-</aside>
-<!-- MAIN -->
-<main id="main">
-
-<h2 class="text-3xl font-bold mb-8">Créer / Modifier Client</h2>
-
-<div class="bg-white p-8 rounded shadow max-w-xl">
-
-<form method="post">
-    {% csrf_token %}
-    
-    {{ form.as_p }}
-
-    <div class="flex gap-4 mt-4">
-        <button class="bg-[#05152B] text-white px-6 py-2 rounded">
-            Enregistrer
-        </button>
-
-        <a href="{% url 'dossiers:liste_clients' %}" 
-           class="bg-gray-300 px-6 py-2 rounded">
-           Annuler
-        </a>
-    </div>
-
-</form>
-
+  </main>
 </div>
 
-</main>
-</div>
-</div>
 <script>
-    document.querySelectorAll('.nav-item').forEach(function(link) {
+document.querySelectorAll('.nav-item').forEach(function(link) {
   if (!link.href) return;
-  const linkPath = new URL(link.href).pathname;
-  const currentPath = window.location.pathname;
-  // on active si le chemin courant commence par le chemin du lien
-  // (ex: /utilisateurs/creer/ → active "Utilisateurs")
-  if (linkPath !== '/' && currentPath.startsWith(linkPath)) {
-    link.classList.add('active');
-  }
+  try {
+    const lp = new URL(link.href).pathname;
+    const cp = window.location.pathname;
+    if (lp !== '/' && cp.startsWith(lp)) link.classList.add('active');
+  } catch(e) {}
 });
-
-// ── Sidebar toggle ───────────────────────────────────
-let sidebarOpen = true;
-function toggleSidebar() {
-  sidebarOpen = !sidebarOpen;
-  document.getElementById('sidebar').classList.toggle('collapsed', !sidebarOpen);
-}
-
-// ── Dark mode ────────────────────────────────────────
 let isDark = false;
 function toggleDark() {
   isDark = !isDark;

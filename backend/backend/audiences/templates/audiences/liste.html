@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Lex Juris | Audiences</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Public+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "secondary-fixed-dim": "#ecc246",
+                        "inverse-primary": "#b8c7e5",
+                        "inverse-surface": "#2f3131",
+                        "background": "#f9f9f9",
+                        "error": "#ba1a1a",
+                        "primary": "#05152b",
+                        "outline": "#75777e",
+                        "surface-tint": "#505f79",
+                        "on-secondary-container": "#735a00",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed-dim": "#c7c6c6",
+                        "on-tertiary-fixed": "#1b1c1c",
+                        "on-error-container": "#93000a",
+                        "surface-dim": "#dadada",
+                        "surface": "#f9f9f9",
+                        "surface-variant": "#e2e2e2",
+                        "surface-container": "#eeeeee",
+                        "on-secondary-fixed-variant": "#584400",
+                        "tertiary-fixed": "#e4e2e2",
+                        "on-primary-fixed-variant": "#394760",
+                        "tertiary": "#151616",
+                        "surface-bright": "#f9f9f9",
+                        "on-primary-fixed": "#0c1c32",
+                        "primary-container": "#1b2a41",
+                        "on-error": "#ffffff",
+                        "on-tertiary-fixed-variant": "#464747",
+                        "on-surface-variant": "#44474d",
+                        "secondary": "#755b00",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f3f3f3",
+                        "on-secondary-fixed": "#241a00",
+                        "primary-fixed": "#d5e3ff",
+                        "primary-fixed-dim": "#b8c7e5",
+                        "on-background": "#1a1c1c",
+                        "secondary-container": "#fed255",
+                        "inverse-on-surface": "#f1f1f1",
+                        "surface-container-highest": "#e2e2e2",
+                        "on-surface": "#1a1c1c",
+                        "tertiary-container": "#292a2a",
+                        "on-tertiary-container": "#919191",
+                        "on-primary": "#ffffff",
+                        "on-primary-container": "#8291ad",
+                        "surface-container-high": "#e8e8e8",
+                        "secondary-fixed": "#ffe08e",
+                        "outline-variant": "#c5c6ce"
+                    },
+                    fontFamily: {
+                        "headline": ["Newsreader"],
+                        "body": ["Public Sans"],
+                        "label": ["Public Sans"]
+                    },
+                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+                },
+            },
+        }
+    </script>
+    <style>
+        /* ═══════════════════════════════════════════════
+           RESET & BASE
+        ═══════════════════════════════════════════════ */
+        *, *::before, *::after { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: 'Public Sans', sans-serif;
+            background: #f9f9f9;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+            font-size: 20px;
+        }
+
+        .headline { font-family: 'Newsreader', serif; }
+
+        .avatar {
+            width: 40px; height: 40px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 13px; flex-shrink: 0;
+        }
+
+        /* ═══════════════════════════════════════════════
+           LAYOUT : wrapper flex racine
+           - La sidebar est sticky (reste en vue au scroll)
+           - Le main prend l'espace restant
+        ═══════════════════════════════════════════════ */
+        #wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ── Sidebar ── */
+        #sidebar {
+            width: 240px;
+            flex-shrink: 0;          /* ne rétrécit jamais */
+            background: #1B2A41;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            position: sticky;        /* ← CLEF : reste visible au scroll */
+            top: 0;
+            overflow-y: auto;
+            transition: width 0.25s ease;
+            z-index: 100;
+        }
+
+        #sidebar.collapsed {
+            width: 0;
+            overflow: hidden;
+        }
+
+        /* ── Main ── */
+        #main {
+            flex: 1;                 /* prend tout l'espace restant */
+            min-width: 0;            /* évite le débordement flex */
+            padding: 3rem;
+            background: #f9f9f9;
+            transition: all 0.25s ease;
+        }
+
+        /* ═══════════════════════════════════════════════
+           NAV ITEMS
+        ═══════════════════════════════════════════════ */
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 11px 20px;
+            color: rgba(255,255,255,.6);
+            transition: all .2s;
+            font-size: 11px;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .nav-item .material-symbols-outlined {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+
+        .nav-item:hover {
+            color: #fff;
+            background: rgba(255,255,255,.05);
+        }
+
+        .nav-item.active {
+            color: #FED255;
+            background: rgba(255,255,255,.1);
+            border-left: 3px solid #FED255;
+        }
+
+        /* ═══════════════════════════════════════════════
+           FORM ELEMENTS
+        ═══════════════════════════════════════════════ */
+        input, select {
+            width: 100%; padding: 8px;
+            border: 1px solid #ddd; border-radius: 8px;
+            font-family: 'Public Sans', sans-serif;
+        }
+
+        label {
+            font-size: 11px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: .08em;
+            color: #75777e; display: block; margin-bottom: 4px;
+        }
+
+        /* ═══════════════════════════════════════════════
+           DARK MODE
+        ═══════════════════════════════════════════════ */
+        .dark body,
+        .dark #main {
+            background: #0f1929 !important;
+            color: #e2e8f0 !important;
+        }
+
+        .dark .bg-white,
+        .dark .bg-surface-container-lowest,
+        .dark .bg-surface-container-low {
+            background: #1a2740 !important;
+        }
+
+        .dark .text-gray-500,
+        .dark .text-gray-600,
+        .dark .text-on-surface-variant {
+            color: #94a3b8 !important;
+        }
+
+        .dark table { color: #e2e8f0; }
+
+        .dark th {
+            background: #162035 !important;
+            color: #94a3b8 !important;
+        }
+
+        .dark td { border-color: #2d3f5a !important; }
+
+        .dark .text-primary { color: #b8c7e5 !important; }
+    </style>
+</head>
+<body class="bg-background text-on-surface min-h-screen">
+
+<!-- ═══════════════════════════════════════════
+     WRAPPER FLEX RACINE
+     sidebar (sticky) + main (flex:1)
+════════════════════════════════════════════ -->
+<div id="wrapper">
+
+    <!-- ══════════ SIDEBAR ══════════ -->
+    <aside id="sidebar">
+
+        <!-- Logo -->
+        <div style="padding:20px 18px 14px;border-bottom:0.5px solid rgba(255,255,255,.08);">
+            <div style="display:flex;align-items:center;gap:9px;">
+                <span class="material-symbols-outlined" style="color:#FED255;font-size:20px;">balance</span>
+                <div>
+                    <div class="headline" style="color:#fff;font-size:17px;font-weight:700;">Lex Juris</div>
+                    <div style="color:rgba(254,210,85,.7);font-size:9px;letter-spacing:.2em;text-transform:uppercase;">Distilled Authority</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav style="flex:1;padding:6px 0;overflow-y:auto;">
+            {% if request.user.role == 'admin' %}
+            <a href="{% url 'dashboard:admin' %}" class="nav-item">
+                <span class="material-symbols-outlined">dashboard</span>Dashboard
+            </a>
+            {% elif request.user.role == 'avocat' %}
+            <a href="{% url 'dashboard:avocat' %}" class="nav-item">
+                <span class="material-symbols-outlined">dashboard</span>Dashboard
+            </a>
+            {% else %}
+            <a href="{% url 'dashboard:assistante' %}" class="nav-item">
+                <span class="material-symbols-outlined">dashboard</span>Dashboard
+            </a>
+            {% endif %}
+
+            <a href="{% url 'utilisateurs:liste' %}" class="nav-item">
+                <span class="material-symbols-outlined">badge</span>Utilisateurs
+            </a>
+            <a href="{% url 'dossiers:liste_clients' %}" class="nav-item">
+                <span class="material-symbols-outlined">group</span>Clients
+            </a>
+            <a href="{% url 'dossiers:liste' %}" class="nav-item">
+                <span class="material-symbols-outlined">folder_shared</span>Dossiers
+            </a>
+            <a href="{% url 'audiences:liste' %}" class="nav-item">
+                <span class="material-symbols-outlined">gavel</span>Audiences
+            </a>
+        </nav>
+
+        <!-- Footer sidebar -->
+        <div style="padding:12px 10px;border-top:0.5px solid rgba(255,255,255,.08);">
+            <button onclick="toggleDark()"
+                style="width:100%;background:rgba(255,255,255,.08);border:0.5px solid rgba(255,255,255,.12);
+                       color:#fff;border-radius:8px;padding:7px;font-size:11px;letter-spacing:.07em;
+                       text-transform:uppercase;cursor:pointer;display:flex;align-items:center;
+                       justify-content:center;gap:6px;margin-bottom:10px;font-family:'Public Sans',sans-serif;">
+                <span class="material-symbols-outlined" id="theme-ico" style="font-size:16px;">dark_mode</span>
+                <span id="theme-lbl">Dark Mode</span>
+            </button>
+
+            <div style="display:flex;align-items:center;gap:9px;padding-top:9px;border-top:0.5px solid rgba(255,255,255,.08);">
+                <div class="avatar" style="background:#c9a227;color:#fff;width:30px;height:30px;font-size:11px;">
+                    {{ request.user.first_name|first }}{{ request.user.last_name|first }}
+                </div>
+                <div>
+                    <div style="color:#fff;font-size:12px;font-weight:600;">{{ request.user.get_full_name }}</div>
+                    <div style="color:rgba(255,255,255,.45);font-size:10px;text-transform:uppercase;letter-spacing:.07em;">Administrateur</div>
+                </div>
+            </div>
+
+            <a href="{% url 'utilisateurs:logout' %}"
+               style="display:flex;align-items:center;gap:7px;margin-top:10px;color:rgba(255,255,255,.5);
+                      font-size:11px;text-decoration:none;padding:6px;border-radius:6px;transition:background .2s;"
+               onmouseover="this.style.background='rgba(255,255,255,.05)'"
+               onmouseout="this.style.background='none'">
+                <span class="material-symbols-outlined" style="font-size:16px;">logout</span>Déconnexion
+            </a>
+        </div>
+
+    </aside>
+    <!-- ══════════ FIN SIDEBAR ══════════ -->
+
+
+    <!-- ══════════ MAIN CONTENT ══════════ -->
+    <main id="main" class="bg-background">
+
+        <!-- Header -->
+        <header class="flex justify-between items-end mb-16">
+            <div class="space-y-2">
+                <p class="font-['Public_Sans'] text-xs uppercase tracking-[0.2em] text-secondary font-semibold">Calendrier Judiciaire</p>
+                <h2 class="font-['Newsreader'] text-5xl font-bold text-primary tracking-tight">Audiences</h2>
+            </div>
+            <div class="flex gap-6 items-center">
+                <div class="text-right">
+                    <p class="font-['Newsreader'] italic text-lg text-primary">Session 2026</p>
+                    <p class="font-['Public_Sans'] text-[10px] uppercase text-outline tracking-wider">Cabinet Juridique</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- Stats -->
+        <section class="grid grid-cols-12 gap-8 mb-16">
+            <div class="col-span-8 bg-surface-container-low p-8 rounded-xl relative overflow-hidden">
+                <div class="relative z-10 flex flex-col h-full justify-between">
+                    <div>
+                        <h3 class="font-['Newsreader'] text-2xl font-semibold mb-2">Calendrier des Audiences</h3>
+                        <p class="text-on-surface-variant max-w-sm">Suivi et gestion des audiences programmées pour le cabinet.</p>
+                    </div>
+                    <div class="mt-8 flex gap-8">
+                        <div>
+                            <span class="block font-['Newsreader'] text-4xl text-primary">{{ audiences|length }}</span>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-secondary">Total</span>
+                        </div>
+                    </div>
+                </div>
+                <span class="material-symbols-outlined absolute -right-8 -bottom-8 text-[12rem] text-primary/5 select-none"
+                      style="font-variation-settings: 'FILL' 1;">gavel</span>
+            </div>
+            <div class="col-span-4 bg-primary-container p-8 rounded-xl text-on-primary-container flex flex-col justify-center text-center">
+                <span class="material-symbols-outlined text-4xl mb-4 text-secondary-container">notifications_active</span>
+                <p class="font-['Newsreader'] italic text-xl text-white mb-2">Audiences Programmées</p>
+                <p class="font-['Public_Sans'] text-4xl font-bold tracking-tight text-white">
+                    {{ audiences|length }}
+                </p>
+                <p class="text-[10px] uppercase tracking-widest mt-4 opacity-60">En attente</p>
+            </div>
+        </section>
+
+        <!-- Table Section -->
+        <section class="space-y-12">
+            <div class="flex items-center justify-between border-b-2 border-outline-variant/10 pb-4">
+                <div class="flex gap-8">
+                    <span class="font-['Public_Sans'] text-xs font-bold uppercase tracking-widest text-primary border-b-2 border-secondary pb-4 -mb-5">
+                        Toutes les Audiences
+                    </span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <a href="{% url 'audiences:creer' %}"
+                       class="bg-primary text-on-primary px-6 py-2 rounded-full text-xs font-['Public_Sans'] font-bold tracking-widest uppercase flex items-center gap-2 hover:opacity-90 transition-opacity">
+                        <span class="material-symbols-outlined text-sm">add</span>Ajouter
+                    </a>
+                </div>
+            </div>
+
+            <!-- List -->
+            <div class="space-y-4">
+                {% for audience in audiences %}
+                <div class="group grid grid-cols-12 items-center bg-surface-container-lowest p-6 rounded-xl
+                            hover:shadow-[0_20px_40px_-15px_rgba(5,21,43,0.08)] transition-all
+                            border border-transparent hover:border-outline-variant/10">
+                    <div class="col-span-2">
+                        <p class="font-['Public_Sans'] text-[10px] font-bold text-secondary uppercase tracking-widest mb-1">Dossier</p>
+                        <p class="font-['Public_Sans'] font-semibold text-primary">{{ audience.dossier }}</p>
+                    </div>
+                    <div class="col-span-3">
+                        <p class="font-['Public_Sans'] text-[10px] font-bold text-outline uppercase tracking-widest mb-1">Avocat</p>
+                        <p class="font-['Newsreader'] text-lg font-bold text-primary">
+                            {% if audience.avocat %}{{ audience.avocat }}{% else %}Non assigné{% endif %}
+                        </p>
+                        <p class="text-xs text-on-surface-variant italic">{{ audience.observations|truncatechars:40 }}</p>
+                    </div>
+                    <div class="col-span-3">
+                        <div class="flex items-start gap-3">
+                            <span class="material-symbols-outlined text-outline mt-1">location_on</span>
+                            <div>
+                                <p class="font-['Public_Sans'] font-medium text-primary text-sm">{{ audience.tribunal }}</p>
+                                <p class="text-[10px] text-outline uppercase tracking-tight">
+                                    {{ audience.date_audience|date:"d M Y" }} • {{ audience.date_audience|time:"H:i" }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-span-2">
+                        <p class="font-['Newsreader'] text-lg text-primary">{{ audience.date_audience|date:"d M, Y" }}</p>
+                        <p class="font-['Public_Sans'] text-[10px] text-outline uppercase font-bold tracking-widest">
+                            {{ audience.date_audience|time:"H:i" }}
+                        </p>
+                    </div>
+                    <div class="col-span-2 flex justify-end items-center gap-3">
+                        {% if audience.statut == 'programmee' %}
+                            <span class="bg-secondary-container/20 text-on-secondary-container text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full border border-secondary/20">Programmée</span>
+                        {% elif audience.statut == 'tenue' %}
+                            <span class="bg-green-100 text-green-800 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full border border-green-200">Tenue</span>
+                        {% elif audience.statut == 'reportee' %}
+                            <span class="bg-surface-container-highest text-outline text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full border border-outline-variant/20">Reportée</span>
+                        {% elif audience.statut == 'annulee' %}
+                            <span class="bg-error-container text-on-error-container text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full border border-error/20">Annulée</span>
+                        {% endif %}
+
+                        <div class="flex gap-2">
+                            <a href="{% url 'audiences:detail' audience.pk %}" class="text-outline hover:text-primary transition-colors" title="Voir">
+                                <span class="material-symbols-outlined text-sm">visibility</span>
+                            </a>
+                            <a href="{% url 'audiences:modifier' audience.pk %}" class="text-outline hover:text-secondary transition-colors" title="Modifier">
+                                <span class="material-symbols-outlined text-sm">edit</span>
+                            </a>
+                            <a href="{% url 'audiences:supprimer' audience.pk %}" class="text-outline hover:text-error transition-colors" title="Supprimer"
+                               onclick="return confirm('Supprimer cette audience ?');">
+                                <span class="material-symbols-outlined text-sm">delete</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-20 text-on-surface-variant">
+                    <span class="material-symbols-outlined text-6xl mb-4 block opacity-20">gavel</span>
+                    <p class="font-['Newsreader'] text-2xl">Aucune audience disponible.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Watermark -->
+        <div class="mt-24 flex justify-center items-center gap-12 opacity-10 grayscale select-none pointer-events-none">
+            <span class="material-symbols-outlined text-9xl">account_balance</span>
+            <div class="text-center">
+                <p class="font-['Newsreader'] font-bold text-6xl">LEX JURIS</p>
+                <p class="font-['Public_Sans'] uppercase tracking-[1em] text-sm mt-2">Authority in Litigation</p>
+            </div>
+            <span class="material-symbols-outlined text-9xl">shield</span>
+        </div>
+
+    </main>
+    <!-- ══════════ FIN MAIN ══════════ -->
+
+</div><!-- fin #wrapper -->
+
+
+<!-- FAB -->
+<a href="{% url 'audiences:creer' %}"
+   class="fixed bottom-8 right-8 bg-primary text-on-primary w-14 h-14 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all z-50">
+    <span class="material-symbols-outlined">add_task</span>
+</a>
+
+<script>
+    /* ── Active nav ───────────────────────────────── */
+    document.querySelectorAll('.nav-item').forEach(function(link) {
+        if (!link.href) return;
+        const linkPath = new URL(link.href).pathname;
+        const currentPath = window.location.pathname;
+        if (linkPath !== '/' && currentPath.startsWith(linkPath)) {
+            link.classList.add('active');
+        }
+    });
+
+    /* ── Sidebar toggle ───────────────────────────── */
+    let sidebarOpen = true;
+    function toggleSidebar() {
+        sidebarOpen = !sidebarOpen;
+        document.getElementById('sidebar').classList.toggle('collapsed', !sidebarOpen);
+    }
+
+    /* ── Dark mode ────────────────────────────────── */
+    let isDark = false;
+    function toggleDark() {
+        isDark = !isDark;
+        document.documentElement.classList.toggle('dark', isDark);
+        document.getElementById('theme-ico').textContent = isDark ? 'light_mode' : 'dark_mode';
+        document.getElementById('theme-lbl').textContent = isDark ? 'Light Mode' : 'Dark Mode';
+    }
+</script>
+</body>
+</html>

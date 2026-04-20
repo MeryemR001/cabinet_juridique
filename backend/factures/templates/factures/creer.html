@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>{% if facture %}Modifier{% else %}Nouvelle{% endif %} Facture | Lex Juris</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Public+Sans:wght@100..900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script>
+        tailwind.config = {
+            theme: { extend: {
+                colors: {
+                    "primary":"#05152b","primary-container":"#1b2a41","on-primary":"#ffffff","on-primary-container":"#8291ad",
+                    "secondary":"#755b00","secondary-container":"#fed255","on-secondary-container":"#735a00","secondary-fixed-dim":"#ecc246",
+                    "surface":"#f9f9f9","surface-container":"#eeeeee","surface-container-low":"#f3f3f3","surface-container-high":"#e8e8e8",
+                    "surface-container-lowest":"#ffffff","surface-container-highest":"#e2e2e2","on-secondary-fixed":"#241a00",
+                    "on-surface":"#1a1c1c","on-surface-variant":"#44474d",
+                    "outline":"#75777e","outline-variant":"#c5c6ce",
+                    "error":"#ba1a1a","error-container":"#ffdad6","on-error-container":"#93000a","background":"#f9f9f9",
+                    "on-tertiary-container":"#919191",
+                },
+                fontFamily: { "headline":["Newsreader"], "body":["Public Sans"], "label":["Public Sans"] },
+                borderRadius: { "DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem" },
+            }}
+        }
+    </script>
+    <style>
+        body{margin:0;font-family:'Public Sans',sans-serif;background:#f9f9f9;}
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;vertical-align:middle;font-size:20px;}
+#app{display:flex;height:100vh;}
+#sidebar{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 240px;
+  height: 100vh;
+  position: fixed;
+height: 100vh;
+}
+#sidebar.collapsed{width:0;}
+.headline{font-family:'Newsreader',serif;}
+.avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;}
+
+/* nav-item : on retire cursor:pointer pour les vrais liens */
+.nav-item{
+  display:flex;align-items:center;padding:11px 20px;
+  color:rgba(255,255,255,.6);transition:all .2s;
+  font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  font-weight:500;text-decoration:none;
+}
+.nav-item .material-symbols-outlined{margin-right:10px;font-size:18px;}
+.nav-item:hover{color:#fff;background:rgba(255,255,255,.05);}
+.nav-item.active{color:#FED255;background:rgba(255,255,255,.1);border-left:3px solid #FED255;}
+.dark body {
+  background: #0f1929 !important;
+  color: #e2e8f0 !important;
+}
+
+.dark .bg-white {
+  background: #1a2740 !important;
+}
+
+.dark .text-gray-500,
+.dark .text-gray-600 {
+  color: #94a3b8 !important;
+}
+
+.dark table {
+  color: #e2e8f0;
+}
+
+.dark th {
+  background: #162035 !important;
+  color: #94a3b8 !important;
+}
+
+.dark td {
+  border-color: #2d3f5a !important;
+}
+/* main */
+#main{
+  margin-left: 240px;
+  min-height: 100vh;
+  overflow-y: auto;
+}
+input,select{width:100%;padding:8px;border:1px solid #ddd;border-radius:8px;font-family:'Public Sans',sans-serif;}
+label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#75777e;display:block;margin-bottom:4px;}
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body { font-family: 'Public Sans', sans-serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .field-wrapper input,
+        .field-wrapper select {
+            width: 100%;
+            background: transparent;
+            border: 0;
+            border-bottom: 2px solid rgba(197, 198, 206, 0.35);
+            padding: 0.75rem 0;
+            font-family: 'Newsreader', serif;
+            font-size: 1.25rem;
+            color: #05152b;
+            outline: none;
+            transition: border-color 0.3s;
+            border-radius: 0;
+            box-shadow: none !important;
+        }
+        .field-wrapper input:focus,
+        .field-wrapper select:focus {
+            border-bottom-color: #755b00;
+            box-shadow: none !important;
+        }
+        .field-wrapper textarea {
+            width: 100%;
+            font-family: 'Public Sans', sans-serif;
+            font-size: 1rem;
+            color: #05152b;
+            background: #f3f3f3;
+            border: 0;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            resize: none;
+            outline: none;
+            transition: background 0.3s;
+            box-shadow: none !important;
+        }
+        .field-wrapper textarea:focus { background: rgba(243,243,243,0.6); }
+        .field-wrapper select { appearance: none; cursor: pointer; }
+        .select-wrap { position: relative; }
+        .select-wrap::after {
+            content: 'expand_more';
+            font-family: 'Material Symbols Outlined';
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+            position: absolute; right: 0; bottom: 0.75rem;
+            color: #44474d; pointer-events: none; font-size: 1.2rem;
+        }
+        body{margin:0;font-family:'Public Sans',sans-serif;background:#f9f9f9;}
+.material-symbols-outlined{font-size:20px;vertical-align:middle;}
+
+#app{
+  display:flex;
+  height:100vh;
+}
+        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; display:inline-block; vertical-align:middle; }
+        body { font-family:'Public Sans',sans-serif; }
+
+        /* Light background fields */
+        .ghost-input {
+            border:none; border-bottom:2px solid rgba(117,119,126,0.2);
+            background:transparent; border-radius:0; padding:0.5rem 0;
+            width:100%; outline:none; font-family:'Public Sans',sans-serif;
+            font-size:0.95rem; color:#05152b; transition:border-color 0.2s;
+        }
+        .ghost-input:focus { border-bottom-color:#755b00; }
+        select.ghost-input { appearance:none; cursor:pointer; }
+
+        /*
+         * Dark card fields — KEY FIX:
+         * Use solid background + border so the field is ALWAYS visible,
+         * not just on focus. White text on dark bg.
+         */
+        .dark-field {
+            display: block;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.12) !important;
+            border: 1px solid rgba(255, 255, 255, 0.25) !important;
+            border-radius: 0.5rem;
+            padding: 0.65rem 0.85rem;
+            color: #ffffff !important;
+            font-family: 'Public Sans', sans-serif;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s, background 0.2s;
+            -webkit-text-fill-color: #ffffff;  /* fixes Safari autofill */
+        }
+        .dark-field:focus {
+            border-color: #FED255 !important;
+            background: rgba(255, 255, 255, 0.18) !important;
+        }
+        /* Calendar icon & date text — force white */
+        .dark-field[type="date"] { color-scheme: dark; }
+        .dark-field[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+            opacity: 0.8;
+        }
+        select.dark-field { appearance: none; cursor: pointer; }
+
+        /* Formset rows */
+        .formset-row input, .formset-row select {
+            background:transparent; border:none; border-bottom:1px solid rgba(117,119,126,0.15);
+            padding:0.4rem 0; outline:none; width:100%; font-size:0.875rem; color:#05152b;
+            transition:border-color 0.2s;
+        }
+        .formset-row input:focus, .formset-row select:focus { border-bottom-color:#755b00; }
+        .formset-row label[for*="DELETE"] { display:none; }
+
+        textarea.ghost-input {
+            background:#f3f3f3; border:0; border-radius:0.5rem;
+            padding:1rem; resize:none; font-size:0.9rem;
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface min-h-screen">
+<div id="app">
+<aside id="sidebar" style="background:#1B2A41;display:flex;flex-direction:column;height:100vh;">
+
+  <div style="padding:20px 18px 14px;border-bottom:0.5px solid rgba(255,255,255,.08);">
+    <div style="display:flex;align-items:center;gap:9px;">
+      <span class="material-symbols-outlined" style="color:#FED255;font-size:20px;">balance</span>
+      <div>
+        <div class="headline" style="color:#fff;font-size:17px;font-weight:700;">Lex Juris</div>
+        <div style="color:rgba(254,210,85,.7);font-size:9px;letter-spacing:.2em;text-transform:uppercase;">Distilled Authority</div>
+      </div>
+    </div>
+  </div>
+
+  <nav style="flex:1;padding:6px 0;overflow-y:auto;">
+    {% if request.user.role == 'admin' %}
+    <a href="{% url 'dashboard:admin' %}" class="nav-item">
+      <span class="material-symbols-outlined">dashboard</span>Dashboard
+    </a>
+    {% elif request.user.role == 'avocat' %}
+    <a href="{% url 'dashboard:avocat' %}" class="nav-item">
+      <span class="material-symbols-outlined">dashboard</span>Dashboard
+    </a>
+    {% else %}
+    <a href="{% url 'dashboard:assistante' %}" class="nav-item">
+      <span class="material-symbols-outlined">dashboard</span>Dashboard
+    </a>
+    {% endif %}
+
+    <a href="{% url 'utilisateurs:liste' %}" class="nav-item">
+      <span class="material-symbols-outlined">badge</span>Utilisateurs
+    </a>
+     <a href="{% url 'dossiers:liste_clients' %}" class="nav-item">
+      <span class="material-symbols-outlined">group</span>Clients
+    </a>
+    <a href="{% url 'dossiers:liste' %}" class="nav-item">
+      <span class="material-symbols-outlined">folder_shared</span>Dossiers
+    </a>
+    <a href="{% url 'audiences:liste' %}" class="nav-item">
+      <span class="material-symbols-outlined">gavel</span>Audiences
+    </a>
+    <a href="{% url 'factures:liste' %}" class="nav-item">
+      <span class="material-symbols-outlined">group</span>Factures
+    </a>
+    
+  </nav>
+
+  <div style="padding:12px 10px;border-top:0.5px solid rgba(255,255,255,.08);">
+    <button onclick="toggleDark()" style="width:100%;background:rgba(255,255,255,.08);border:0.5px solid rgba(255,255,255,.12);color:#fff;border-radius:8px;padding:7px;font-size:11px;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:10px;font-family:'Public Sans',sans-serif;">
+      <span class="material-symbols-outlined" id="theme-ico" style="font-size:16px;">dark_mode</span>
+      <span id="theme-lbl">Dark Mode</span>
+    </button>
+    <div style="display:flex;align-items:center;gap:9px;padding-top:9px;border-top:0.5px solid rgba(255,255,255,.08);">
+      <div class="avatar" style="background:#c9a227;color:#fff;width:30px;height:30px;font-size:11px;">
+        {{ request.user.first_name|first }}{{ request.user.last_name|first }}
+      </div>
+      <div>
+        <div style="color:#fff;font-size:12px;font-weight:600;">{{ request.user.get_full_name }}</div>
+        <div style="color:rgba(255,255,255,.45);font-size:10px;text-transform:uppercase;letter-spacing:.07em;">Administrateur</div>
+      </div>
+    </div>
+    <a href="{% url 'utilisateurs:logout' %}" style="display:flex;align-items:center;gap:7px;margin-top:10px;color:rgba(255,255,255,.5);font-size:11px;text-decoration:none;padding:6px;border-radius:6px;transition:background .2s;"
+       onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+      <span class="material-symbols-outlined" style="font-size:16px;">logout</span>Déconnexion
+    </a>
+  </div>
+
+</aside>
+
+
+<main id="main">
+
+    <header class="flex justify-between items-center px-12 h-16 sticky top-0 bg-[#F9F9F9]/80 backdrop-blur-xl z-40 border-b border-outline-variant/10">
+        <div class="flex items-center gap-3">
+            <a href="{% url 'factures:liste' %}" class="text-outline hover:text-primary transition-colors">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </a>
+            <span class="font-label text-xs tracking-widest uppercase text-secondary font-bold">
+                {% if facture %}Modifier la Facture{% else %}Génération de Facture{% endif %}
+            </span>
+        </div>
+        <span class="font-['Public_Sans'] text-xs text-outline">
+            {{ request.user.get_full_name|default:request.user.username }}
+            <span class="ml-2 bg-surface-container text-on-surface-variant text-[10px] px-2 py-0.5 rounded-full uppercase tracking-widest">{{ request.user.role }}</span>
+        </span>
+    </header>
+
+    <div class="p-12 max-w-6xl mx-auto">
+        <div class="mb-16 relative">
+            <span class="material-symbols-outlined absolute -top-10 -left-10 text-[180px] opacity-[0.03] text-primary select-none pointer-events-none">receipt_long</span>
+            <h2 class="font-headline text-5xl text-primary tracking-tight mb-4 italic">
+                {% if facture %}Modifier la Facture{% else %}Génération de Facture{% endif %}
+            </h2>
+            <p class="text-on-surface-variant max-w-lg font-light leading-relaxed">
+                Créez un document de facturation formel pour les services juridiques rendus.
+            </p>
+        </div>
+
+        <form method="POST" id="facture-form">
+            {% csrf_token %}
+            {{ formset.management_form }}
+             {% csrf_token %}
+
+             {% if form.non_field_errors %}
+<div class="mb-8 rounded-xl overflow-hidden shadow-lg" style="border-left: 4px solid #ba1a1a;">
+    <div class="flex items-start gap-4 p-5" style="background: linear-gradient(135deg, #ffdad6 0%, #fff0ee 100%);">
+        <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center" style="background:#ba1a1a;">
+            <span class="material-symbols-outlined text-white" style="font-size:18px;">gavel</span>
+        </div>
+        <div>
+            <p class="font-label text-[10px] uppercase tracking-widest font-bold mb-1" style="color:#93000a;">
+                Erreur de validation
+            </p>
+            {% for error in form.non_field_errors %}
+            <p class="text-sm font-semibold" style="color:#ba1a1a;">{{ error }}</p>
+            {% endfor %}
+        </p>
+        </div>
+    </div>
+</div>
+{% endif %}
+            <div class="grid grid-cols-12 gap-8">
+
+                <!-- Left -->
+                <div class="col-span-8 space-y-12">
+
+                    <section class="bg-surface-container-low p-10 rounded-xl relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-4 opacity-10"><span class="material-symbols-outlined text-4xl">account_balance</span></div>
+                        <h3 class="font-label text-[10px] uppercase tracking-[0.2em] text-secondary font-bold mb-8">Identification</h3>
+                        <div class="grid grid-cols-2 gap-10">
+                            <div class="flex flex-col gap-2">
+                                <label class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">{{ form.numero.label }}</label>
+                                {{ form.numero }}
+                                {% if form.numero.errors %}<p class="text-error text-xs mt-1">{{ form.numero.errors|join:", " }}</p>{% endif %}
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <label class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">{{ form.statut.label }}</label>
+                                {{ form.statut }}
+                                {% if form.statut.errors %}<p class="text-error text-xs mt-1">{{ form.statut.errors|join:", " }}</p>{% endif %}
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="bg-surface-container-low p-10 rounded-xl relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-4 opacity-10"><span class="material-symbols-outlined text-4xl">folder_shared</span></div>
+                        <h3 class="font-label text-[10px] uppercase tracking-[0.2em] text-secondary font-bold mb-8">Client & Dossier</h3>
+                        <div class="grid grid-cols-2 gap-10">
+                            <div class="flex flex-col gap-2">
+                                <label class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">{{ form.client.label }}</label>
+                                {{ form.client }}
+                                {% if form.client.errors %}<p class="text-error text-xs mt-1">{{ form.client.errors|join:", " }}</p>{% endif %}
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <label class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">{{ form.dossier.label }}</label>
+                                {{ form.dossier }}
+                                {% if form.dossier.errors %}<p class="text-error text-xs mt-1">{{ form.dossier.errors|join:", " }}</p>{% endif %}
+                            </div>
+                            <div class="flex flex-col gap-2 col-span-2">
+                                <label class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">{{ form.avocat.label }}</label>
+                                {{ form.avocat }}
+                                {% if form.avocat.errors %}<p class="text-error text-xs mt-1">{{ form.avocat.errors|join:", " }}</p>{% endif %}
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Lignes -->
+                    <section>
+                        <div class="flex items-center justify-between mb-8">
+                            <h3 class="font-label text-[10px] uppercase tracking-[0.2em] text-secondary font-bold">Prestations Facturées</h3>
+                            <button type="button" id="add-line" class="text-xs font-bold flex items-center gap-1 hover:text-secondary transition-colors text-on-surface-variant">
+                                <span class="material-symbols-outlined text-sm">add_circle</span>AJOUTER UNE LIGNE
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-12 px-4 py-2 text-[10px] uppercase tracking-widest text-on-tertiary-container font-bold mb-2">
+                            <div class="col-span-5">Description</div>
+                            <div class="col-span-2 text-center">Qté</div>
+                            <div class="col-span-2 text-center">Prix Unit.</div>
+                            <div class="col-span-2 text-right">Total</div>
+                            <div class="col-span-1 text-center">Del</div>
+                        </div>
+                        <div id="formset-container" class="space-y-3">
+                            {% for ligne_form in formset %}
+                            <div class="formset-row bg-surface-container-lowest p-5 rounded-lg shadow-sm border-l-4 {% if forloop.first %}border-primary{% else %}border-outline-variant/30{% endif %} grid grid-cols-12 items-center gap-4">
+                                {{ ligne_form.id }}
+                                <div class="col-span-5">{{ ligne_form.description }}</div>
+                                <div class="col-span-2 text-center">{{ ligne_form.quantite }}</div>
+                                <div class="col-span-2 text-center">{{ ligne_form.prix_unitaire }}</div>
+                                <div class="col-span-2 text-right font-bold text-primary text-sm line-total">—</div>
+                                <div class="col-span-1 text-center">
+                                    <label class="cursor-pointer text-outline hover:text-error transition-colors">
+                                        {{ ligne_form.DELETE }}
+                                        <span class="material-symbols-outlined text-sm">delete</span>
+                                    </label>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% if form.notes %}
+                        <div class="mt-8 flex flex-col gap-2">
+                            <label class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">{{ form.notes.label }}</label>
+                            {{ form.notes }}
+                        </div>
+                        {% endif %}
+                    </section>
+                </div>
+
+                <!-- Right: Dark metadata card -->
+                <div class="col-span-4 space-y-6">
+                    <div class="rounded-xl relative overflow-hidden" style="background: linear-gradient(135deg, #05152b 0%, #1b2a41 100%); padding: 2rem;">
+                        <div class="absolute inset-0 opacity-20 pointer-events-none" style="background: radial-gradient(circle at 80% 20%, #fed255 0%, transparent 60%);"></div>
+                        <div class="relative z-10">
+                            <h3 class="font-label text-[10px] uppercase tracking-[0.2em] font-bold mb-6" style="color:#ecc246;">Métadonnées</h3>
+
+                            <div class="space-y-5">
+                                <div class="flex flex-col gap-2">
+                                    <label class="text-[10px] uppercase tracking-widest font-bold" style="color:rgba(255,255,255,0.5);">{{ form.date_echeance.label }}</label>
+                                    <!-- Rendered with dark-field class via JS -->
+                                    {{ form.date_echeance }}
+                                    {% if form.date_echeance.errors %}<p class="text-xs mt-1" style="color:#fca5a5;">{{ form.date_echeance.errors|join:", " }}</p>{% endif %}
+                                </div>
+                                <div class="flex flex-col gap-2">
+                                    <label class="text-[10px] uppercase tracking-widest font-bold" style="color:rgba(255,255,255,0.5);">{{ form.montant_ht.label }} (MAD)</label>
+                                    {{ form.montant_ht }}
+                                    {% if form.montant_ht.errors %}<p class="text-xs mt-1" style="color:#fca5a5;">{{ form.montant_ht.errors|join:", " }}</p>{% endif %}
+                                </div>
+                                <div class="flex flex-col gap-2">
+                                    <label class="text-[10px] uppercase tracking-widest font-bold" style="color:rgba(255,255,255,0.5);">{{ form.tva.label }} (%)</label>
+                                    {{ form.tva }}
+                                    {% if form.tva.errors %}<p class="text-xs mt-1" style="color:#fca5a5;">{{ form.tva.errors|join:", " }}</p>{% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Live Total -->
+                            <div class="mt-8 pt-6" style="border-top: 1px solid rgba(255,255,255,0.1);">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-xs" style="color:rgba(255,255,255,0.5);">Montant HT</span>
+                                    <span class="text-base font-light text-white" id="preview-ht">0.00 MAD</span>
+                                </div>
+                                <div class="flex justify-between items-center mb-4">
+                                    <span class="text-xs" style="color:rgba(255,255,255,0.5);">TVA</span>
+                                    <span class="text-base font-light text-white" id="preview-tva">0.00 MAD</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs uppercase tracking-widest font-bold text-white">Total TTC</span>
+                                    <span class="text-2xl font-headline italic" style="color:#FED255;" id="preview-ttc">0.00 MAD</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <button type="submit" class="w-full font-bold py-5 rounded-xl flex items-center justify-center gap-3 shadow-lg hover:scale-[1.02] transition-transform" style="background:#fed255; color:#241a00;">
+                            <span class="material-symbols-outlined">picture_as_pdf</span>
+                            {% if facture %}Enregistrer{% else %}Créer la Facture{% endif %}
+                        </button>
+                        <a href="{% url 'factures:liste' %}" class="w-full bg-white text-primary border border-outline-variant/30 py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-surface-container-low transition-colors">
+                            <span class="material-symbols-outlined text-xl">close</span>Annuler
+                        </a>
+                    </div>
+
+                    <div class="bg-surface-container p-5 rounded-xl border border-dashed border-outline-variant/50">
+                        <p class="text-[10px] text-on-surface-variant leading-relaxed text-center">
+                            En créant ce document, vous certifiez que les informations renseignées sont exactes et conformes aux directives du cabinet.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="fixed bottom-8 right-8 pointer-events-none opacity-5 flex flex-col items-end">
+        <span class="font-headline text-8xl italic text-primary">Lex Juris</span>
+        <span class="text-xs tracking-[1em] uppercase text-primary -mt-4">Private Practice</span>
+    </div>
+</main>
+</div>
+</div>
+<script>
+ // Apply ghost-input to light-bg fields
+document.querySelectorAll('input[type="text"], input[type="number"]').forEach(el => {
+    if (!el.closest('[style*="gradient"]') && !el.closest('.formset-row')) el.classList.add('ghost-input');
+});
+document.querySelectorAll('select').forEach(el => {
+    if (!el.closest('[style*="gradient"]')) el.classList.add('ghost-input');
+});
+document.querySelectorAll('textarea').forEach(el => el.classList.add('ghost-input'));
+
+document.querySelectorAll('[style*="gradient"] input, [style*="gradient"] select').forEach(el => {
+    el.classList.remove('ghost-input');
+    el.classList.add('dark-field');
+});
+
+document.querySelectorAll('input[type="checkbox"][name*="DELETE"]').forEach(cb => {
+    cb.style.display = 'none';
+    const icon = cb.parentElement.querySelector('.material-symbols-outlined');
+    if (icon) icon.addEventListener('click', () => {
+        cb.checked = !cb.checked;
+        cb.closest('.formset-row').style.opacity = cb.checked ? '0.35' : '1';
+    });
+});
+
+function updateTotals() {
+    const ht = parseFloat(document.querySelector('[name$="montant_ht"]')?.value) || 0;
+    const tva = parseFloat(document.querySelector('[name$="tva"]')?.value) || 0;
+    const tvaAmt = ht * tva / 100;
+    document.getElementById('preview-ht').textContent = ht.toFixed(2) + ' MAD';
+    document.getElementById('preview-tva').textContent = tvaAmt.toFixed(2) + ' MAD';
+    document.getElementById('preview-ttc').textContent = (ht + tvaAmt).toFixed(2) + ' MAD';
+}
+document.querySelector('[name$="montant_ht"]')?.addEventListener('input', updateTotals);
+document.querySelector('[name$="tva"]')?.addEventListener('input', updateTotals);
+updateTotals();
+
+function calcLine(row) {
+    const q = parseFloat(row.querySelector('[name*="quantite"]')?.value) || 0;
+    const p = parseFloat(row.querySelector('[name*="prix_unitaire"]')?.value) || 0;
+    const el = row.querySelector('.line-total');
+    if (el) el.textContent = (q * p).toFixed(2) + ' MAD';
+}
+document.querySelectorAll('.formset-row').forEach(r =>
+    r.querySelectorAll('input').forEach(i => i.addEventListener('input', () => calcLine(r)))
+);
+
+document.getElementById('add-line')?.addEventListener('click', () => {
+    const container = document.getElementById('formset-container');
+    const total = document.querySelector('[name$="TOTAL_FORMS"]');
+    const count = parseInt(total.value);
+    const last = container.querySelector('.formset-row:last-child');
+    if (!last) return;
+    const row = last.cloneNode(true);
+    row.querySelectorAll('input,select').forEach(el => {
+        el.value = '';
+        el.name = el.name?.replace(/-\d+-/, `-${count}-`);
+        el.id = el.id?.replace(/-\d+-/, `-${count}-`);
+    });
+    row.classList.remove('border-primary');
+    row.classList.add('border-outline-variant/30');
+    row.querySelector('.line-total').textContent = '—';
+    container.appendChild(row);
+    total.value = count + 1;
+    row.querySelectorAll('input').forEach(i => i.addEventListener('input', () => calcLine(row)));
+    const cb = row.querySelector('input[type="checkbox"][name*="DELETE"]');
+    if (cb) {
+        cb.style.display = 'none';
+        const icon = cb.parentElement.querySelector('.material-symbols-outlined');
+        if (icon) icon.addEventListener('click', () => {
+            cb.checked = !cb.checked;
+            row.style.opacity = cb.checked ? '0.35' : '1';
+        });
+    }
+});
+
+// Sidebar & Dark mode
+document.querySelectorAll('.nav-item').forEach(function(link) {
+    if (!link.href) return;
+    const linkPath = new URL(link.href).pathname;
+    if (linkPath !== '/' && window.location.pathname.startsWith(linkPath)) {
+        link.classList.add('active');
+    }
+});
+let isDark = false;
+function toggleDark() {
+    isDark = !isDark;
+    document.documentElement.classList.toggle('dark', isDark);
+    document.getElementById('theme-ico').textContent = isDark ? 'light_mode' : 'dark_mode';
+    document.getElementById('theme-lbl').textContent = isDark ? 'Light Mode' : 'Dark Mode';
+}
+
+// Filtre dossiers par client
+const clientSelect = document.querySelector('[name="client"]');
+const dossierSelect = document.querySelector('[name="dossier"]');
+const allDossierOptions = [...dossierSelect.options];
+
+function filterDossiers() {
+    const clientId = clientSelect.value;
+    const currentDossier = dossierSelect.value;
+    dossierSelect.innerHTML = '<option value="">---------</option>';
+    allDossierOptions.forEach(opt => {
+        if (!opt.value || !clientId || opt.dataset.client === clientId) {
+            dossierSelect.appendChild(opt.cloneNode(true));
+        }
+    });
+    dossierSelect.value = currentDossier;
+}
+clientSelect?.addEventListener('change', filterDossiers);
+if (clientSelect?.value) filterDossiers();
+
+// Auto-sélection avocat selon dossier
+const dossierAvocats = {
+    {% for d in dossiers_avocats %}
+    "{{ d.pk }}": "{{ d.avocat_responsable_id }}",
+    {% endfor %}
+};
+
+const avocatSelect = document.querySelector('[name="avocat"]');
+
+dossierSelect?.addEventListener('change', function() {
+    const dossierId = this.value;
+    const avocatId = dossierAvocats[dossierId];
+    if (dossierId && avocatId) {
+        avocatSelect.value = avocatId;
+    }
+});
+</script>
+
+</body>
+</html>

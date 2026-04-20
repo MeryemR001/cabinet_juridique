@@ -7,19 +7,9 @@ class User(AbstractUser):
         ('avocat', 'Avocat'),
         ('assistante', 'Assistante'),
     ]
-
     role = models.CharField(max_length=20, choices=ROLES, default='assistante')
     telephone = models.CharField(max_length=20, blank=True)
     barreau = models.CharField(max_length=100, blank=True)
-
-    # 🔥 AJOUT IMPORTANT
-    avocat = models.ForeignKey(
-    'self',
-    null=True,
-    blank=True,
-    on_delete=models.SET_NULL,
-    related_name='assistantes'
-)
 
     def is_avocat(self):
         return self.role == 'avocat'
@@ -31,4 +21,6 @@ class User(AbstractUser):
         return self.role == 'admin'
 
     def __str__(self):
+        # Affiche seulement le nom complet si disponible, sinon le username
         return self.get_full_name() or self.username
+    

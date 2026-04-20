@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Facture {{ facture.numero }} — Impression | Lex Juris</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Public+Sans:wght@100..900&display=swap" rel="stylesheet"/>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Public Sans', sans-serif; background: #fff; color: #1a1c1c; margin: 0; }
+        h1,h2,h3 { font-family: 'Newsreader', serif; }
+        .page { max-width: 800px; margin: 0 auto; padding: 60px 60px 40px; }
+        .no-print { }
+        @media print {
+            .no-print { display: none !important; }
+            body { background: #fff; }
+            .page { padding: 40px; }
+        }
+    </style>
+</head>
+<body class="bg-white">
+
+    <!-- Print Controls (no-print) -->
+    <div class="no-print fixed top-0 left-0 right-0 z-50 bg-[#05152b] text-white px-8 py-3 flex items-center justify-between shadow-lg">
+        <div class="flex items-center gap-3">
+            <span class="font-['Newsreader'] text-lg italic">Lex Juris</span>
+            <span class="text-slate-400 text-xs">/ Impression Facture</span>
+        </div>
+        <div class="flex gap-3">
+            <button onclick="window.print()"
+                class="bg-[#fed255] text-[#05152b] font-bold px-6 py-2 rounded-lg text-sm flex items-center gap-2 hover:brightness-105 transition-all">
+                🖨️ Imprimer
+            </button>
+            <a href="{% url 'factures:detail' facture.pk %}"
+               class="bg-white/10 text-white px-6 py-2 rounded-lg text-sm hover:bg-white/20 transition-colors">
+                ← Retour
+            </a>
+        </div>
+    </div>
+
+    <div class="page" style="padding-top: 100px;">
+
+        <!-- Header -->
+        <div class="flex justify-between items-start mb-12 pb-8 border-b-2 border-[#05152b]">
+            <div>
+                <h1 class="text-4xl italic text-[#05152b] mb-1">Lex Juris</h1>
+                <p class="text-xs uppercase tracking-widest text-[#75777e]">Cabinet Juridique — Casablanca</p>
+            </div>
+            <div class="text-right">
+                <p class="text-xs uppercase tracking-widest text-[#75777e] mb-1">Facture</p>
+                <h2 class="text-3xl font-bold text-[#05152b]">{{ facture.numero }}</h2>
+                <p class="text-sm text-[#75777e] mt-2">
+                    Émise le {{ facture.date_emission|date:"d M Y" }}<br>
+                    Échéance : <strong class="text-[#05152b]">{{ facture.date_echeance|date:"d M Y" }}</strong>
+                </p>
+            </div>
+        </div>
+
+        <!-- Client / Avocat Info -->
+        <div class="grid grid-cols-2 gap-12 mb-12">
+            <div>
+                <p class="text-[10px] uppercase tracking-widest text-[#75777e] font-bold mb-2">Facturé à</p>
+                <p class="text-base font-semibold text-[#05152b]">{{ facture.client }}</p>
+                <p class="text-sm text-[#75777e] mt-1">Dossier : {{ facture.dossier }}</p>
+            </div>
+            <div>
+                <p class="text-[10px] uppercase tracking-widest text-[#75777e] font-bold mb-2">Avocat Responsable</p>
+                <p class="text-base font-semibold text-[#05152b]">{{ facture.avocat|default:"Non assigné" }}</p>
+                <p class="text-sm text-[#75777e] mt-1">
+                    Statut :
+                    <strong>{{ facture.get_statut_display }}</strong>
+                </p>
+            </div>
+        </div>
+
+        <!-- Line Items Table -->
+        <table class="w-full text-left border-collapse mb-10">
+            <thead>
+                <tr style="background:#05152b; color:#fff;">
+                    <th class="px-5 py-4 text-[10px] uppercase tracking-widest font-bold" style="width:50%">Description</th>
+                    <th class="px-5 py-4 text-[10px] uppercase tracking-widest font-bold text-center">Qté</th>
+                    <th class="px-5 py-4 text-[10px] uppercase tracking-widest font-bold text-right">Prix Unit.</th>
+                    <th class="px-5 py-4 text-[10px] uppercase tracking-widest font-bold text-right">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ligne in lignes %}
+                <tr style="border-bottom: 1px solid #e2e2e2;">
+                    <td class="px-5 py-4 text-sm font-medium text-[#05152b]">{{ ligne.description }}</td>
+                    <td class="px-5 py-4 text-sm text-center text-[#44474d]">{{ ligne.quantite }}</td>
+                    <td class="px-5 py-4 text-sm text-right text-[#44474d]">{{ ligne.prix_unitaire|floatformat:2 }} MAD</td>
+                    <td class="px-5 py-4 text-sm text-right font-semibold text-[#05152b]">{{ ligne.total|floatformat:2 }} MAD</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="px-5 py-8 text-center text-sm italic text-[#75777e]">Aucune prestation enregistrée.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Totals -->
+        <div class="flex justify-end mb-12">
+            <div style="width:280px;">
+                <div class="flex justify-between py-2 text-sm text-[#75777e] border-b border-[#e2e2e2]">
+                    <span>Montant HT</span>
+                    <span>{{ facture.montant_ht|floatformat:2 }} MAD</span>
+                </div>
+                <div class="flex justify-between py-2 text-sm text-[#75777e] border-b border-[#e2e2e2]">
+                    <span>TVA ({{ facture.tva }}%)</span>
+                    <span>{{ facture.montant_ttc|floatformat:2 }} MAD</span>
+                </div>
+                <div class="flex justify-between pt-4" style="border-top:3px solid #05152b;">
+                    <span class="font-['Newsreader'] text-xl italic font-bold text-[#05152b]">Total TTC</span>
+                    <span class="font-['Newsreader'] text-xl italic font-bold text-[#755b00]">{{ facture.montant_ttc|floatformat:2 }} MAD</span>
+                </div>
+            </div>
+        </div>
+
+        {% if facture.notes %}
+        <div class="mb-10 p-5 bg-[#f3f3f3] rounded-lg">
+            <p class="text-[10px] uppercase tracking-widest text-[#75777e] font-bold mb-2">Notes</p>
+            <p class="text-sm text-[#1a1c1c] leading-relaxed">{{ facture.notes }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Footer -->
+        <div class="flex justify-between items-end pt-8 border-t border-[#e2e2e2]">
+            <div>
+                <p class="text-[10px] uppercase tracking-widest text-[#75777e]">Lex Juris — Cabinet Juridique</p>
+                <p class="text-[10px] text-[#75777e] mt-1">Document confidentiel — © 2024</p>
+            </div>
+            <div class="text-right opacity-30 select-none">
+                <p class="font-['Newsreader'] text-3xl italic text-[#05152b]">Lex Juris</p>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,27 @@
+<h1>Liste des factures</h1>
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>Numéro</th>
+            <th>Client</th>
+            <th>Montant</th>
+            <th>Date</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for facture in factures %}
+        <tr>
+            <td>{{ facture.numero }}</td>
+            <td>{{ facture.client }}</td>
+            <td>{{ facture.montant }}</td>
+            <td>{{ facture.date }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4">Aucune facture</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

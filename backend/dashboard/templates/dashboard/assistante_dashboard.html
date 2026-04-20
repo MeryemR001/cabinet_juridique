@@ -58,25 +58,19 @@ td{padding:11px 14px;font-size:13px;border-bottom:0.5px solid #e8e8e8;}
       </div>
     </div>
   </div>
-  <nav style="flex:1;padding:6px 0;overflow-y:auto;">
-    <div class="nav-item active" onclick="goTo('dashboard',this)">
-      <span class="material-symbols-outlined">dashboard</span>Dashboard
-    </div>
-    <div class="nav-item" onclick="goTo('users',this)">
-      <span class="material-symbols-outlined">badge</span>Utilisateurs
-    </div>
-     <a href="{% url 'dossiers:liste_clients' %}" class="nav-item">
-      <span class="material-symbols-outlined">group</span>Clients
-    </a>
-    <div class="nav-item" onclick="goTo('dossiers',this)">
-      <span class="material-symbols-outlined">folder_shared</span>Dossiers
-    </div>
-    <div class="nav-item" onclick="goTo('audiences',this)">
-      <span class="material-symbols-outlined">gavel</span>Audiences
-    </div>
-    
+ <nav style="flex:1;padding:6px 0;overflow-y:auto;">
+    {% if request.user.role == 'admin' %}
+    <a href="{% url 'dashboard:admin' %}" class="nav-item active"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+    {% elif request.user.role == 'avocat' %}
+    <a href="{% url 'dashboard:avocat' %}" class="nav-item active"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+    {% else %}
+    <a href="{% url 'dashboard:assistante' %}" class="nav-item active"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+    {% endif %}
    
-    
+    <a href="{% url 'dossiers:liste_clients' %}" class="nav-item"><span class="material-symbols-outlined">group</span>Clients</a>
+    <a href="{% url 'dossiers:liste' %}" class="nav-item"><span class="material-symbols-outlined">folder_shared</span>Dossiers</a>
+    <a href="{% url 'audiences:liste' %}" class="nav-item"><span class="material-symbols-outlined">gavel</span>Audiences</a>
+    <a href="{% url 'factures:liste' %}" class="nav-item"><span class="material-symbols-outlined">receipt_long</span>Factures</a>
   </nav>
   <div style="padding:12px 10px;border-top:0.5px solid rgba(255,255,255,.08);">
     <div style="display:flex;align-items:center;gap:9px;padding:9px;">

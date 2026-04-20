@@ -85,16 +85,16 @@ class UserUpdateForm(forms.ModelForm):
         ]
 
     def clean(self):
-        cleaned_data = super().clean()
-        p1 = cleaned_data.get("password1")
-        p2 = cleaned_data.get("password2")
+     cleaned_data = super().clean()
 
-        # ✅ validation seulement si l'utilisateur veut changer le mdp
-        if p1 or p2:
-            if p1 != p2:
-                raise forms.ValidationError("Les mots de passe ne correspondent pas.")
+     dossier = cleaned_data.get("dossier")
+     avocat = cleaned_data.get("avocat")
 
-            if len(p1) < 6:
-                raise forms.ValidationError("Mot de passe trop court.")
+    # 🔒 règle métier
+     if dossier and avocat:
+        if dossier.avocat_responsable != avocat:
+            raise forms.ValidationError(
+                "❌ Cet avocat n'est pas responsable de ce dossier."
+            )
 
-        return cleaned_data
+     return cleaned_data

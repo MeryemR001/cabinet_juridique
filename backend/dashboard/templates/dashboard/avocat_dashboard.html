@@ -58,20 +58,30 @@ td{padding:11px 14px;font-size:13px;border-bottom:0.5px solid #e8e8e8;}
       </div>
     </div>
   </div>
-  <nav style="flex:1;padding:6px 0;overflow-y:auto;">
-    <div class="nav-item active" onclick="goTo('dashboard',this)">
-      <span class="material-symbols-outlined">dashboard</span>Dashboard
-    </div>
-    <div class="nav-item" onclick="goTo('dossiers',this)">
-      <span class="material-symbols-outlined">folder_shared</span>Mes Dossiers
-    </div>
-    <div class="nav-item" onclick="goTo('audiences',this)">
-      <span class="material-symbols-outlined">gavel</span>Mes Audiences
-    </div>
-    
-    
-   
-  </nav>
+  <!-- sidebar_avocat.html -->
+<nav style="flex:1;padding:6px 0;overflow-y:auto;">
+
+  <a href="{% url 'dashboard:avocat' %}" class="nav-item active">
+    <span class="material-symbols-outlined">dashboard</span>Dashboard
+  </a>
+
+  <a href="{% url 'dossiers:liste' %}" class="nav-item">
+    <span class="material-symbols-outlined">folder_shared</span>Mes Dossiers
+  </a>
+
+  <a href="{% url 'dossiers:liste_clients' %}" class="nav-item">
+    <span class="material-symbols-outlined">group</span>Clients
+  </a>
+
+  <a href="{% url 'audiences:liste' %}" class="nav-item">
+    <span class="material-symbols-outlined">gavel</span>Audiences
+  </a>
+
+  <a href="{% url 'factures:liste' %}" class="nav-item">
+    <span class="material-symbols-outlined">receipt_long</span>Factures
+  </a>
+
+</nav>
   <div style="padding:12px 10px;border-top:0.5px solid rgba(255,255,255,.08);">
     <div style="display:flex;align-items:center;gap:9px;padding:9px;">
       <div class="avatar" style="background:#c9a227;color:#fff;width:30px;height:30px;font-size:11px;">

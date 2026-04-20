@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from .forms import LoginForm, UserCreateForm, UserUpdateForm
 from .models import User
 from .decorators import role_required
-
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 
 # 🔥 LOGIN PROPRE (SANS ROLE FORM)
 def login_view(request):
@@ -91,45 +91,34 @@ def creer_utilisateur(request):
 # 🔥 MODIFIER UTILISATEUR
 @login_required
 @role_required('admin')
+@login_required
+@role_required('admin')
 def modifier_utilisateur(request, pk):
     utilisateur = get_object_or_404(User, pk=pk)
-
     if request.method == 'POST':
         form = UserUpdateForm(request.POST, instance=utilisateur)
-
         if form.is_valid():
             user = form.save(commit=False)
-
-            # relations
             if user.role == 'avocat':
                 user.assistante = form.cleaned_data.get('assistante')
                 user.avocat = None
-
             elif user.role == 'assistante':
                 user.avocat = form.cleaned_data.get('avocat')
                 user.assistante = None
-
             else:
                 user.assistante = None
                 user.avocat = None
-
-            # ✅ mot de passe
             password = form.cleaned_data.get('password1')
             if password:
                 user.set_password(password)
-
             user.save()
-
+            if password:
+                update_session_auth_hash(request, user)
             messages.success(request, "Utilisateur modifié avec succès.")
             return redirect('utilisateurs:liste')
-
     else:
         form = UserUpdateForm(instance=utilisateur)
-
-    return render(request, 'utilisateurs/creer.html', {
-        'form': form
-    })
-
+    return render(request, 'utilisateurs/creer.html', {'form': form})
 # 🔥 SUPPRIMER UTILISATEUR
 @login_required
 @role_required('admin')

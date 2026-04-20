@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>{% if audience %}Modifier{% else %}Enregistrer{% endif %} une Audience | Lex Juris</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Public+Sans:wght@100..900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "error-container": "#ffdad6", "surface-container": "#eeeeee",
+                        "surface-container-lowest": "#ffffff", "surface-container-low": "#f3f3f3",
+                        "surface-variant": "#e2e2e2", "on-error-container": "#93000a",
+                        "error": "#ba1a1a", "surface": "#f9f9f9", "outline": "#75777e",
+                        "on-secondary": "#ffffff", "on-background": "#1a1c1c",
+                        "surface-container-highest": "#e2e2e2", "on-primary-container": "#8291ad",
+                        "on-primary": "#ffffff", "inverse-primary": "#b8c7e5",
+                        "on-secondary-fixed": "#241a00", "secondary-fixed-dim": "#ecc246",
+                        "on-error": "#ffffff", "primary-container": "#1b2a41",
+                        "on-surface": "#1a1c1c", "primary": "#05152b", "background": "#f9f9f9",
+                        "secondary": "#755b00", "outline-variant": "#c5c6ce",
+                        "secondary-fixed": "#ffe08e", "surface-container-high": "#e8e8e8",
+                        "on-surface-variant": "#44474d", "on-secondary-container": "#735a00",
+                        "secondary-container": "#fed255", "on-secondary-fixed-variant": "#584400"
+                    },
+                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+                    fontFamily: {"headline": ["Newsreader"], "body": ["Public Sans"], "label": ["Public Sans"]}
+                },
+            },
+        }
+    </script>
+    <style>
+        body{margin:0;font-family:'Public Sans',sans-serif;background:#f9f9f9;}
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;vertical-align:middle;font-size:20px;}
+#app{display:flex;height:100vh;}
+#sidebar{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 240px;
+  height: 100vh;
+  position: fixed;
+height: 100vh;
+}
+#sidebar.collapsed{width:0;}
+.headline{font-family:'Newsreader',serif;}
+.avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;}
+
+/* nav-item : on retire cursor:pointer pour les vrais liens */
+.nav-item{
+  display:flex;align-items:center;padding:11px 20px;
+  color:rgba(255,255,255,.6);transition:all .2s;
+  font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  font-weight:500;text-decoration:none;
+}
+.nav-item .material-symbols-outlined{margin-right:10px;font-size:18px;}
+.nav-item:hover{color:#fff;background:rgba(255,255,255,.05);}
+.nav-item.active{color:#FED255;background:rgba(255,255,255,.1);border-left:3px solid #FED255;}
+.dark body {
+  background: #0f1929 !important;
+  color: #e2e8f0 !important;
+}
+
+.dark .bg-white {
+  background: #1a2740 !important;
+}
+
+.dark .text-gray-500,
+.dark .text-gray-600 {
+  color: #94a3b8 !important;
+}
+
+.dark table {
+  color: #e2e8f0;
+}
+
+.dark th {
+  background: #162035 !important;
+  color: #94a3b8 !important;
+}
+
+.dark td {
+  border-color: #2d3f5a !important;
+}
+/* main */
+#main{
+  margin-left: 240px;
+  min-height: 100vh;
+  overflow-y: auto;
+}
+input,select{width:100%;padding:8px;border:1px solid #ddd;border-radius:8px;font-family:'Public Sans',sans-serif;}
+label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#75777e;display:block;margin-bottom:4px;}
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body { font-family: 'Public Sans', sans-serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .field-wrapper input,
+        .field-wrapper select {
+            width: 100%;
+            background: transparent;
+            border: 0;
+            border-bottom: 2px solid rgba(197, 198, 206, 0.35);
+            padding: 0.75rem 0;
+            font-family: 'Newsreader', serif;
+            font-size: 1.25rem;
+            color: #05152b;
+            outline: none;
+            transition: border-color 0.3s;
+            border-radius: 0;
+            box-shadow: none !important;
+        }
+        .field-wrapper input:focus,
+        .field-wrapper select:focus {
+            border-bottom-color: #755b00;
+            box-shadow: none !important;
+        }
+        .field-wrapper textarea {
+            width: 100%;
+            font-family: 'Public Sans', sans-serif;
+            font-size: 1rem;
+            color: #05152b;
+            background: #f3f3f3;
+            border: 0;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            resize: none;
+            outline: none;
+            transition: background 0.3s;
+            box-shadow: none !important;
+        }
+        .field-wrapper textarea:focus { background: rgba(243,243,243,0.6); }
+        .field-wrapper select { appearance: none; cursor: pointer; }
+        .select-wrap { position: relative; }
+        .select-wrap::after {
+            content: 'expand_more';
+            font-family: 'Material Symbols Outlined';
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+            position: absolute; right: 0; bottom: 0.75rem;
+            color: #44474d; pointer-events: none; font-size: 1.2rem;
+        }
+        body{margin:0;font-family:'Public Sans',sans-serif;background:#f9f9f9;}
+.material-symbols-outlined{font-size:20px;vertical-align:middle;}
+
+#app{
+  display:flex;
+  height:100vh;
+}
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body min-h-screen">
+<div id="app">
+<aside id="sidebar" style="background:#1B2A41;display:flex;flex-direction:column;height:100vh;">
+
+  <div style="padding:20px 18px 14px;border-bottom:0.5px solid rgba(255,255,255,.08);">
+    <div style="display:flex;align-items:center;gap:9px;">
+      <span class="material-symbols-outlined" style="color:#FED255;font-size:20px;">balance</span>
+      <div>
+        <div class="headline" style="color:#fff;font-size:17px;font-weight:700;">Lex Juris</div>
+        <div style="color:rgba(254,210,85,.7);font-size:9px;letter-spacing:.2em;text-transform:uppercase;">Distilled Authority</div>
+      </div>
+    </div>
+  </div>
+
+  <nav style="flex:1;padding:6px 0;overflow-y:auto;">
+    {% if request.user.role == 'admin' %}
+    <a href="{% url 'dashboard:admin' %}" class="nav-item">
+      <span class="material-symbols-outlined">dashboard</span>Dashboard
+    </a>
+    {% elif request.user.role == 'avocat' %}
+    <a href="{% url 'dashboard:avocat' %}" class="nav-item">
+      <span class="material-symbols-outlined">dashboard</span>Dashboard
+    </a>
+    {% else %}
+    <a href="{% url 'dashboard:assistante' %}" class="nav-item">
+      <span class="material-symbols-outlined">dashboard</span>Dashboard
+    </a>
+    {% endif %}
+
+    <a href="{% url 'utilisateurs:liste' %}" class="nav-item">
+      <span class="material-symbols-outlined">badge</span>Utilisateurs
+    </a>
+     <a href="{% url 'dossiers:liste_clients' %}" class="nav-item">
+      <span class="material-symbols-outlined">group</span>Clients
+    </a>
+    <a href="{% url 'dossiers:liste' %}" class="nav-item">
+      <span class="material-symbols-outlined">folder_shared</span>Dossiers
+    </a>
+    <a href="{% url 'audiences:liste' %}" class="nav-item">
+      <span class="material-symbols-outlined">gavel</span>Audiences
+    </a>
+  </nav>
+
+  <div style="padding:12px 10px;border-top:0.5px solid rgba(255,255,255,.08);">
+    <button onclick="toggleDark()" style="width:100%;background:rgba(255,255,255,.08);border:0.5px solid rgba(255,255,255,.12);color:#fff;border-radius:8px;padding:7px;font-size:11px;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:10px;font-family:'Public Sans',sans-serif;">
+      <span class="material-symbols-outlined" id="theme-ico" style="font-size:16px;">dark_mode</span>
+      <span id="theme-lbl">Dark Mode</span>
+    </button>
+    <div style="display:flex;align-items:center;gap:9px;padding-top:9px;border-top:0.5px solid rgba(255,255,255,.08);">
+      <div class="avatar" style="background:#c9a227;color:#fff;width:30px;height:30px;font-size:11px;">
+        {{ request.user.first_name|first }}{{ request.user.last_name|first }}
+      </div>
+      <div>
+        <div style="color:#fff;font-size:12px;font-weight:600;">{{ request.user.get_full_name }}</div>
+        <div style="color:rgba(255,255,255,.45);font-size:10px;text-transform:uppercase;letter-spacing:.07em;">Administrateur</div>
+      </div>
+    </div>
+    <a href="{% url 'utilisateurs:logout' %}" style="display:flex;align-items:center;gap:7px;margin-top:10px;color:rgba(255,255,255,.5);font-size:11px;text-decoration:none;padding:6px;border-radius:6px;transition:background .2s;"
+       onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+      <span class="material-symbols-outlined" style="font-size:16px;">logout</span>Déconnexion
+    </a>
+  </div>
+
+</aside>
+
+<main id="main" >
+
+    <!-- Watermark -->
+    <div class="absolute top-0 right-0 w-full h-full opacity-[0.03] pointer-events-none overflow-hidden flex justify-end items-end">
+        <span class="material-symbols-outlined text-[600px] leading-none translate-x-1/4 translate-y-1/4">account_balance</span>
+    </div>
+
+    <!-- Top Bar -->
+    <header class="flex justify-between items-center px-12 h-16 sticky top-0 bg-[#F9F9F9]/80 backdrop-blur-xl z-40">
+        <div class="flex items-center gap-3">
+            <a href="{% url 'audiences:liste' %}" class="text-outline hover:text-primary transition-colors">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </a>
+            <span class="font-['Public_Sans'] text-xs tracking-widest uppercase text-[#755B00] font-bold">
+                {% if audience %}Modifier l'Audience{% else %}Enregistrer une Audience{% endif %}
+            </span>
+        </div>
+        <div class="flex gap-4 items-center">
+            <span class="font-['Public_Sans'] text-xs text-outline">
+                {{ request.user.get_full_name|default:request.user.username }}
+                <span class="ml-2 bg-surface-container-high text-on-surface-variant text-[10px] uppercase tracking-widest px-2 py-0.5 rounded-full">{{ request.user.role }}</span>
+            </span>
+        </div>
+    </header>
+
+    <div class="relative px-12 py-16 max-w-7xl mx-auto">
+
+        <!-- Hero -->
+        <div class="mb-16 max-w-2xl">
+            <h2 class="font-['Newsreader'] text-[3.5rem] leading-tight text-primary mb-6 tracking-tight">
+                {% if audience %}Modifier l'Audience{% else %}Enregistrer une Audience{% endif %}
+            </h2>
+            <p class="font-body text-on-surface-variant text-lg leading-relaxed border-l-2 border-secondary/30 pl-6">
+                Renseignez les détails de l'audience. Assurez-vous que le dossier, l'avocat et le tribunal sont correctement renseignés.
+            </p>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+            <div class="grid grid-cols-12 gap-12 items-start">
+
+                <!-- Form -->
+                <div class="col-span-8 space-y-12">
+
+                    <!-- Dossier + Avocat -->
+                    <section class="grid grid-cols-2 gap-8">
+                        <div class="field-wrapper">
+                            <label class="block font-['Public_Sans'] text-[10px] uppercase tracking-[0.1em] text-on-surface-variant mb-2 font-bold">{{ form.dossier.label }}</label>
+                            <div class="select-wrap">{{ form.dossier }}</div>
+                            {% if form.dossier.errors %}<p class="text-error text-xs mt-2">{{ form.dossier.errors|join:", " }}</p>{% endif %}
+                        </div>
+                        <div class="field-wrapper">
+                            <label class="block font-['Public_Sans'] text-[10px] uppercase tracking-[0.1em] text-on-surface-variant mb-2 font-bold">{{ form.avocat.label }}</label>
+                            <div class="select-wrap">{{ form.avocat }}</div>
+                            {% if form.avocat.errors %}<p class="text-error text-xs mt-2">{{ form.avocat.errors|join:", " }}</p>{% endif %}
+                        </div>
+                    </section>
+
+                    <!-- Tribunal + Statut -->
+                    <section class="grid grid-cols-2 gap-8">
+                        <div class="field-wrapper">
+                            <label class="block font-['Public_Sans'] text-[10px] uppercase tracking-[0.1em] text-on-surface-variant mb-2 font-bold">{{ form.tribunal.label }}</label>
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-secondary">gavel</span>
+                                {{ form.tribunal }}
+                            </div>
+                            {% if form.tribunal.errors %}<p class="text-error text-xs mt-2">{{ form.tribunal.errors|join:", " }}</p>{% endif %}
+                        </div>
+                        <div class="field-wrapper">
+                            <label class="block font-['Public_Sans'] text-[10px] uppercase tracking-[0.1em] text-on-surface-variant mb-2 font-bold">{{ form.statut.label }}</label>
+                            <div class="select-wrap">{{ form.statut }}</div>
+                            {% if form.statut.errors %}<p class="text-error text-xs mt-2">{{ form.statut.errors|join:", " }}</p>{% endif %}
+                        </div>
+                    </section>
+
+                    <!-- Date -->
+                    <section>
+                        <div class="field-wrapper">
+                            <label class="block font-['Public_Sans'] text-[10px] uppercase tracking-[0.1em] text-on-surface-variant mb-2 font-bold">{{ form.date_audience.label }}</label>
+                            {{ form.date_audience }}
+                            {% if form.date_audience.errors %}<p class="text-error text-xs mt-2">{{ form.date_audience.errors|join:", " }}</p>{% endif %}
+                        </div>
+                    </section>
+
+                    <!-- Observations -->
+                    <section class="field-wrapper">
+                        <label class="block font-['Public_Sans'] text-[10px] uppercase tracking-[0.1em] text-on-surface-variant mb-2 font-bold">{{ form.observations.label }}</label>
+                        {{ form.observations }}
+                        {% if form.observations.errors %}<p class="text-error text-xs mt-2">{{ form.observations.errors|join:", " }}</p>{% endif %}
+                    </section>
+
+                    <!-- Résultat -->
+                    <section class="field-wrapper">
+                        <label class="block font-['Public_Sans'] text-[10px] uppercase tracking-[0.1em] text-on-surface-variant mb-2 font-bold">{{ form.resultat.label }}</label>
+                        {{ form.resultat }}
+                        {% if form.resultat.errors %}<p class="text-error text-xs mt-2">{{ form.resultat.errors|join:", " }}</p>{% endif %}
+                    </section>
+
+                    <!-- Actions -->
+                    <footer class="flex items-center justify-between pt-10 border-t border-outline-variant/10">
+                        <a href="{% url 'audiences:liste' %}" class="text-primary font-['Public_Sans'] text-xs uppercase tracking-widest font-bold hover:text-secondary transition-colors relative group">
+                            Annuler
+                            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-secondary group-hover:w-full transition-all duration-300"></span>
+                        </a>
+                        <button type="submit" class="bg-gradient-to-r from-primary to-primary-container text-on-primary py-5 px-12 rounded-xl font-body font-bold text-lg hover:scale-95 transition-transform duration-300 shadow-[0_20px_40px_-10px_rgba(5,21,43,0.3)]">
+                            {% if audience %}Enregistrer les modifications{% else %}Planifier l'Audience{% endif %}
+                        </button>
+                    </footer>
+                </div>
+
+                <!-- Dynamic Aside -->
+                <aside class="col-span-4 space-y-6 sticky top-24">
+
+                    <!-- Résumé du dossier sélectionné (dynamique si modification) -->
+                    {% if audience %}
+                    <div class="bg-surface-container-lowest p-8 rounded-xl border border-outline-variant/10 shadow-sm">
+                        <p class="font-['Public_Sans'] text-[10px] uppercase tracking-widest text-outline font-bold mb-4">Audience en cours de modification</p>
+                        <div class="space-y-3">
+                            <div>
+                                <p class="text-[10px] uppercase tracking-widest text-outline font-bold">Dossier</p>
+                                <p class="font-['Newsreader'] text-xl text-primary">{{ audience.dossier }}</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] uppercase tracking-widest text-outline font-bold">Avocat</p>
+                                <p class="font-['Public_Sans'] text-sm text-on-surface">{{ audience.avocat|default:"Non assigné" }}</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] uppercase tracking-widest text-outline font-bold">Date actuelle</p>
+                                <p class="font-['Newsreader'] text-lg text-primary">{{ audience.date_audience|date:"d M Y à H:i" }}</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] uppercase tracking-widest text-outline font-bold">Statut actuel</p>
+                                <p class="font-['Public_Sans'] text-sm font-bold
+                                    {% if audience.statut == 'programmee' %}text-secondary
+                                    {% elif audience.statut == 'tenue' %}text-green-700
+                                    {% elif audience.statut == 'reportee' %}text-outline
+                                    {% else %}text-error{% endif %}">
+                                    {{ audience.get_statut_display }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <!-- Création : afficher les audiences récentes du user -->
+                    <div class="bg-surface-container-lowest p-8 rounded-xl border border-outline-variant/10 shadow-sm">
+                        <p class="font-['Public_Sans'] text-[10px] uppercase tracking-widest text-outline font-bold mb-4">Vos Audiences Récentes</p>
+                        {% with recent=request.user.audiences.all|slice:":4" %}
+                        {% if recent %}
+                        <ul class="space-y-4">
+                            {% for a in recent %}
+                            <li class="flex items-start gap-3 border-b border-outline-variant/10 pb-3 last:border-0">
+                                <span class="material-symbols-outlined text-secondary mt-0.5 text-base">event</span>
+                                <div>
+                                    <p class="font-['Public_Sans'] text-sm font-semibold text-primary leading-tight">{{ a.dossier }}</p>
+                                    <p class="font-['Public_Sans'] text-[10px] text-outline uppercase tracking-widest">{{ a.date_audience|date:"d M Y" }} — {{ a.get_statut_display }}</p>
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <p class="text-sm text-on-surface-variant italic">Aucune audience enregistrée pour le moment.</p>
+                        {% endif %}
+                        {% endwith %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Info contextuelle selon rôle -->
+                    <div class="bg-primary-container p-8 rounded-xl shadow-xl">
+                        <h3 class="font-['Newsreader'] text-xl text-secondary-fixed mb-3">
+                            {% if request.user.role == 'admin' %}Vue Administrateur{% else %}Rappel{% endif %}
+                        </h3>
+                        {% if request.user.role == 'admin' %}
+                        <p class="text-sm text-white opacity-80 leading-relaxed">
+                            En tant qu'administrateur, vous pouvez assigner n'importe quel avocat et accéder à tous les dossiers du cabinet.
+                        </p>
+                        {% else %}
+                        <p class="text-sm text-white opacity-80 leading-relaxed">
+                            Vous ne pouvez créer ou modifier que les audiences liées à vos dossiers assignés.
+                        </p>
+                        {% endif %}
+                        <div class="mt-6 flex items-center gap-4 bg-primary/30 p-4 rounded-lg">
+                            <div class="w-9 h-9 rounded-full bg-secondary-container/20 flex items-center justify-center flex-shrink-0">
+                                <span class="material-symbols-outlined text-secondary text-base">person</span>
+                            </div>
+                            <div>
+                                <p class="text-[10px] uppercase tracking-widest font-bold opacity-60 text-white">Connecté en tant que</p>
+                                <p class="font-['Newsreader'] text-white text-lg leading-tight">{{ request.user.get_full_name|default:request.user.username }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </aside>
+            </div>
+        </form>
+    </div>
+</main>
+</div>
+<script>
+   document.querySelectorAll('.nav-item').forEach(function(link) {
+  if (!link.href) return;
+  const linkPath = new URL(link.href).pathname;
+  const currentPath = window.location.pathname;
+  if (linkPath !== '/' && currentPath.startsWith(linkPath)) {
+    link.classList.add('active');
+  }
+});
+
+
+
+// ── Sidebar toggle ───────────────────────────────────
+let sidebarOpen = true;
+function toggleSidebar() {
+  sidebarOpen = !sidebarOpen;
+  document.getElementById('sidebar').classList.toggle('collapsed', !sidebarOpen);
+}
+
+// ── Dark mode ────────────────────────────────────────
+let isDark = false;
+function toggleDark() {
+  isDark = !isDark;
+  document.documentElement.classList.toggle('dark', isDark);
+  document.getElementById('theme-ico').textContent = isDark ? 'light_mode' : 'dark_mode';
+  document.getElementById('theme-lbl').textContent = isDark ? 'Light Mode' : 'Dark Mode';
+}
+</script>
+
+</body>
+</html>
+

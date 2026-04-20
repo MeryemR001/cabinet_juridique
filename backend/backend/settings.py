@@ -137,5 +137,5 @@ LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
 # settings.py
 
-
+LOGIN_URL = '/admin/login/'
 

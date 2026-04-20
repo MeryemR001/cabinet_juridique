@@ -1,240 +1,309 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Dossiers</title>
-
-<script src="https://cdn.tailwindcss.com"></script>
-
-<link href="https://fonts.googleapis.com/css2?family=Newsreader&family=Public+Sans&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
-
+<title>Lex Juris | Dossiers</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Public+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+tailwind.config = {
+  darkMode: "class",
+  theme: { extend: { colors: { "primary":"#05152b","primary-container":"#1b2a41","secondary":"#755b00","secondary-container":"#fed255","surface":"#f9f9f9","surface-container-lowest":"#ffffff","surface-container-low":"#f3f3f3","surface-container":"#eeeeee","surface-container-high":"#e8e8e8","outline-variant":"#c5c6ce","on-surface":"#1a1c1c","on-surface-variant":"#44474d","outline":"#75777e","error":"#ba1a1a" }, fontFamily:{"headline":["Newsreader","serif"],"body":["Public Sans","sans-serif"],"label":["Public Sans","sans-serif"]} } }
+}
+</script>
 <style>
-body{
-  margin:0;
-  font-family:'Public Sans',sans-serif;
-  background:#f9f9f9;
-}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; padding: 0; }
+.material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+.app-layout { display: flex; height: 100vh; overflow: hidden; }
+#sidebar { width: 240px; flex-shrink: 0; height: 100vh; background: #1B2A41; display: flex; flex-direction: column; overflow: hidden; transition: width .25s; }
+#sidebar.collapsed { width: 0; }
+.headline { font-family: 'Newsreader', serif; }
+.nav-item { display:flex;align-items:center;padding:11px 20px;color:rgba(255,255,255,.6);transition:all .2s;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:500;text-decoration:none;gap:10px; }
+.nav-item .material-symbols-outlined { font-size: 18px; }
+.nav-item:hover { color:#fff;background:rgba(255,255,255,.05); }
+.nav-item.active { color:#FED255!important;background:rgba(255,255,255,.1)!important;border-left:3px solid #FED255!important; }
+.avatar { border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700; }
+#main-content { flex:1;overflow-y:auto;background:#f9f9f9; }
+.glass-header { background:rgba(249,249,249,.9);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px); }
 
-.material-symbols-outlined{
-  font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;
-  vertical-align:middle;
-  font-size:20px;
-}
-.dark body {
-  background: #0f1929 !important;
-  color: #e2e8f0 !important;
-}
-
-.dark .bg-white {
-  background: #1a2740 !important;
-}
-
-.dark .text-gray-500,
-.dark .text-gray-600 {
-  color: #94a3b8 !important;
-}
-
-.dark table {
-  color: #e2e8f0;
-}
-
-.dark th {
-  background: #162035 !important;
-  color: #94a3b8 !important;
-}
-
-.dark td {
-  border-color: #2d3f5a !important;
-}
-/* 🔥 FIX UNIQUEMENT ICI */
-#sidebar{
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 240px;
-  height: 100vh;
-  flex-shrink: 0;
-  transition: width .25s ease;
+/* ── Dossier cards ─── */
+.dossier-card {
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid rgba(197,198,206,.2);
+  box-shadow: 0 1px 4px rgba(5,21,43,.05);
+  transition: all .25s ease;
+  display: flex; flex-direction: column;
   overflow: hidden;
 }
+.dossier-card:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(5,21,43,.11); }
+.dossier-card .card-top { padding: 24px 24px 0; flex: 1; }
+.dossier-card .card-footer { padding: 16px 24px; border-top: 1px solid rgba(197,198,206,.15); display:flex;justify-content:space-between;align-items:center;margin-top:20px; }
 
-/* MAIN FIX */
-#main{
-  margin-left: 240px;
-  padding: 40px;
-  min-height: 100vh;
-}
+.ghost-card { border:2px dashed rgba(197,198,206,.4);border-radius:14px;min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .25s;text-decoration:none;padding:28px; }
+.ghost-card:hover { border-color:#FED255; }
+.ghost-card:hover .ghost-icon { background:#fed255; }
+.ghost-card:hover .ghost-icon .material-symbols-outlined { color:#755b00; }
+.ghost-card:hover .ghost-label { color:#05152b; }
 
-/* TU GARDES EXACTEMENT TON STYLE */
-#sidebar.collapsed{width:0;}
+.badge { display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase; }
+.badge-ouvert { background:rgba(34,197,94,.12);color:#166534; }
+.badge-en_cours { background:rgba(254,210,85,.25);color:#755b00; }
+.badge-clos { background:rgba(197,198,206,.3);color:#44474d; }
 
-.headline{font-family:'Newsreader',serif;}
+.search-input { background:transparent;border:0;border-bottom:2px solid rgba(197,198,206,.3);padding:8px 36px 8px 4px;font-family:'Public Sans',sans-serif;font-size:13px;color:#05152b;outline:none;width:220px;transition:border-color .25s; }
+.search-input:focus { border-bottom-color:#755b00; }
 
-.avatar{
-  width:40px;height:40px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-weight:700;font-size:13px;
-}
-
-/* nav-item inchangé */
-.nav-item{
-  display:flex;align-items:center;padding:11px 20px;
-  color:rgba(255,255,255,.6);
-  transition:all .2s;
-  font-size:11px;
-  letter-spacing:.08em;
-  text-transform:uppercase;
-  font-weight:500;
-  text-decoration:none;
-}
-.nav-item .material-symbols-outlined{margin-right:10px;font-size:18px;}
-.nav-item:hover{color:#fff;background:rgba(255,255,255,.05);}
-.nav-item.active{
-  color:#FED255;
-  background:rgba(255,255,255,.1);
-  border-left:3px solid #FED255;
-}
+.dark #main-content { background:#0f1929!important; }
+.dark .dossier-card { background:#1a2740!important;border-color:rgba(255,255,255,.08)!important; }
 </style>
 </head>
 
-<body>
+<body class="font-body text-on-surface">
+<div class="app-layout">
 
-<!-- ================= SIDEBAR (100% IDENTIQUE) ================= -->
-<aside id="sidebar" style="background:#1B2A41;display:flex;flex-direction:column;height:100vh;">
-
-  <div style="padding:20px 18px 14px;border-bottom:0.5px solid rgba(255,255,255,.08);">
-    <div style="display:flex;align-items:center;gap:9px;">
-      <span class="material-symbols-outlined" style="color:#FED255;font-size:20px;">balance</span>
-      <div>
-        <div class="headline" style="color:#fff;font-size:17px;font-weight:700;">Lex Juris</div>
-        <div style="color:rgba(254,210,85,.7);font-size:9px;letter-spacing:.2em;text-transform:uppercase;">
-          Distilled Authority
+  <!-- ══════════ SIDEBAR ══════════ -->
+  <aside id="sidebar">
+    <div style="padding:20px 18px 14px;border-bottom:0.5px solid rgba(255,255,255,.08);">
+      <div style="display:flex;align-items:center;gap:9px;">
+        <span class="material-symbols-outlined" style="color:#FED255;font-size:20px;">balance</span>
+        <div>
+          <div class="headline" style="color:#fff;font-size:17px;font-weight:700;">Lex Juris</div>
+          <div style="color:rgba(254,210,85,.7);font-size:9px;letter-spacing:.2em;text-transform:uppercase;">Distilled Authority</div>
         </div>
       </div>
     </div>
-  </div>
-
-  <nav style="flex:1;padding:6px 0;overflow-y:auto;">
-
-    {% if request.user.role == 'admin' %}
-    <a href="{% url 'dashboard:admin' %}" class="nav-item">
-      <span class="material-symbols-outlined">dashboard</span>Dashboard
-    </a>
-    {% elif request.user.role == 'avocat' %}
-    <a href="{% url 'dashboard:avocat' %}" class="nav-item">
-      <span class="material-symbols-outlined">dashboard</span>Dashboard
-    </a>
-    {% else %}
-    <a href="{% url 'dashboard:assistante' %}" class="nav-item">
-      <span class="material-symbols-outlined">dashboard</span>Dashboard
-    </a>
-    {% endif %}
-
-    <a href="{% url 'utilisateurs:liste' %}" class="nav-item">
-      <span class="material-symbols-outlined">badge</span>Utilisateurs
-    </a>
-
-    <a href="{% url 'dossiers:liste_clients' %}" class="nav-item">
-      <span class="material-symbols-outlined">group</span>Clients
-    </a>
-
-    <a href="{% url 'dossiers:liste' %}" class="nav-item">
-      <span class="material-symbols-outlined">folder_shared</span>Dossiers
-    </a>
-
-    <a href="{% url 'audiences:liste' %}" class="nav-item">
-      <span class="material-symbols-outlined">gavel</span>Audiences
-    </a>
-
-  </nav>
-
-   <div style="padding:12px 10px;border-top:0.5px solid rgba(255,255,255,.08);">
-    <button onclick="toggleDark()" style="width:100%;background:rgba(255,255,255,.08);border:0.5px solid rgba(255,255,255,.12);color:#fff;border-radius:8px;padding:7px;font-size:11px;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:10px;font-family:'Public Sans',sans-serif;">
-      <span class="material-symbols-outlined" id="theme-ico" style="font-size:16px;">dark_mode</span>
-      <span id="theme-lbl">Dark Mode</span>
-    </button>
-    <div style="display:flex;align-items:center;gap:9px;padding-top:9px;border-top:0.5px solid rgba(255,255,255,.08);">
-      <div class="avatar" style="background:#c9a227;color:#fff;width:30px;height:30px;font-size:11px;">
-        {{ request.user.first_name|first }}{{ request.user.last_name|first }}
+    <nav style="flex:1;padding:6px 0;overflow-y:auto;">
+      {% if request.user.role == 'admin' %}
+      <a href="{% url 'dashboard:admin' %}" class="nav-item"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+      {% elif request.user.role == 'avocat' %}
+      <a href="{% url 'dashboard:avocat' %}" class="nav-item"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+      {% else %}
+      <a href="{% url 'dashboard:assistante' %}" class="nav-item"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+      {% endif %}
+      <a href="{% url 'utilisateurs:liste' %}" class="nav-item"><span class="material-symbols-outlined">badge</span>Utilisateurs</a>
+      <a href="{% url 'dossiers:liste_clients' %}" class="nav-item"><span class="material-symbols-outlined">group</span>Clients</a>
+      <a href="{% url 'dossiers:liste' %}" class="nav-item"><span class="material-symbols-outlined">folder_shared</span>Dossiers</a>
+      <a href="{% url 'audiences:liste' %}" class="nav-item"><span class="material-symbols-outlined">gavel</span>Audiences</a>
+    </nav>
+    <div style="padding:12px 10px;border-top:0.5px solid rgba(255,255,255,.08);">
+      <button onclick="toggleDark()" style="width:100%;background:rgba(255,255,255,.08);border:0.5px solid rgba(255,255,255,.12);color:#fff;border-radius:8px;padding:7px;font-size:11px;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:10px;font-family:'Public Sans',sans-serif;">
+        <span class="material-symbols-outlined" id="theme-ico" style="font-size:16px;">dark_mode</span>
+        <span id="theme-lbl">Dark Mode</span>
+      </button>
+      <div style="display:flex;align-items:center;gap:9px;padding-top:9px;border-top:0.5px solid rgba(255,255,255,.08);">
+        <div class="avatar" style="background:#c9a227;color:#fff;width:30px;height:30px;font-size:11px;">{{ request.user.first_name|first }}{{ request.user.last_name|first }}</div>
+        <div>
+          <div style="color:#fff;font-size:12px;font-weight:600;">{{ request.user.get_full_name }}</div>
+          <div style="color:rgba(255,255,255,.45);font-size:10px;text-transform:uppercase;letter-spacing:.07em;">{{ request.user.role|capfirst }}</div>
+        </div>
       </div>
-      <div>
-        <div style="color:#fff;font-size:12px;font-weight:600;">{{ request.user.get_full_name }}</div>
-        <div style="color:rgba(255,255,255,.45);font-size:10px;text-transform:uppercase;letter-spacing:.07em;">Administrateur</div>
-      </div>
+      <a href="{% url 'utilisateurs:logout' %}" style="display:flex;align-items:center;gap:7px;margin-top:10px;color:rgba(255,255,255,.5);font-size:11px;text-decoration:none;padding:6px;border-radius:6px;transition:background .2s;" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+        <span class="material-symbols-outlined" style="font-size:16px;">logout</span>Déconnexion
+      </a>
     </div>
-    <a href="{% url 'utilisateurs:logout' %}" style="display:flex;align-items:center;gap:7px;margin-top:10px;color:rgba(255,255,255,.5);font-size:11px;text-decoration:none;padding:6px;border-radius:6px;transition:background .2s;"
-       onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
-      <span class="material-symbols-outlined" style="font-size:16px;">logout</span>Déconnexion
-    </a>
-  </div>
+  </aside>
 
-</aside>
+  <!-- ══════════ MAIN ══════════ -->
+  <main id="main-content">
 
-<!-- ================= MAIN ================= -->
-<main id="main">
+    <!-- Sticky header -->
+    <header class="glass-header sticky top-0 z-40 px-10 py-6 flex justify-between items-end" style="border-bottom:1px solid rgba(197,198,206,.2);">
+      <div>
+        <p style="font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#755b00;margin-bottom:4px;">Cabinet Juridique</p>
+        <h2 class="headline" style="font-size:2.4rem;color:#05152b;line-height:1;font-weight:600;">Dossiers</h2>
+      </div>
+      <div style="display:flex;align-items:center;gap:20px;">
+        <div style="position:relative;">
+          <input class="search-input" placeholder="Rechercher un dossier…" type="text" oninput="filterCards(this.value)" />
+          <span class="material-symbols-outlined" style="position:absolute;right:4px;bottom:8px;color:#75777e;font-size:18px;">search</span>
+        </div>
+        {% if request.user.role != 'avocat' %}
+        <a href="{% url 'dossiers:creer' %}"
+           style="display:inline-flex;align-items:center;gap:7px;background:#05152b;color:#fff;padding:10px 20px;border-radius:10px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;transition:background .2s;"
+           onmouseover="this.style.background='#1b2a41'" onmouseout="this.style.background='#05152b'">
+          <span class="material-symbols-outlined" style="font-size:16px;">create_new_folder</span>
+          Nouveau Dossier
+        </a>
+        {% endif %}
+      </div>
+    </header>
 
-<h2 class="text-3xl font-bold mb-6">Liste des dossiers</h2>
+    <section class="px-10 py-8">
 
-<a href="{% url 'dossiers:creer' %}" 
-   class="bg-[#05152B] text-white px-4 py-2 rounded mb-6 inline-block">
-   + Nouveau dossier
-</a>
+      <!-- Stats row -->
+      <div style="display:flex;gap:16px;margin-bottom:32px;flex-wrap:wrap;">
+        <div style="background:#fff;border-radius:10px;padding:16px 24px;border:1px solid rgba(197,198,206,.2);flex:1;min-width:120px;box-shadow:0 1px 4px rgba(5,21,43,.04);">
+          <p style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#75777e;">Total</p>
+          <p class="headline" style="font-size:2rem;color:#05152b;font-weight:700;margin-top:4px;">{{ dossiers|length }}</p>
+        </div>
+        <div style="background:#fff;border-radius:10px;padding:16px 24px;border:1px solid rgba(34,197,94,.2);flex:1;min-width:120px;box-shadow:0 1px 4px rgba(5,21,43,.04);">
+          <p style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#166534;">Ouverts</p>
+          <p class="headline" style="font-size:2rem;color:#166534;font-weight:700;margin-top:4px;">{{ dossiers|length }}</p>
+        </div>
+        <div style="background:#05152b;border-radius:10px;padding:16px 24px;flex:2;min-width:180px;display:flex;align-items:center;gap:12px;">
+          <span class="material-symbols-outlined" style="font-size:30px;color:#fed255;">folder_shared</span>
+          <div>
+            <p style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(254,210,85,.7);">Dossiers Actifs</p>
+            <p style="font-size:13px;font-weight:600;color:#fff;margin-top:2px;">Suivez l'avancement de vos affaires</p>
+          </div>
+        </div>
+      </div>
 
-<div class="bg-white rounded shadow p-6">
+      <!-- Tabs -->
+      <div style="display:flex;gap:0;margin-bottom:28px;border-bottom:1px solid rgba(197,198,206,.25);">
+        <button onclick="filterStatus('all',this)" class="tab-btn active-tab" style="padding:10px 20px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:none;border:none;border-bottom:2px solid #fed255;color:#05152b;cursor:pointer;transition:all .2s;margin-bottom:-1px;">Tous</button>
+        <button onclick="filterStatus('ouvert',this)" class="tab-btn" style="padding:10px 20px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:none;border:none;border-bottom:2px solid transparent;color:#75777e;cursor:pointer;transition:all .2s;margin-bottom:-1px;">Ouverts</button>
+        <button onclick="filterStatus('en_cours',this)" class="tab-btn" style="padding:10px 20px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:none;border:none;border-bottom:2px solid transparent;color:#75777e;cursor:pointer;transition:all .2s;margin-bottom:-1px;">En cours</button>
+        <button onclick="filterStatus('clos',this)" class="tab-btn" style="padding:10px 20px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:none;border:none;border-bottom:2px solid transparent;color:#75777e;cursor:pointer;transition:all .2s;margin-bottom:-1px;">Clos</button>
+      </div>
 
-<table class="w-full">
-<thead>
-<tr class="border-b">
-<th>ID</th>
-<th>Titre</th>
-<th>Client</th>
-<th>Avocat</th>
-<th>Actions</th>
-</tr>
-</thead>
+      <!-- Cards grid -->
+      <div id="cards-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px;">
 
-<tbody>
-{% for dossier in dossiers %}
-<tr class="border-b">
-<td>{{ dossier.id }}</td>
-<td>{{ dossier.titre }}</td>
-<td>{{ dossier.client }}</td>
-<td>{{ dossier.avocat_responsable }}</td>
-<td>
-<a href="{% url 'dossiers:detail' dossier.id %}" class="text-blue-500">Voir</a> |
-<a href="{% url 'dossiers:modifier' dossier.id %}" class="text-yellow-500">Modifier</a>|
-<a href="{% url 'dossiers:supprimer' dossier.id %}" class="text-yellow-500">supprimer</a>
-</td>
-</tr>
-{% empty %}
-<tr>
-<td colspan="5" class="text-center p-4 text-gray-500">
-Aucun dossier trouvé
-</td>
-</tr>
-{% endfor %}
-</tbody>
+        {% for dossier in dossiers %}
+        <div class="dossier-card" data-title="{{ dossier.titre|lower }} {{ dossier.reference|lower }}" data-status="{{ dossier.statut }}">
+          <div class="card-top">
+            <!-- Top row -->
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <div style="width:40px;height:40px;border-radius:10px;background:#1b2a41;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  <span class="material-symbols-outlined" style="font-size:20px;color:#fed255;">folder_shared</span>
+                </div>
+                <div>
+                  <p style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#75777e;">{{ dossier.reference }}</p>
+                  <h3 class="headline" style="font-size:1.15rem;color:#05152b;font-weight:600;line-height:1.25;margin-top:2px;">{{ dossier.titre|truncatechars:40 }}</h3>
+                </div>
+              </div>
+              <span class="badge badge-{{ dossier.statut }}">{{ dossier.get_statut_display }}</span>
+            </div>
 
-</table>
+            <!-- Client & Avocat -->
+            <div style="display:flex;flex-direction:column;gap:8px;padding:14px;background:#f9f9f9;border-radius:10px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span class="material-symbols-outlined" style="font-size:16px;color:#75777e;">person</span>
+                <div>
+                  <p style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#75777e;margin-bottom:1px;">Client</p>
+                  <p style="font-size:13px;font-weight:600;color:#05152b;">{{ dossier.client }}</p>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;padding-top:8px;border-top:1px solid rgba(197,198,206,.2);">
+                <span class="material-symbols-outlined" style="font-size:16px;color:#75777e;">gavel</span>
+                <div>
+                  <p style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#75777e;margin-bottom:1px;">Avocat responsable</p>
+                  <p style="font-size:13px;font-weight:600;color:#05152b;">{{ dossier.avocat_responsable }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
 
+          <!-- Card footer -->
+          <div class="card-footer">
+            <span style="font-size:10px;color:#75777e;">{{ dossier.date_ouverture|date:"d M Y" }}</span>
+            <div style="display:flex;gap:4px;">
+              <a href="{% url 'dossiers:detail' dossier.id %}"
+                 style="display:inline-flex;align-items:center;gap:4px;padding:6px 11px;border-radius:7px;font-size:11px;font-weight:600;color:#05152b;background:rgba(5,21,43,.06);text-decoration:none;transition:background .2s;"
+                 onmouseover="this.style.background='rgba(5,21,43,.12)'" onmouseout="this.style.background='rgba(5,21,43,.06)'">
+                <span class="material-symbols-outlined" style="font-size:14px;">visibility</span>
+                Voir
+              </a>
+              {% if request.user.role != 'avocat' %}
+              <a href="{% url 'dossiers:modifier' dossier.id %}"
+                 style="display:inline-flex;align-items:center;gap:4px;padding:6px 11px;border-radius:7px;font-size:11px;font-weight:600;color:#755b00;background:rgba(254,210,85,.12);text-decoration:none;transition:background .2s;"
+                 onmouseover="this.style.background='rgba(254,210,85,.25)'" onmouseout="this.style.background='rgba(254,210,85,.12)'">
+                <span class="material-symbols-outlined" style="font-size:14px;">edit</span>
+              </a>
+              {% endif %}
+              {% if request.user.role == 'admin' %}
+              <a href="{% url 'dossiers:supprimer' dossier.id %}"
+                 style="display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border-radius:7px;font-size:11px;font-weight:600;color:#ba1a1a;background:rgba(186,26,26,.07);text-decoration:none;transition:background .2s;"
+                 onmouseover="this.style.background='rgba(186,26,26,.15)'" onmouseout="this.style.background='rgba(186,26,26,.07)'"
+                 onclick="return confirm('Supprimer ce dossier ?')">
+                <span class="material-symbols-outlined" style="font-size:14px;">delete</span>
+              </a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        {% endfor %}
+
+        <!-- Ghost add card -->
+        {% if request.user.role != 'avocat' %}
+        <a href="{% url 'dossiers:creer' %}" class="ghost-card">
+          <div class="ghost-icon" style="width:52px;height:52px;border-radius:50%;background:#eeeeee;display:flex;align-items:center;justify-content:center;margin-bottom:12px;transition:background .25s;">
+            <span class="material-symbols-outlined" style="font-size:26px;color:#75777e;transition:color .25s;">add</span>
+          </div>
+          <p class="ghost-label headline" style="font-size:1.1rem;color:#75777e;transition:color .25s;">Nouveau Dossier</p>
+          <p style="font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#c5c6ce;margin-top:4px;">Créer un dossier</p>
+        </a>
+        {% endif %}
+
+      </div>
+
+      {% if not dossiers %}
+      <div style="text-align:center;padding:60px 20px;color:#75777e;">
+        <span class="material-symbols-outlined" style="font-size:64px;opacity:.2;">folder_shared</span>
+        <p class="headline" style="font-size:1.5rem;margin-top:16px;color:#05152b;">Aucun dossier pour le moment</p>
+        <p style="font-size:14px;margin-top:8px;">Créez votre premier dossier pour commencer.</p>
+      </div>
+      {% endif %}
+    </section>
+  </main>
 </div>
 
-</main>
+<div style="position:fixed;bottom:32px;right:32px;opacity:.03;pointer-events:none;user-select:none;">
+  <span class="material-symbols-outlined" style="font-size:200px;color:#05152b;font-variation-settings:'wght' 100;">folder_shared</span>
+</div>
 
 <script>
-document.querySelectorAll('.nav-item').forEach(function(link){
-  if(link.href && link.href.includes(window.location.pathname)){
-    link.classList.add('active');
-  }
+document.querySelectorAll('.nav-item').forEach(function(link) {
+  if (!link.href) return;
+  try {
+    const lp = new URL(link.href).pathname;
+    const cp = window.location.pathname;
+    if (lp !== '/' && cp.startsWith(lp)) link.classList.add('active');
+  } catch(e) {}
 });
 
-function toggleDark(){
-  document.documentElement.classList.toggle('dark');
+let isDark = false;
+function toggleDark() {
+  isDark = !isDark;
+  document.documentElement.classList.toggle('dark', isDark);
+  document.getElementById('theme-ico').textContent = isDark ? 'light_mode' : 'dark_mode';
+  document.getElementById('theme-lbl').textContent = isDark ? 'Light Mode' : 'Dark Mode';
+}
+
+let currentStatus = 'all';
+let currentSearch = '';
+
+function filterStatus(status, btn) {
+  currentStatus = status;
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.style.borderBottomColor = 'transparent';
+    b.style.color = '#75777e';
+  });
+  btn.style.borderBottomColor = '#fed255';
+  btn.style.color = '#05152b';
+  applyFilters();
+}
+
+function filterCards(query) {
+  currentSearch = query.toLowerCase();
+  applyFilters();
+}
+
+function applyFilters() {
+  document.querySelectorAll('#cards-grid .dossier-card').forEach(function(card) {
+    const titleMatch = (card.dataset.title || '').includes(currentSearch);
+    const statusMatch = currentStatus === 'all' || card.dataset.status === currentStatus;
+    card.style.display = (titleMatch && statusMatch) ? '' : 'none';
+  });
 }
 </script>
-
 </body>
 </html>
