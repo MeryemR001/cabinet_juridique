@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+{% include 'shared/typography.html' %}
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Lex Juris | Espace Assistante</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Public Sans',sans-serif;background:#f9f9f9;color:#1a1c1c;min-height:100vh;overflow:hidden;}
+  #app-wrap{display:flex;min-height:100vh;width:100%;}
+  #sidebar{width:240px;flex-shrink:0;background:#1B2A41;display:flex;flex-direction:column;overflow:hidden;transition:width .25s ease;}
+  #sidebar.collapsed{width:0;}
+  #sidebar .nav-item{display:flex;align-items:center;gap:10px;padding:11px 20px;color:rgba(255,255,255,.6);text-decoration:none;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:500;transition:all .2s;}
+  #sidebar .nav-item:hover{color:#fff;background:rgba(255,255,255,.05);}
+  #sidebar .nav-item.active{color:#FED255;background:rgba(255,255,255,.1);border-left:3px solid #FED255;}
+  #sidebar .nav-item .material-symbols-outlined{font-size:18px;}
+  #main-area{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;}
+  .topbar{height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;background:rgba(249,249,249,.92);backdrop-filter:blur(12px);border-bottom:0.5px solid #e2e2e2;flex-shrink:0;}
+  .page-scroll{flex:1;overflow-y:auto;}
+  .section-pad{padding:18px 24px 40px;}
+  .kpi-card{background:#fff;border-radius:12px;border:0.5px solid #e2e2e2;padding:18px;}
+  .hover-lift{transition:transform .2s,box-shadow .2s;}
+  .hover-lift:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(27,42,65,.08);}
+  .status-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;}
+  .badge-gold{background:#fff3cd;color:#755b00;}
+  .badge-gray{background:#e8e8e8;color:#44474d;}
+  .badge-green{background:#d1fae5;color:#065f46;}
+  .badge-red{background:#fee2e2;color:#991b1b;}
+  .row-hover:hover{background:rgba(0,0,0,.02);cursor:pointer;}
+  .avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;}
+  table{width:100%;border-collapse:collapse;}
+  th{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#75777e;font-weight:600;padding:11px 14px;text-align:left;background:#f3f3f3;}
+  td{padding:11px 14px;font-size:13px;border-bottom:0.5px solid #e8e8e8;}
+  .metric-bar{height:10px;background:#e8e8e8;border-radius:999px;overflow:hidden;}
+  .metric-fill{height:100%;border-radius:999px;}
+  .calendar-day{min-height:32px;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;font-weight:500;cursor:default;position:relative;padding:3px;}
+  .calendar-day.today{background:#1B2A41;color:#FED255;font-weight:700;}
+  .calendar-day.has-audience{border:2px solid #ef4444;background:#fff;color:#ef4444;font-weight:700;}
+  .calendar-day.empty{min-height:32px;}
+</style>
+</head>
+<body>
+<div id="app-wrap">
+  <aside id="sidebar">
+    <div style="padding:20px 18px 14px;border-bottom:0.5px solid rgba(255,255,255,.08);">
+      <div style="display:flex;align-items:center;gap:9px;">
+        <span class="material-symbols-outlined" style="color:#FED255;font-size:20px;">balance</span>
+        <div>
+          <div class="headline" style="color:#fff;font-size:17px;font-weight:700;">Lex Juris</div>
+          <div style="color:rgba(254,210,85,.7);font-size:9px;letter-spacing:.2em;text-transform:uppercase;">Distilled Authority</div>
+        </div>
+      </div>
+    </div>
+
+    <nav style="flex:1;padding:6px 0;overflow-y:auto;min-height:0;">
+      <a href="{% url 'dashboard:assistante' %}" class="nav-item active"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+      <a href="{% url 'dossiers:liste_clients' %}" class="nav-item"><span class="material-symbols-outlined">group</span>Clients</a>
+      <a href="{% url 'dossiers:liste' %}" class="nav-item"><span class="material-symbols-outlined">folder_shared</span>Dossiers</a>
+      <a href="{% url 'dossiers:liste_interventions' %}" class="nav-item"><span class="material-symbols-outlined">work_history</span>Interventions</a>
+      <a href="{% url 'audiences:liste' %}" class="nav-item"><span class="material-symbols-outlined">gavel</span>Audiences</a>
+      <a href="{% url 'factures:liste' %}" class="nav-item"><span class="material-symbols-outlined">receipt_long</span>Factures</a>
+    </nav>
+
+    <div style="padding:12px 10px;border-top:0.5px solid rgba(255,255,255,.08);">
+      <div style="display:flex;align-items:center;gap:9px;padding:9px;">
+        <div class="avatar" style="background:#c9a227;color:#fff;width:30px;height:30px;font-size:11px;">
+          {{ request.user.first_name|first }}{{ request.user.last_name|first }}
+        </div>
+        <div>
+          <div style="color:#fff;font-size:12px;font-weight:600;">{{ request.user.get_full_name }}</div>
+          <div style="color:rgba(255,255,255,.45);font-size:10px;text-transform:uppercase;letter-spacing:.07em;">Assistante</div>
+        </div>
+      </div>
+      <a href="{% url 'utilisateurs:logout' %}" style="display:flex;align-items:center;gap:7px;margin-top:6px;color:rgba(255,255,255,.5);font-size:11px;text-decoration:none;padding:6px;border-radius:6px;" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+        <span class="material-symbols-outlined" style="font-size:16px;">logout</span>Déconnexion
+      </a>
+    </div>
+  </aside>
+
+  <div id="main-area">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span class="material-symbols-outlined" style="cursor:pointer;color:#75777e;" onclick="toggleSidebar()">menu</span>
+        <div>
+          <div class="headline" style="font-size:19px;font-weight:700;">Mon Espace</div>
+          <div style="font-size:11px;color:#75777e;">Tableau de bord assistante</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="position:relative;cursor:pointer;">
+          <span class="material-symbols-outlined" style="color:#75777e;">notifications</span>
+          <div style="width:7px;height:7px;background:#c9a227;border-radius:50%;position:absolute;top:-1px;right:-1px;"></div>
+        </div>
+        <div class="avatar" style="background:#1B2A41;color:#FED255;width:32px;height:32px;font-size:12px;">{{ request.user.first_name|first }}{{ request.user.last_name|first }}</div>
+      </div>
+    </div>
+
+    <div class="page-scroll">
+      <div class="section-pad">
+        <div style="margin-bottom:18px;">
+          <div style="color:#c9a227;font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;">Mon Espace</div>
+          <div class="headline" style="font-size:24px;font-weight:700;margin-top:2px;">{{ dashboard_greeting }}</div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;">
+          <div class="kpi-card hover-lift" style="border-left:3px solid #c9a227;">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#75777e;margin-bottom:5px;">Dossiers à gérer</div>
+            <div class="headline" style="font-size:24px;font-weight:700;">{{ total_dossiers }}</div>
+          </div>
+          <div class="kpi-card hover-lift" style="border-left:3px solid #1B2A41;">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#75777e;margin-bottom:5px;">Audiences à planifier</div>
+            <div class="headline" style="font-size:24px;font-weight:700;">{{ audiences_a_planifier }}</div>
+          </div>
+          <div class="kpi-card hover-lift" style="border-left:3px solid #10b981;">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#75777e;margin-bottom:5px;">Chiffre d'affaires</div>
+            <div class="headline" style="font-size:24px;font-weight:700;">{{ chiffre_affaires|floatformat:0 }}</div>
+            <div style="color:#10b981;font-size:11px;margin-top:3px;">MAD encaissés</div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1.2fr 0.9fr 1fr;gap:14px;margin-bottom:14px;align-items:start;">
+          <div class="kpi-card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+              <div class="headline" style="font-size:15px;font-weight:700;">Dossiers récents</div>
+              <a href="{% url 'dossiers:liste' %}" style="font-size:10px;color:#c9a227;font-weight:700;text-decoration:none;">Voir tout →</a>
+            </div>
+            <table>
+              <thead><tr><th>Référence</th><th>Client</th><th>Statut</th></tr></thead>
+              <tbody>
+                {% for dossier in dossiers_recent %}
+                <tr class="row-hover">
+                  <td style="font-family:monospace;font-size:12px;color:#c9a227;font-weight:700;"><a href="{% url 'dossiers:detail' dossier.pk %}" style="text-decoration:none;color:#c9a227;">{{ dossier.reference }}</a></td>
+                  <td style="font-weight:600;">{{ dossier.client }}</td>
+                  <td>
+                    {% if dossier.statut == 'ouvert' %}<span class="status-badge badge-green">Ouvert</span>
+                    {% elif dossier.statut == 'en_cours' %}<span class="status-badge badge-gold">En cours</span>
+                    {% else %}<span class="status-badge badge-gray">Clos</span>{% endif %}
+                  </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="3" style="text-align:center;padding:20px;color:#75777e;">Aucun dossier</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="kpi-card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+              <div class="headline" style="font-size:15px;font-weight:700;">Résultat des audiences</div>
+              <a href="{% url 'audiences:liste' %}" style="font-size:10px;color:#c9a227;font-weight:700;text-decoration:none;">Voir tout →</a>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:14px;margin-top:10px;">
+              <div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:12px;font-weight:700;color:#1B2A41;">
+                  <span>Audiences tenues</span><span>{{ audiences_success_count }}</span>
+                </div>
+                <div class="metric-bar"><div class="metric-fill" style="width:{{ audiences_success_pct }}%;background:#10b981;"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:12px;font-weight:700;color:#1B2A41;">
+                  <span>Audiences annulées</span><span>{{ audiences_failed_count }}</span>
+                </div>
+                <div class="metric-bar"><div class="metric-fill" style="width:{{ audiences_failed_pct }}%;background:#ef4444;"></div></div>
+              </div>
+              <div style="font-size:11px;color:#75777e;line-height:1.5;">Suivi rapide des audiences traitées par votre avocat lié.</div>
+            </div>
+          </div>
+
+          <div class="kpi-card" style="padding:16px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+              <div class="headline" style="font-size:15px;font-weight:700;">Calendrier</div>
+              <span style="font-size:10px;color:#c9a227;font-weight:700;text-transform:uppercase;letter-spacing:.08em;" id="cal-month-label"></span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <button type="button" onclick="changeMonth(-1)" style="background:none;border:0.5px solid #e2e2e2;border-radius:6px;padding:3px 8px;cursor:pointer;font-size:12px;">‹</button>
+              <span id="cal-nav-label" style="font-size:12px;font-weight:700;color:#1B2A41;"></span>
+              <button type="button" onclick="changeMonth(1)" style="background:none;border:0.5px solid #e2e2e2;border-radius:6px;padding:3px 8px;cursor:pointer;font-size:12px;">›</button>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px;">
+              {% for j in "LMMJVSD" %}<div style="text-align:center;font-size:9px;font-weight:700;color:#75777e;padding:3px;">{{ j }}</div>{% endfor %}
+            </div>
+            <div id="cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;"></div>
+            <div style="display:flex;align-items:center;gap:12px;margin-top:10px;padding-top:10px;border-top:0.5px solid #e2e2e2;">
+              <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:#75777e;"><div style="width:8px;height:8px;border-radius:50%;background:#ef4444;"></div>Audience</div>
+              <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:#75777e;"><div style="width:8px;height:8px;border-radius:50%;background:#1B2A41;"></div>Aujourd'hui</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <div class="headline" style="font-size:15px;font-weight:700;">Mes audiences récentes</div>
+            <a href="{% url 'audiences:liste' %}" style="font-size:10px;color:#c9a227;font-weight:700;text-decoration:none;">Voir tout →</a>
+          </div>
+          <table>
+            <thead><tr><th>Date</th><th>Dossier</th><th>Avocat</th></tr></thead>
+            <tbody>
+              {% for audience in audiences_recent %}
+              <tr class="row-hover">
+                <td style="font-weight:700;">{{ audience.date_audience|date:"d/m/Y" }}</td>
+                <td style="color:#c9a227;font-weight:700;">{{ audience.dossier.reference }}</td>
+                <td style="color:#75777e;">{{ audience.avocat.get_full_name }}</td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="3" style="text-align:center;padding:20px;color:#75777e;">Aucune audience</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script id="audience-days-data" type="application/json">
+[
+{% for a in audiences_mois %}
+"{{ a.date_audience|date:'Y-m-d' }}"{% if not forloop.last %},{% endif %}
+{% endfor %}
+]
+</script>
+
+<script>
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  if (sidebar) {
+    sidebar.classList.toggle('collapsed');
+  }
+}
+
+const dataEl = document.getElementById('audience-days-data');
+let audienceDates = [];
+
+if (dataEl) {
+  try {
+    audienceDates = JSON.parse(dataEl.textContent);
+  } catch (e) {
+    console.error('Erreur JSON :', e);
+  }
+}
+
+let calYear;
+let calMonth;
+const now = new Date();
+calYear = now.getFullYear();
+calMonth = now.getMonth();
+
+const monthNames = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+
+function buildCalendar() {
+  const grid = document.getElementById('cal-grid');
+  const label = document.getElementById('cal-nav-label');
+  if (!grid || !label) return;
+
+  label.textContent = monthNames[calMonth] + ' ' + calYear;
+
+  const firstDay = new Date(calYear, calMonth, 1);
+  const lastDay = new Date(calYear, calMonth + 1, 0);
+  let startDow = firstDay.getDay();
+  startDow = (startDow === 0) ? 6 : startDow - 1;
+
+  grid.innerHTML = '';
+
+  for (let i = 0; i < startDow; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'calendar-day empty';
+    grid.appendChild(cell);
+  }
+
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  for (let d = 1; d <= lastDay.getDate(); d++) {
+    const dateStr = calYear + '-' + String(calMonth + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+    const isToday = d === now.getDate() && calMonth === now.getMonth() && calYear === now.getFullYear();
+    const hasAudience = audienceDates.includes(dateStr) && dateStr >= todayStr;
+
+    const cell = document.createElement('div');
+    cell.className = 'calendar-day' + (isToday ? ' today' : '') + (hasAudience && !isToday ? ' has-audience' : '');
+    cell.innerHTML = '<span>' + d + '</span>';
+
+    if (hasAudience) {
+      const dot = document.createElement('div');
+      dot.style.cssText = 'width:5px;height:5px;border-radius:50%;background:#ef4444;margin-top:1px;';
+      cell.appendChild(dot);
+    }
+
+    grid.appendChild(cell);
+  }
+}
+
+function changeMonth(dir) {
+  calMonth += dir;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  buildCalendar();
+}
+
+buildCalendar();
+</script>
+</body>
+</html>

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Public+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+
+<title>Détail Dossier</title>
+</head>
+<style>
+  .dark body {
+  background: #0f1929 !important;
+  color: #e2e8f0 !important;
+}
+
+.dark .bg-white {
+  background: #1a2740 !important;
+}
+
+.dark .text-gray-500,
+.dark .text-gray-600 {
+  color: #94a3b8 !important;
+}
+
+.dark table {
+  color: #e2e8f0;
+}
+
+.dark th {
+  background: #162035 !important;
+  color: #94a3b8 !important;
+}
+
+.dark td {
+  border-color: #2d3f5a !important;
+}
+    body{margin:0;font-family:'Public Sans',sans-serif;background:#f9f9f9;}
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;vertical-align:middle;font-size:20px;}
+#app{display:flex;height:100vh;}
+#sidebar{width:240px;flex-shrink:0;transition:width .25s ease;overflow:hidden;}
+#sidebar.collapsed{width:0;}
+.headline{font-family:'Newsreader',serif;}
+.avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;}
+
+/* nav-item : on retire cursor:pointer pour les vrais liens */
+.nav-item{
+  display:flex;align-items:center;padding:11px 20px;
+  color:rgba(255,255,255,.6);transition:all .2s;
+  font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  font-weight:500;text-decoration:none;
+}
+.nav-item .material-symbols-outlined{margin-right:10px;font-size:18px;}
+.nav-item:hover{color:#fff;background:rgba(255,255,255,.05);}
+.nav-item.active{color:#FED255;background:rgba(255,255,255,.1);border-left:3px solid #FED255;}
+
+/* main */
+#main{flex:1;padding:40px;overflow-y:auto;}
+input,select{width:100%;padding:8px;border:1px solid #ddd;border-radius:8px;font-family:'Public Sans',sans-serif;}
+label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#75777e;display:block;margin-bottom:4px;}
+
+/* Layout */
+.app-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+
+/* Main */
+#main-content {
+  flex: 1;
+  overflow-y: auto;
+}
+</style>
+<body class="bg-gray-100">
+
+
+
+ <div id="app" >
+
+<!-- SIDEBAR -->
+<aside id="sidebar" style="background:#1B2A41;display:flex;flex-direction:column;height:100vh;">
+
+  <div style="padding:20px 18px 14px;border-bottom:0.5px solid rgba(255,255,255,.08);">
+    <div style="display:flex;align-items:center;gap:9px;">
+      <span class="material-symbols-outlined" style="color:#FED255;font-size:20px;">balance</span>
+      <div>
+        <div class="headline" style="color:#fff;font-size:17px;font-weight:700;">Lex Juris</div>
+        <div style="color:rgba(254,210,85,.7);font-size:9px;letter-spacing:.2em;text-transform:uppercase;">Distilled Authority</div>
+      </div>
+    </div>
+  </div>
+
+  <nav style="flex:1;padding:6px 0;overflow-y:auto;">
+    {% if request.user.role == 'admin' %}
+    <a href="{% url 'dashboard:admin' %}" class="nav-item">
+      <span class="material-symbols-outlined">dashboard</span>Dashboard
+    </a>
+    {% elif request.user.role == 'avocat' %}
+    <a href="{% url 'dashboard:avocat' %}" class="nav-item">
+      <span class="material-symbols-outlined">dashboard</span>Dashboard
+    </a>
+    {% else %}
+    <a href="{% url 'dashboard:assistante' %}" class="nav-item">
+      <span class="material-symbols-outlined">dashboard</span>Dashboard
+    </a>
+    {% endif %}
+
+    <a href="{% url 'utilisateurs:liste' %}" class="nav-item">
+      <span class="material-symbols-outlined">badge</span>Utilisateurs
+    </a>
+    
+     <a href="{% url 'dossiers:liste_clients' %}" class="nav-item">
+      <span class="material-symbols-outlined">group</span>Clients
+    </a>
+    <a href="{% url 'dossiers:liste' %}" class="nav-item">
+      <span class="material-symbols-outlined">folder_shared</span>Dossiers
+    </a>
+    
+    <a href="{% url 'audiences:liste' %}" class="nav-item">
+      <span class="material-symbols-outlined">gavel</span>Audiences
+    </a>
+  </nav>
+
+  <div style="padding:12px 10px;border-top:0.5px solid rgba(255,255,255,.08);">
+    <button onclick="toggleDark()" style="width:100%;background:rgba(255,255,255,.08);border:0.5px solid rgba(255,255,255,.12);color:#fff;border-radius:8px;padding:7px;font-size:11px;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:10px;font-family:'Public Sans',sans-serif;">
+      <span class="material-symbols-outlined" id="theme-ico" style="font-size:16px;">dark_mode</span>
+      <span id="theme-lbl">Dark Mode</span>
+    </button>
+    <div style="display:flex;align-items:center;gap:9px;padding-top:9px;border-top:0.5px solid rgba(255,255,255,.08);">
+      <div class="avatar" style="background:#c9a227;color:#fff;width:30px;height:30px;font-size:11px;">
+        {{ request.user.first_name|first }}{{ request.user.last_name|first }}
+      </div>
+      <div>
+        <div style="color:#fff;font-size:12px;font-weight:600;">{{ request.user.get_full_name }}</div>
+        <div style="color:rgba(255,255,255,.45);font-size:10px;text-transform:uppercase;letter-spacing:.07em;">Administrateur</div>
+      </div>
+    </div>
+    <a href="{% url 'utilisateurs:logout' %}" style="display:flex;align-items:center;gap:7px;margin-top:10px;color:rgba(255,255,255,.5);font-size:11px;text-decoration:none;padding:6px;border-radius:6px;transition:background .2s;"
+       onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+      <span class="material-symbols-outlined" style="font-size:16px;">logout</span>Déconnexion
+    </a>
+  </div>
+
+</aside>
+
+
+<!-- MAIN -->
+<main id="main">
+
+
+
+ 
+
+<h2 class="text-3xl font-bold mb-6">Détail du dossier</h2>
+
+<div class="bg-white p-6 rounded shadow mb-6">
+    <p><strong>Titre :</strong> {{ dossier.titre }}</p>
+    <p><strong>Client :</strong> {{ dossier.client }}</p>
+    <p><strong>Avocat :</strong> {{ dossier.avocat_responsable }}</p>
+</div>
+
+<!-- INTERVENTIONS -->
+<div class="bg-white p-6 rounded shadow mb-6">
+<h3 class="text-xl font-bold mb-4">Interventions</h3>
+
+<ul>
+{% for i in interventions %}
+<li>{{ i.date }} - {{ i.description }}</li>
+{% empty %}
+<li>Aucune intervention</li>
+{% endfor %}
+</ul>
+</div>
+
+<!-- DOCUMENTS -->
+<div class="bg-white p-6 rounded shadow mb-6">
+<h3 class="text-xl font-bold mb-4">Documents</h3>
+
+<ul>
+{% for doc in documents %}
+<li>{{ doc.nom }}</li>
+{% empty %}
+<li>Aucun document</li>
+{% endfor %}
+</ul>
+</div>
+
+<!-- AUDIENCES -->
+<div class="bg-white p-6 rounded shadow">
+<h3 class="text-xl font-bold mb-4">Audiences</h3>
+
+<ul>
+{% for a in audiences %}
+<li>{{ a.date }} - {{ a.lieu }}</li>
+{% empty %}
+<li>Aucune audience</li>
+{% endfor %}
+</ul>
+</div>
+</div>
+</div>
+</main>
+<script>
+ document.querySelectorAll('.nav-item').forEach(function(link) {
+  if (!link.href) return;
+  const linkPath = new URL(link.href).pathname;
+  const currentPath = window.location.pathname;
+  // on active si le chemin courant commence par le chemin du lien
+  // (ex: /utilisateurs/creer/ → active "Utilisateurs")
+  if (linkPath !== '/' && currentPath.startsWith(linkPath)) {
+    link.classList.add('active');
+  }
+});
+
+// ── Sidebar toggle ───────────────────────────────────
+let sidebarOpen = true;
+function toggleSidebar() {
+  sidebarOpen = !sidebarOpen;
+  document.getElementById('sidebar').classList.toggle('collapsed', !sidebarOpen);
+}
+
+// ── Dark mode ────────────────────────────────────────
+let isDark = false;
+function toggleDark() {
+  isDark = !isDark;
+  document.documentElement.classList.toggle('dark', isDark);
+  document.getElementById('theme-ico').textContent = isDark ? 'light_mode' : 'dark_mode';
+  document.getElementById('theme-lbl').textContent = isDark ? 'Light Mode' : 'Dark Mode';
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+{% load permissions_tags %}
+<html lang="fr">
+<head>
+{% include 'shared/typography.html' %}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lex Juris | Detail Client</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Public+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; font-family: 'Public Sans', sans-serif; background: #f9f9f9; }
+.material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+.headline { font-family: 'Newsreader', serif; }
+.nav-item { display: flex; align-items: center; padding: 11px 20px; color: rgba(255,255,255,.6); transition: all .2s; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; font-weight: 500; text-decoration: none; gap: 10px; }
+.nav-item .material-symbols-outlined { font-size: 18px; }
+.nav-item:hover { color: #fff; background: rgba(255,255,255,.05); }
+.nav-item.active { color: #FED255 !important; background: rgba(255,255,255,.1) !important; border-left: 3px solid #FED255 !important; }
+.card { background: #fff; border: 1px solid rgba(197,198,206,.25); border-radius: 14px; }
+.badge { display: inline-flex; align-items: center; border-radius: 999px; padding: 3px 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+.badge-ouvert { background: #dcfce7; color: #166534; }
+.badge-en_cours { background: #fef9c3; color: #854d0e; }
+.badge-clos { background: #f1f5f9; color: #475569; }
+</style>
+</head>
+<body>
+<div style="display:flex;height:100vh;overflow:hidden;">
+
+  <aside style="background:#1B2A41;display:flex;flex-direction:column;height:100vh;width:240px;flex-shrink:0;overflow:hidden;">
+    <div style="padding:20px 18px 14px;border-bottom:0.5px solid rgba(255,255,255,.08);">
+      <div style="display:flex;align-items:center;gap:9px;">
+        <span class="material-symbols-outlined" style="color:#FED255;font-size:20px;">balance</span>
+        <div>
+          <div class="headline" style="color:#fff;font-size:17px;font-weight:700;">Lex Juris</div>
+          <div style="color:rgba(254,210,85,.7);font-size:9px;letter-spacing:.2em;text-transform:uppercase;">Distilled Authority</div>
+        </div>
+      </div>
+    </div>
+
+    <nav style="flex:1;padding:6px 0;overflow-y:auto;">
+      {% if request.user|role_is:'admin' %}
+      <a href="{% url 'dashboard:admin' %}" class="nav-item"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+      <a href="{% url 'utilisateurs:liste' %}" class="nav-item"><span class="material-symbols-outlined">badge</span>Utilisateurs</a>
+      {% elif request.user|role_is:'avocat' %}
+      <a href="{% url 'dashboard:avocat' %}" class="nav-item"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+      {% else %}
+      <a href="{% url 'dashboard:assistante' %}" class="nav-item"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+      {% endif %}
+      <a href="{% url 'dossiers:liste_clients' %}" class="nav-item active"><span class="material-symbols-outlined">group</span>Clients</a>
+      <a href="{% url 'dossiers:liste' %}" class="nav-item"><span class="material-symbols-outlined">folder_shared</span>Dossiers</a>
+      <a href="{% url 'audiences:liste' %}" class="nav-item"><span class="material-symbols-outlined">gavel</span>Audiences</a>
+    </nav>
+
+    <div style="padding:12px 10px;border-top:0.5px solid rgba(255,255,255,.08);">
+      <div style="display:flex;align-items:center;gap:9px;padding-top:9px;border-top:0.5px solid rgba(255,255,255,.08);">
+        <div style="width:30px;height:30px;border-radius:50%;background:#c9a227;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;">
+          {{ request.user.first_name|first }}{{ request.user.last_name|first }}
+        </div>
+        <div>
+          <div style="color:#fff;font-size:12px;font-weight:600;">{{ request.user.get_full_name }}</div>
+          <div style="color:rgba(255,255,255,.45);font-size:10px;text-transform:uppercase;letter-spacing:.07em;">{{ request.user.role|capfirst }}</div>
+        </div>
+      </div>
+      <a href="{% url 'utilisateurs:logout' %}" style="display:flex;align-items:center;gap:7px;margin-top:10px;color:rgba(255,255,255,.5);font-size:11px;text-decoration:none;padding:6px;border-radius:6px;transition:background .2s;" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+        <span class="material-symbols-outlined" style="font-size:16px;">logout</span>Déconnexion
+      </a>
+    </div>
+  </aside>
+
+  <main style="flex:1;overflow-y:auto;">
+    <header style="position:sticky;top:0;z-index:30;background:rgba(249,249,249,.92);backdrop-filter:blur(16px);padding:20px 30px;border-bottom:1px solid rgba(197,198,206,.2);display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <a href="{% url 'dossiers:liste_clients' %}" style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#75777e;text-decoration:none;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;">
+          <span class="material-symbols-outlined" style="font-size:15px;">arrow_back</span>Clients
+        </a>
+        <h1 class="headline" style="font-size:2rem;color:#05152b;margin:0;">{{ client.nom }} {{ client.prenom }}</h1>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <a href="{% url 'dossiers:modifier_client' client.pk %}" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:9px;background:rgba(254,210,85,.2);color:#755b00;text-decoration:none;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;">
+          <span class="material-symbols-outlined" style="font-size:14px;">edit</span>Modifier
+        </a>
+      </div>
+    </header>
+
+    <section style="padding:26px 30px;display:grid;grid-template-columns:320px 1fr;gap:16px;align-items:start;">
+      <div class="card" style="padding:20px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <div style="width:54px;height:54px;border-radius:50%;background:#1b2a41;display:flex;align-items:center;justify-content:center;">
+            <span class="headline" style="color:#fed255;font-size:20px;font-weight:700;">{{ client.nom|first|upper }}{{ client.prenom|first|upper }}</span>
+          </div>
+          <div>
+            <p style="margin:0;font-size:10px;letter-spacing:.12em;color:#75777e;text-transform:uppercase;font-weight:700;">Fiche client</p>
+            <p style="margin:2px 0 0;font-size:13px;color:#44474d;">Créé le {{ client.date_creation|date:"d M Y" }}</p>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          {% if client.email %}
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="material-symbols-outlined" style="font-size:16px;color:#75777e;">mail</span>
+            <span style="font-size:13px;color:#05152b;">{{ client.email }}</span>
+          </div>
+          {% endif %}
+          {% if client.telephone %}
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="material-symbols-outlined" style="font-size:16px;color:#75777e;">call</span>
+            <span style="font-size:13px;color:#05152b;">{{ client.telephone }}</span>
+          </div>
+          {% endif %}
+          {% if client.cin %}
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="material-symbols-outlined" style="font-size:16px;color:#75777e;">badge</span>
+            <span style="font-size:13px;color:#05152b;">{{ client.cin }}</span>
+          </div>
+          {% endif %}
+          {% if client.adresse %}
+          <div style="display:flex;align-items:flex-start;gap:8px;">
+            <span class="material-symbols-outlined" style="font-size:16px;color:#75777e;margin-top:1px;">location_on</span>
+            <span style="font-size:13px;color:#05152b;line-height:1.45;">{{ client.adresse }}</span>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+          <div class="card" style="padding:14px 16px;">
+            <p style="margin:0;font-size:10px;font-weight:700;letter-spacing:.1em;color:#75777e;text-transform:uppercase;">Total dossiers</p>
+            <p class="headline" style="margin:4px 0 0;font-size:30px;color:#05152b;">{{ nb_dossiers }}</p>
+          </div>
+          <div class="card" style="padding:14px 16px;">
+            <p style="margin:0;font-size:10px;font-weight:700;letter-spacing:.1em;color:#75777e;text-transform:uppercase;">Ouverts</p>
+            <p class="headline" style="margin:4px 0 0;font-size:30px;color:#166534;">{{ nb_ouverts }}</p>
+          </div>
+          <div class="card" style="padding:14px 16px;">
+            <p style="margin:0;font-size:10px;font-weight:700;letter-spacing:.1em;color:#75777e;text-transform:uppercase;">En cours</p>
+            <p class="headline" style="margin:4px 0 0;font-size:30px;color:#854d0e;">{{ nb_en_cours }}</p>
+          </div>
+          <div class="card" style="padding:14px 16px;">
+            <p style="margin:0;font-size:10px;font-weight:700;letter-spacing:.1em;color:#75777e;text-transform:uppercase;">Clos</p>
+            <p class="headline" style="margin:4px 0 0;font-size:30px;color:#475569;">{{ nb_clos }}</p>
+          </div>
+        </div>
+
+        <div class="card" style="padding:18px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <h2 class="headline" style="font-size:1.4rem;color:#05152b;margin:0;">Dossiers du client</h2>
+            <a href="{% url 'dossiers:creer' %}" style="display:inline-flex;align-items:center;gap:5px;padding:7px 12px;background:#05152b;color:#fff;text-decoration:none;border-radius:8px;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;">
+              <span class="material-symbols-outlined" style="font-size:14px;">add</span>Dossier
+            </a>
+          </div>
+
+          {% if dossiers %}
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            {% for d in dossiers %}
+            <div style="display:flex;align-items:center;justify-content:space-between;border:1px solid rgba(197,198,206,.25);border-radius:10px;padding:12px 14px;">
+              <div>
+                <p style="margin:0;font-size:14px;font-weight:700;color:#05152b;">{{ d.reference }} - {{ d.titre }}</p>
+                <p style="margin:2px 0 0;font-size:12px;color:#75777e;">
+                  {% if d.avocat_responsable %}{{ d.avocat_responsable.get_full_name }}{% else %}Aucun avocat assigné{% endif %}
+                  · {{ d.date_ouverture|date:"d M Y" }}
+                </p>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span class="badge badge-{{ d.statut }}">{{ d.get_statut_display }}</span>
+                <a href="{% url 'documents:liste' d.pk %}" style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;border:1px solid rgba(197,198,206,.5);color:#755b00;text-decoration:none;" title="Documents" onmouseover="this.style.borderColor='#755b00'" onmouseout="this.style.borderColor='rgba(197,198,206,.5)'">
+                  <span class="material-symbols-outlined" style="font-size:14px;">description</span>
+                </a>
+                {% if request.user|role_is:'admin,assistante,avocat' %}
+                <a href="{% url 'dossiers:ajouter_intervention' d.pk %}" style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;border:1px solid rgba(197,198,206,.5);color:#1b2a41;text-decoration:none;" title="Ajouter intervention" onmouseover="this.style.borderColor='#1b2a41'" onmouseout="this.style.borderColor='rgba(197,198,206,.5)'">
+                  <span class="material-symbols-outlined" style="font-size:14px;">add</span>
+                </a>
+                {% endif %}
+                <a href="{% url 'dossiers:detail' d.pk %}" style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;border:1px solid rgba(197,198,206,.5);color:#75777e;text-decoration:none;" onmouseover="this.style.borderColor='#05152b';this.style.color='#05152b'" onmouseout="this.style.borderColor='rgba(197,198,206,.5)';this.style.color='#75777e'">
+                  <span class="material-symbols-outlined" style="font-size:14px;">open_in_new</span>
+                </a>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div style="text-align:center;padding:34px 16px;color:#75777e;">
+            <span class="material-symbols-outlined" style="font-size:32px;display:block;margin-bottom:8px;opacity:.35;">folder_open</span>
+            <p style="margin:0;font-size:13px;">Ce client n'a encore aucun dossier.</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+{% include 'shared/typography.html' %}
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Ajouter une Intervention | Lex Juris</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400&family=Public+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;}body{margin:0;font-family:'Public Sans',sans-serif;background:#f9f9f9;}
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24;vertical-align:middle;}
+.nav-item{display:flex;align-items:center;padding:11px 20px;color:rgba(255,255,255,.6);transition:all .2s;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:500;text-decoration:none;gap:10px;}
+.nav-item .material-symbols-outlined{font-size:18px;}
+.nav-item:hover{color:#fff;background:rgba(255,255,255,.05);}
+.nav-item.active{color:#FED255;background:rgba(255,255,255,.1);border-left:3px solid #FED255;}
+.ghost-field{margin-bottom:24px;}
+.ghost-field label{font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#75777e;display:block;margin-bottom:6px;}
+.ghost-field input,.ghost-field select,.ghost-field textarea{width:100%;background:transparent;border:0;border-bottom:2px solid rgba(197,198,206,.35);padding:10px 0;font-family:'Newsreader',serif;font-size:1.1rem;color:#05152b;outline:none;transition:border-color .25s;border-radius:0;box-shadow:none!important;}
+.ghost-field input:focus,.ghost-field select:focus,.ghost-field textarea:focus{border-bottom-color:#755b00;}
+.ghost-field textarea{font-family:'Public Sans',sans-serif;font-size:.95rem;background:#f3f3f3;border:0;border-radius:10px;padding:14px 16px;resize:none;}
+.ghost-field select{appearance:none;cursor:pointer;}
+.errorlist{list-style:none;margin:4px 0 0;padding:0;}.errorlist li{font-size:11px;color:#ba1a1a;}
+</style>
+</head>
+<body>
+<div style="display:flex;height:100vh;overflow:hidden;">
+
+{% include 'shared/sidebar.html' %}
+
+<div style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
+  <header style="flex-shrink:0;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 32px;background:rgba(249,249,249,.9);backdrop-filter:blur(16px);border-bottom:1px solid rgba(197,198,206,.3);">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <a href="{% url 'dossiers:detail' dossier.pk %}" style="color:#75777e;text-decoration:none;display:flex;align-items:center;gap:4px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;" onmouseover="this.style.color='#05152b'" onmouseout="this.style.color='#75777e'">
+        <span class="material-symbols-outlined" style="font-size:16px;">arrow_back</span>{{ dossier.reference }}
+      </a>
+      <span style="color:#c5c6ce;font-size:14px;">›</span>
+      <span style="font-size:11px;font-weight:700;color:#05152b;text-transform:uppercase;letter-spacing:.08em;">Nouvelle Intervention</span>
+    </div>
+  </header>
+
+  <main style="flex:1;overflow-y:auto;padding:36px 40px;">
+    <div style="max-width:640px;margin:0 auto;">
+
+      <div style="margin-bottom:36px;position:relative;">
+        <span class="material-symbols-outlined" style="position:absolute;left:-4px;top:-8px;font-size:100px;color:#05152b;opacity:.03;pointer-events:none;">handshake</span>
+        <p style="font-size:10px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:#755b00;margin:0 0 6px;">{{ dossier.reference }}</p>
+        <h2 style="font-family:'Newsreader',serif;font-size:2.4rem;color:#05152b;font-weight:600;line-height:1.1;margin:0 0 8px;position:relative;">Nouvelle Intervention</h2>
+        <p style="font-size:13px;color:#75777e;margin:0;">{{ dossier.titre }}</p>
+      </div>
+
+      {% if form.errors %}
+      <div style="background:#ffdad6;border-radius:10px;padding:14px 18px;margin-bottom:24px;">
+        {% for field, errors in form.errors.items %}{% for e in errors %}<p style="font-size:12px;color:#93000a;margin:2px 0;">{{ e }}</p>{% endfor %}{% endfor %}
+      </div>
+      {% endif %}
+
+      <form method="POST">
+        {% csrf_token %}
+
+        <div style="background:#fff;border-radius:16px;border:1.5px solid rgba(197,198,206,.3);padding:36px 32px;margin-bottom:24px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:28px;padding-bottom:16px;border-bottom:1px solid #eeeeee;">
+            <span style="height:1px;width:24px;background:#fed255;display:inline-block;"></span>
+            <h3 style="font-family:'Public Sans',sans-serif;font-size:10px;font-weight:800;letter-spacing:.3em;text-transform:uppercase;color:#05152b;margin:0;">Détails de l'Intervention</h3>
+          </div>
+
+          <div class="ghost-field">
+            <label>Dossier concerné</label>
+            <input type="text" value="{{ dossier.reference }} — {{ dossier.titre }}" disabled style="opacity:.6;cursor:not-allowed;"/>
+            <div style="display:none;">{{ form.dossier }}</div>
+          </div>
+
+          <div class="ghost-field">
+            <label>{{ form.description.label }}</label>
+            {{ form.description }}
+            {% if form.description.errors %}<ul class="errorlist">{% for e in form.description.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+          </div>
+
+          <div class="ghost-field" style="max-width:200px;">
+            <label>{{ form.heures_travaillees.label }}</label>
+            {{ form.heures_travaillees }}
+            {% if form.heures_travaillees.errors %}<ul class="errorlist">{% for e in form.heures_travaillees.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+          </div>
+
+          <div style="background:#f3f3f3;border-radius:10px;padding:14px 16px;margin-top:8px;">
+            <p style="font-size:11px;color:#75777e;margin:0;">
+              <span class="material-symbols-outlined" style="font-size:14px;color:#755b00;vertical-align:middle;margin-right:4px;">person</span>
+              Cette intervention sera enregistrée sous votre nom : <strong>{{ request.user.get_full_name }}</strong>
+            </p>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <a href="{% url 'dossiers:detail' dossier.pk %}" style="font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#75777e;text-decoration:none;transition:color .2s;" onmouseover="this.style.color='#05152b'" onmouseout="this.style.color='#75777e'">Annuler</a>
+          <button type="submit" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#05152b,#1b2a41);color:#fff;padding:13px 30px;border-radius:12px;font-family:'Public Sans',sans-serif;font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;border:none;cursor:pointer;box-shadow:0 6px 20px rgba(5,21,43,.25);transition:transform .2s,box-shadow .2s;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'">
+            <span class="material-symbols-outlined" style="font-size:16px;">save</span>Enregistrer l'Intervention
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
+</div>
+</div>
+</body>
+</html>

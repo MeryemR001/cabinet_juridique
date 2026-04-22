@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+{% load permissions_tags %}
+<html lang="fr">
+<head>
+{% include 'shared/typography.html' %}
+    <meta charset="UTF-8">
+    <title>Téléverser un Document | Lex Juris</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,700;1,400&family=Public+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script>
+        tailwind.config = {
+            theme: { extend: {
+                colors: {
+                    "primary":"#05152b","primary-container":"#1b2a41","on-primary":"#ffffff","on-primary-container":"#8291ad",
+                    "secondary":"#755b00","secondary-container":"#fed255","on-secondary-container":"#735a00",
+                    "surface":"#f9f9f9","surface-container":"#eeeeee","surface-container-low":"#f3f3f3","surface-container-high":"#e8e8e8",
+                    "surface-container-lowest":"#ffffff","on-surface":"#1a1c1c","on-surface-variant":"#44474d",
+                    "outline":"#75777e","outline-variant":"#c5c6ce","background":"#f9f9f9",
+                    "error":"#ba1a1a",
+                },
+                fontFamily: { "headline":["Newsreader"], "body":["Public Sans"], "label":["Public Sans"] },
+                borderRadius: { "DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem" },
+            }}
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; }
+        body { font-family:'Public Sans',sans-serif; }
+        .glass-panel { backdrop-filter:blur(20px); background:rgba(255,255,255,0.7); }
+
+        /* Ghost inputs */
+        .field-input {
+            width:100%; background:transparent; border:none;
+            border-bottom:2px solid rgba(197,198,206,0.4);
+            padding:0.75rem 0; font-family:'Newsreader',serif; font-size:1.25rem;
+            color:#05152b; outline:none; transition:border-color 0.2s; border-radius:0;
+        }
+        .field-input:focus { border-bottom-color:#755b00; }
+        select.field-input { appearance:none; cursor:pointer; font-family:'Public Sans',sans-serif; font-size:1rem; }
+
+        /* File drop zone */
+        #drop-zone { transition: all 0.3s; }
+        #drop-zone.drag-over {
+            border-color:#755b00;
+            background:rgba(254,210,85,0.05);
+        }
+        /* Hide default file input */
+        #drop-zone input[type="file"] { display:none; }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface flex min-h-screen">
+
+{% include 'shared/sidebar.html' %}
+
+<main class="flex-1 min-h-screen bg-surface">
+
+    <!-- Top Bar -->
+    <header class="w-full sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-outline-variant/10 flex items-center justify-between px-12 h-16 shadow-sm">
+        <div class="flex items-center gap-3">
+            <a href="{% url 'documents:liste' dossier.pk %}" class="text-outline hover:text-primary transition-colors">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </a>
+            <nav class="flex items-center gap-2 text-sm">
+                <a href="{% url 'documents:liste' dossier.pk %}" class="text-slate-400 hover:text-primary transition-colors">Documents</a>
+                <span class="material-symbols-outlined text-slate-300 text-xs">chevron_right</span>
+                <span class="text-primary font-bold">Téléverser</span>
+            </nav>
+        </div>
+        <div class="flex items-center gap-4">
+            <a href="{% url 'dossiers:detail' dossier.pk %}" class="text-xs font-bold uppercase tracking-widest text-primary hover:opacity-80">Dossier</a>
+            <a href="{% url 'dossiers:detail_client' dossier.client.pk %}" class="text-xs font-bold uppercase tracking-widest text-primary hover:opacity-80">Client</a>
+            <span class="font-['Public_Sans'] text-xs text-outline">
+                {{ request.user.get_full_name|default:request.user.username }}
+                <span class="ml-2 bg-surface-container text-on-surface-variant text-[10px] px-2 py-0.5 rounded-full uppercase tracking-widest">{{ request.user|role_label }}</span>
+            </span>
+        </div>
+    </header>
+
+    <!-- Content -->
+    <div class="px-12 py-12 max-w-6xl mx-auto">
+
+        <!-- Header -->
+        <div class="mb-12 relative">
+            <div class="absolute -left-12 top-0 opacity-[0.03] pointer-events-none">
+                <span class="material-symbols-outlined text-[12rem] text-primary">account_balance</span>
+            </div>
+            <p class="font-label text-[10px] uppercase tracking-[0.2em] text-secondary font-bold mb-3">Dossier — {{ dossier }}</p>
+            <h2 class="font-headline text-5xl text-primary font-bold tracking-tight mb-3">Téléverser un Document</h2>
+            <p class="text-on-surface-variant max-w-xl text-lg leading-relaxed">
+                Assurez-vous que tous les fichiers légaux sont correctement catégorisés et associés au bon dossier.
+            </p>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data" id="upload-form">
+            {% csrf_token %}
+
+            <div class="grid grid-cols-12 gap-10">
+
+                <!-- Left: Form Fields -->
+                <div class="col-span-12 lg:col-span-7 space-y-10">
+
+                    <!-- Title & Category -->
+                    <section class="bg-surface-container-lowest p-10 rounded-xl shadow-sm border border-slate-100/50">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+                            <!-- Titre -->
+                            <div class="col-span-2">
+                                <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-3">{{ form.titre.label }}</label>
+                                {{ form.titre }}
+                                {% if form.titre.errors %}<p class="text-error text-xs mt-1">{{ form.titre.errors|join:", " }}</p>{% endif %}
+                            </div>
+
+                            <!-- Type -->
+                            <div class="relative">
+                                <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-3">{{ form.type_document.label }}</label>
+                                <div class="relative">
+                                    {{ form.type_document }}
+                                    <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">expand_more</span>
+                                </div>
+                                {% if form.type_document.errors %}<p class="text-error text-xs mt-1">{{ form.type_document.errors|join:", " }}</p>{% endif %}
+                            </div>
+
+                            <!-- Dossier (hidden — set in view, shown for info) -->
+                            <div class="hidden">{{ form.dossier }}</div>
+                            <div class="flex items-center gap-3 bg-surface-container p-4 rounded-lg">
+                                <span class="material-symbols-outlined text-secondary">folder_shared</span>
+                                <div>
+                                    <p class="text-[10px] uppercase tracking-widest text-outline font-bold">Dossier</p>
+                                    <p class="text-sm font-semibold text-primary">{{ dossier }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Uploadé par info -->
+                    <section class="bg-surface-container-lowest p-8 rounded-xl shadow-sm border border-slate-100/50">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center">
+                                <span class="material-symbols-outlined text-on-primary-container text-sm">person</span>
+                            </div>
+                            <div>
+                                <p class="text-[10px] uppercase tracking-widest text-outline font-bold">Uploadé par</p>
+                                <p class="text-sm font-semibold text-primary">{{ request.user.get_full_name|default:request.user.username }}</p>
+                                <p class="text-xs text-on-surface-variant">{{ request.user.role }}</p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Right: Drop Zone -->
+                <div class="col-span-12 lg:col-span-5">
+                    <div class="sticky top-24">
+
+                        <!-- Drop Zone -->
+                        <div id="drop-zone"
+                             class="bg-surface-container-low border-2 border-dashed border-slate-300 rounded-2xl p-8 text-center flex flex-col items-center justify-center min-h-[380px] cursor-pointer group hover:border-secondary hover:bg-secondary-container/5"
+                             onclick="document.getElementById('file-input').click()">
+
+                            {{ form.fichier }}
+
+                            <div id="drop-icon" class="w-24 h-24 rounded-full bg-primary-container flex items-center justify-center mb-8 shadow-xl group-hover:scale-110 transition-transform">
+                                <span class="material-symbols-outlined text-4xl text-secondary">upload_file</span>
+                            </div>
+                            <h3 class="font-headline text-2xl font-bold text-primary mb-2">Glisser & Déposer</h3>
+                            <p class="text-on-surface-variant max-w-xs mx-auto mb-8 text-sm">PDF, DOCX ou tout fichier légal. Max 50 Mo par document.</p>
+
+                            <div id="file-name" class="hidden bg-surface-container px-6 py-3 rounded-xl text-sm font-semibold text-primary mb-4 max-w-full truncate"></div>
+
+                            <button type="button"
+                                onclick="event.stopPropagation(); document.getElementById('file-input').click();"
+                                class="bg-primary text-on-primary py-4 px-10 rounded-xl font-bold text-sm uppercase tracking-widest shadow-lg hover:shadow-primary/20 hover:scale-105 active:scale-95 transition-all">
+                                Parcourir les Fichiers
+                            </button>
+
+                            <p class="text-[10px] text-slate-400 uppercase tracking-widest font-bold mt-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                                Upload sécurisé — Chiffrement RSA-4096
+                            </p>
+                        </div>
+
+                        {% if form.fichier.errors %}
+                        <p class="text-error text-xs mt-2 text-center">{{ form.fichier.errors|join:", " }}</p>
+                        {% endif %}
+
+                        <!-- Actions -->
+                        <div class="mt-6 grid grid-cols-2 gap-4">
+                            <a href="{% url 'documents:liste' dossier.pk %}"
+                               class="py-4 border-2 border-primary text-primary rounded-xl font-bold uppercase tracking-widest text-xs text-center hover:bg-primary hover:text-white transition-all">
+                                Annuler
+                            </a>
+                            <button type="submit"
+                                class="py-4 bg-secondary-container text-on-secondary-container rounded-xl font-bold uppercase tracking-widest text-xs shadow-lg hover:brightness-95 active:scale-[0.98] transition-all">
+                                Finaliser & Upload
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Watermark -->
+    <div class="fixed bottom-0 right-0 p-12 opacity-[0.02] pointer-events-none z-0">
+        <span class="material-symbols-outlined text-[30rem] text-primary">balance</span>
+    </div>
+</main>
+
+<script>
+    // Style Django widgets
+    const titreInput = document.querySelector('[name="titre"]');
+    if (titreInput) {
+        titreInput.classList.add('field-input');
+        titreInput.style.fontSize = '1.25rem';
+        titreInput.style.fontFamily = "'Newsreader', serif";
+    }
+
+    const typeSelect = document.querySelector('[name="type_document"]');
+    if (typeSelect) {
+        typeSelect.classList.add('field-input');
+        typeSelect.style.cssText += 'background:#f3f3f3;border:none;border-radius:0.5rem;padding:1rem;font-size:0.95rem;';
+    }
+
+    // Hide Django file input, show custom drop zone
+    const fileInput = document.querySelector('[name="fichier"]');
+    if (fileInput) {
+        fileInput.id = 'file-input';
+        fileInput.style.display = 'none';
+        fileInput.addEventListener('change', () => {
+            const name = fileInput.files[0]?.name;
+            if (name) {
+                const el = document.getElementById('file-name');
+                el.textContent = '📄 ' + name;
+                el.classList.remove('hidden');
+                document.getElementById('drop-icon').innerHTML = '<span class="material-symbols-outlined text-4xl text-green-600" style="font-variation-settings:\'FILL\' 1;">check_circle</span>';
+            }
+        });
+    }
+
+    // Drag & drop
+    const zone = document.getElementById('drop-zone');
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+    zone.addEventListener('drop', e => {
+        e.preventDefault();
+        zone.classList.remove('drag-over');
+        if (e.dataTransfer.files.length && fileInput) {
+            const dt = new DataTransfer();
+            dt.items.add(e.dataTransfer.files[0]);
+            fileInput.files = dt.files;
+            fileInput.dispatchEvent(new Event('change'));
+        }
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Public+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        "primary": "#05152b",
+        "primary-container": "#1b2a41",
+        "secondary": "#755b00",
+        "surface-container-lowest": "#ffffff",
+        "surface-container-low": "#f3f3f3",
+        "surface-container": "#eeeeee",
+        "surface-container-high": "#e8e8e8",
+        "on-surface": "#1a1c1c",
+        "error": "#ba1a1a",
+      },
+      fontFamily: {
+        "headline": ["Newsreader", "serif"],
+        "body": ["Public Sans", "sans-serif"],
+        "label": ["Public Sans", "sans-serif"]
+      }
+    },
+  },
+}
+</script>
+<style>
+* { box-sizing: border-box; }
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  vertical-align: middle;
+}
+
+html, body { height: 100%; margin: 0; padding: 0; }
+
+/* Layout flex — pas de fixed */
+.app-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Sidebar */
+#sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  height: 100vh;
+  overflow: hidden;
+  transition: width .25s ease;
+  background: #1B2A41;
+  display: flex;
+  flex-direction: column;
+}
+#sidebar.collapsed { width: 0; }
+
+/* Textes sidebar — tailles fixes comme utilisateurs/creer */
+#sidebar .headline { font-family: 'Newsreader', serif; }
+
+#sidebar .material-symbols-outlined { font-size: 20px; }
+.dark body {
+  background: #0f1929 !important;
+  color: #e2e8f0 !important;
+}
+
+.dark .bg-white {
+  background: #1a2740 !important;
+}
+
+.dark .text-gray-500,
+.dark .text-gray-600 {
+  color: #94a3b8 !important;
+}
+
+.dark table {
+  color: #e2e8f0;
+}
+
+.dark th {
+  background: #162035 !important;
+  color: #94a3b8 !important;
+}
+
+.dark td {
+  border-color: #2d3f5a !important;
+}
+/* Nav links */
+.nav-link {
+  display: flex;
+  align-items: center;
+  padding: 11px 20px;
+  color: rgba(255,255,255,.6);
+  transition: all .2s;
+  font-size: 11px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  font-weight: 500;
+  text-decoration: none;
+  gap: 10px;
+}
+.nav-link:hover { color: #fff; background: rgba(255,255,255,.05); }
+.nav-link.active {
+  color: #FED255 !important;
+  background: rgba(255,255,255,.1) !important;
+  border-left: 3px solid #FED255 !important;
+  font-weight: 700 !important;
+}
+.nav-link .material-symbols-outlined { font-size: 18px; }
+
+/* Main scrollable */
+#main-content { flex: 1; overflow-y: auto; }
+</style>
+<title>Créer Dossier - Lex Juris</title>
+</head>
+
+<body class="bg-surface-container-lowest font-body text-on-surface">
+<div class="app-layout">
+
+  <!-- ===== SIDEBAR — style identique à utilisateurs/creer ===== -->
+  <aside id="sidebar">
+
+    <!-- Logo -->
+    <div style="padding:20px 18px 14px;border-bottom:0.5px solid rgba(255,255,255,.08);">
+      <div style="display:flex;align-items:center;gap:9px;">
+        <span class="material-symbols-outlined" style="color:#FED255;font-size:20px;">balance</span>
+        <div>
+          <div class="headline" style="color:#fff;font-size:17px;font-weight:700;">Lex Juris</div>
+          <div style="color:rgba(254,210,85,.7);font-size:9px;letter-spacing:.2em;text-transform:uppercase;">Distilled Authority</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav style="flex:1;padding:6px 0;overflow-y:auto;">
+      {% if request.user.role == 'admin' %}
+      <a href="{% url 'dashboard:admin' %}" class="nav-link">
+        <span class="material-symbols-outlined">dashboard</span>Dashboard
+      </a>
+      {% elif request.user.role == 'avocat' %}
+      <a href="{% url 'dashboard:avocat' %}" class="nav-link">
+        <span class="material-symbols-outlined">dashboard</span>Dashboard
+      </a>
+      {% else %}
+      <a href="{% url 'dashboard:assistante' %}" class="nav-link">
+        <span class="material-symbols-outlined">dashboard</span>Dashboard
+      </a>
+      {% endif %}
+
+      <a href="{% url 'utilisateurs:liste' %}" class="nav-link">
+        <span class="material-symbols-outlined">badge</span>Utilisateurs
+      </a>
+       <a href="{% url 'dossiers:liste_clients' %}" class="nav-link">
+      <span class="material-symbols-outlined">group</span>Clients
+    </a>
+      <a href="{% url 'dossiers:liste' %}" class="nav-link">
+        <span class="material-symbols-outlined">folder_shared</span>Dossiers
+      </a>
+      <a href="{% url 'audiences:liste' %}" class="nav-link">
+        <span class="material-symbols-outlined">gavel</span>Audiences
+      </a>
+    </nav>
+
+    <!-- Bottom -->
+    <div style="padding:12px 10px;border-top:0.5px solid rgba(255,255,255,.08);">
+      <button onclick="toggleDark()" style="width:100%;background:rgba(255,255,255,.08);border:0.5px solid rgba(255,255,255,.12);color:#fff;border-radius:8px;padding:7px;font-size:11px;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:10px;font-family:'Public Sans',sans-serif;">
+        <span class="material-symbols-outlined" id="theme-ico" style="font-size:16px;">dark_mode</span>
+        <span id="theme-lbl">Dark Mode</span>
+      </button>
+      <div style="display:flex;align-items:center;gap:9px;padding-top:9px;border-top:0.5px solid rgba(255,255,255,.08);">
+        <div style="width:30px;height:30px;border-radius:50%;background:#c9a227;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">
+          {{ request.user.first_name|first }}{{ request.user.last_name|first }}
+        </div>
+        <div>
+          <div style="color:#fff;font-size:12px;font-weight:600;">{{ request.user.get_full_name }}</div>
+          <div style="color:rgba(255,255,255,.45);font-size:10px;text-transform:uppercase;letter-spacing:.07em;">Administrateur</div>
+        </div>
+      </div>
+      <a href="{% url 'utilisateurs:logout' %}" style="display:flex;align-items:center;gap:7px;margin-top:10px;color:rgba(255,255,255,.5);font-size:11px;text-decoration:none;padding:6px;border-radius:6px;transition:background .2s;"
+         onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+        <span class="material-symbols-outlined" style="font-size:16px;">logout</span>Déconnexion
+      </a>
+    </div>
+
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <main id="main-content" class="p-10">
+    <h2 class="text-3xl font-serif text-primary mb-8">Créer / Modifier Dossier</h2>
+
+    <div class="grid grid-cols-12 gap-8">
+      <div class="col-span-8 space-y-8">
+        <div class="bg-surface-container-lowest p-10 rounded-xl shadow-sm border-b-2 border-surface-container">
+          <form method="post" class="space-y-6">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="w-full px-8 py-3 bg-gradient-to-br from-primary to-primary-container text-white text-xs uppercase tracking-widest font-bold rounded-xl shadow-xl hover:scale-105 transition-transform">
+              Enregistrer
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <div class="col-span-4 space-y-8">
+        <div class="bg-primary text-white p-8 rounded-xl">
+          <h3 class="font-serif text-xl mb-6">Avocat Assigné</h3>
+          <p class="text-sm">Maître Julien DuPont</p>
+        </div>
+        <div class="bg-surface-container-high p-8 rounded-xl">
+          <h3 class="font-serif text-xl text-primary mb-4">Client</h3>
+          <p class="text-sm font-medium">Banque du Nord Europe</p>
+          <p class="text-xs text-slate-500">Corporate Banking Division</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+</div>
+
+<script>
+// Sidebar active auto
+document.querySelectorAll('.nav-link').forEach(function(link) {
+  if (!link.href) return;
+  const linkPath = new URL(link.href).pathname;
+  const currentPath = window.location.pathname;
+  if (linkPath !== '/' && currentPath.startsWith(linkPath)) {
+    link.classList.add('active');
+  }
+});
+
+// Dark mode
+function toggleDark() {
+  document.documentElement.classList.toggle('dark');
+  const isDark = document.documentElement.classList.contains('dark');
+  document.getElementById('theme-ico').textContent = isDark ? 'light_mode' : 'dark_mode';
+  document.getElementById('theme-lbl').textContent = isDark ? 'Light Mode' : 'Dark Mode';
+}
+</script>
+
+</body>
+</html>

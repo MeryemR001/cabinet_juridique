@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Lex Juris | Dashboard Admin</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;0,700;1,400&family=Public+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Public Sans',sans-serif;background:#f9f9f9;color:#1a1c1c;min-height:100vh;overflow:hidden;}
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;vertical-align:middle;font-size:20px;}
+.headline{font-family:'Newsreader',serif;}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-thumb{background:#c9a227;border-radius:4px;}
+.dark body{background:#0f1929;color:#e2e8f0;}
+.dark .topbar{background:rgba(26,39,64,.92)!important;border-color:#2d3f5a!important;}
+.dark .text-primary-color{color:#e2e8f0!important;}
+.dark .text-muted{color:#94a3b8!important;}
+.dark .row-hover:hover{background:#1e2f4a!important;}
+.dark .kpi-card{background:#1a2740!important;border-color:#2d3f5a!important;}
+.dark .tonal-card{background:#1a2740!important;}
+.dark th{background:#162035!important;color:#94a3b8!important;}
+.dark td{border-color:#2d3f5a!important;}
+.dark .team-item{background:#1a2740!important;border-color:#2d3f5a!important;}
+.dark .modal-box{background:#1a2740!important;}
+.dark .ev-gray{background:#2d3f5a!important;color:#e2e8f0!important;}
+.dark .cal-cell{border-color:#2d3f5a!important;}
+.page{display:none;height:calc(100vh - 56px);overflow-y:auto;}
+.page.active{display:block;}
+.fade-in{animation:fi .25s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.nav-item{display:flex;align-items:center;padding:11px 20px;color:rgba(255,255,255,.6);transition:all .2s;cursor:pointer;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:500;}
+.nav-item:hover{color:#fff;background:rgba(255,255,255,.05);}
+.nav-item.active{color:#FED255;background:rgba(255,255,255,.1);border-left:3px solid #FED255;}
+.nav-item .material-symbols-outlined{margin-right:10px;font-size:18px;}
+.status-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;}
+.badge-gold{background:#fff3cd;color:#755b00;}
+.badge-navy{background:#1B2A41;color:#fff;}
+.badge-gray{background:#e8e8e8;color:#44474d;}
+.badge-green{background:#d1fae5;color:#065f46;}
+.badge-red{background:#fee2e2;color:#991b1b;}
+.row-hover:hover{background:rgba(0,0,0,.02);cursor:pointer;}
+.hover-lift{transition:transform .2s,box-shadow .2s;}
+.hover-lift:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(27,42,65,.08);}
+.tonal-card{background:#fff;border-radius:12px;border:0.5px solid #e2e2e2;padding:22px;transition:all .3s;}
+.mini-bar{background:rgba(201,162,39,.15);border-radius:2px 2px 0 0;transition:background .2s;cursor:pointer;}
+.mini-bar:hover{background:rgba(201,162,39,.5);}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:center;justify-content:center;}
+.modal-box{background:#fff;border-radius:16px;padding:30px;width:480px;max-width:90vw;animation:fi .2s ease;}
+.avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;}
+#sidebar{width:240px;flex-shrink:0;transition:width .25s ease;overflow:hidden;}
+#sidebar.collapsed{width:0;}
+#app-wrap{display:flex;height:100vh;}
+#main-area{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.topbar{background:rgba(249,249,249,.88);backdrop-filter:blur(12px);border-bottom:0.5px solid #e2e2e2;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;flex-shrink:0;}
+.search-input{background:#f3f3f3;border:0.5px solid #e2e2e2;border-radius:20px;padding:6px 12px 6px 32px;font-size:13px;outline:none;width:175px;transition:width .3s,border-color .2s;font-family:'Public Sans',sans-serif;}
+.search-input:focus{border-color:#c9a227;width:210px;}
+.search-wrap{position:relative;}
+.search-wrap .material-symbols-outlined{position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:16px;color:#75777e;pointer-events:none;}
+table{width:100%;border-collapse:collapse;}
+th{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#75777e;font-weight:600;padding:11px 14px;text-align:left;background:#f3f3f3;}
+td{padding:11px 14px;font-size:13px;border-bottom:0.5px solid #e8e8e8;}
+.kpi-card{background:#fff;border-radius:12px;border:0.5px solid #e2e2e2;padding:18px;}
+.section-pad{padding:18px 24px 40px;}
+.team-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;border:0.5px solid #e2e2e2;background:#fff;cursor:pointer;transition:background .2s;}
+.team-item:hover{background:#f8fafc;}
+.btn-primary{background:#1B2A41;color:#fff;border:none;border-radius:10px;padding:8px 16px;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background .2s;font-family:'Public Sans',sans-serif;}
+.btn-primary:hover{background:#c9a227;}
+.btn-secondary{background:#f3f3f3;color:#1a1c1c;border:0.5px solid #e2e2e2;border-radius:10px;padding:8px 16px;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background .2s;font-family:'Public Sans',sans-serif;}
+.btn-secondary:hover{background:#e8e8e8;}
+.notif-dot{width:7px;height:7px;background:#c9a227;border-radius:50%;position:absolute;top:-1px;right:-1px;}
+.cal-cell{min-height:72px;padding:5px;border-right:0.5px solid #e2e2e2;}
+.cal-event{font-size:10px;padding:4px 6px;border-radius:4px;margin-bottom:3px;cursor:pointer;}
+.ev-navy{background:#1B2A41;color:#FED255;border-left:2px solid #FED255;}
+.ev-gold{background:#FED255;color:#1B2A41;font-weight:700;}
+.ev-gray{background:#e8e8e8;color:#1a1c1c;border-left:2px solid rgba(27,42,65,.3);}
+label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#75777e;display:block;margin-bottom:4px;}
+.form-input{width:100%;border:0.5px solid #e2e2e2;border-radius:8px;padding:8px 11px;font-size:13px;outline:none;background:#f9f9f9;font-family:'Public Sans',sans-serif;transition:border-color .2s;}
+.form-input:focus{border-color:#c9a227;}
+#toast{position:fixed;bottom:22px;right:22px;background:#1B2A41;color:#FED255;padding:9px 18px;border-radius:10px;font-size:13px;font-weight:600;z-index:9999;transform:translateY(80px);opacity:0;transition:all .35s cubic-bezier(.34,1.56,.64,1);pointer-events:none;}
+#toast.show{transform:translateY(0);opacity:1;}
+.filter-btn{padding:5px 14px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;transition:all .2s;border:1px solid #e2e2e2;background:#f3f3f3;color:#1a1c1c;}
+.filter-btn.active{background:#1B2A41;color:#fff;border-color:#1B2A41;}
+.progress-bar{height:4px;border-radius:2px;background:#e2e2e2;overflow:hidden;}
+.progress-fill{height:100%;border-radius:2px;}
+</style>
+</head>
+<body>
+<div id="app-wrap">
+
+<!-- SIDEBAR -->
+<aside id="sidebar" style="background:#1B2A41;display:flex;flex-direction:column;height:100vh;">
+  <div style="padding:20px 18px 14px;border-bottom:0.5px solid rgba(255,255,255,.08);">
+    <div style="display:flex;align-items:center;gap:9px;">
+      <span class="material-symbols-outlined" style="color:#FED255;font-size:20px;">balance</span>
+      <div>
+        <div class="headline" style="color:#fff;font-size:17px;font-weight:700;">Lex Juris</div>
+        <div style="color:rgba(254,210,85,.7);font-size:9px;letter-spacing:.2em;text-transform:uppercase;">Distilled Authority</div>
+      </div>
+    </div>
+  </div>
+  <nav style="flex:1;padding:6px 0;overflow-y:auto;">
+    <div class="nav-item active" onclick="goTo('dashboard',this)">
+      <span class="material-symbols-outlined">dashboard</span>Dashboard
+    </div>
+    <div class="nav-item" onclick="goTo('users',this)">
+      <span class="material-symbols-outlined">badge</span>Utilisateurs
+    </div>
+     <a href="{% url 'dossiers:liste_clients' %}" class="nav-item">
+      <span class="material-symbols-outlined">group</span>Clients
+    </a>
+    <div class="nav-item" onclick="goTo('dossiers',this)">
+      <span class="material-symbols-outlined">folder_shared</span>Dossiers
+    </div>
+    <div class="nav-item" onclick="goTo('audiences',this)">
+      <span class="material-symbols-outlined">gavel</span>Audiences
+    </div>
+    
+   
+    
+  </nav>
+  <div style="padding:12px 10px;border-top:0.5px solid rgba(255,255,255,.08);">
+    <button onclick="toggleDark()" style="width:100%;background:rgba(255,255,255,.08);border:0.5px solid rgba(255,255,255,.12);color:#fff;border-radius:8px;padding:7px;font-size:11px;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:10px;font-family:'Public Sans',sans-serif;">
+      <span class="material-symbols-outlined" id="theme-ico" style="font-size:16px;">dark_mode</span>
+      <span id="theme-lbl">Dark Mode</span>
+    </button>
+    <div style="display:flex;align-items:center;gap:9px;padding-top:9px;border-top:0.5px solid rgba(255,255,255,.08);">
+      <div class="avatar" style="background:#c9a227;color:#fff;width:30px;height:30px;font-size:11px;">AD</div>
+      <div>
+        <div style="color:#fff;font-size:12px;font-weight:600;">{{ request.user.get_full_name }}</div>
+        <div style="color:rgba(255,255,255,.45);font-size:10px;text-transform:uppercase;letter-spacing:.07em;">Administrateur</div>
+      </div>
+    </div>
+    <a href="{% url 'utilisateurs:logout' %}" style="display:flex;align-items:center;gap:7px;margin-top:10px;color:rgba(255,255,255,.5);font-size:11px;text-decoration:none;padding:6px;border-radius:6px;transition:background .2s;" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+      <span class="material-symbols-outlined" style="font-size:16px;">logout</span>Déconnexion
+    </a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div id="main-area">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span class="material-symbols-outlined" style="cursor:pointer;color:#75777e;font-size:22px;" onclick="toggleSidebar()">menu</span>
+      <div>
+        <div class="headline text-primary-color" style="font-size:19px;font-weight:700;line-height:1.1;" id="page-title">Dashboard</div>
+        <div class="text-muted" style="font-size:11px;" id="page-sub">Vue d'ensemble du cabinet</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="search-wrap">
+        <span class="material-symbols-outlined">search</span>
+        <input class="search-input" placeholder="Rechercher..." type="text"/>
+      </div>
+      <button onclick="toggleDark()" style="background:none;border:0.5px solid #e2e2e2;border-radius:50%;width:30px;height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#75777e;">
+        <span class="material-symbols-outlined" style="font-size:16px;" id="topbar-theme">dark_mode</span>
+      </button>
+      <div style="position:relative;cursor:pointer;">
+        <span class="material-symbols-outlined text-muted">notifications</span>
+        <div class="notif-dot"></div>
+      </div>
+      <div class="avatar" style="background:#1B2A41;color:#FED255;width:32px;height:32px;font-size:12px;">AD</div>
+    </div>
+  </div>
+
+  <!-- PAGE DASHBOARD -->
+  <div class="page active fade-in" id="page-dashboard">
+    <div class="section-pad">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:18px;flex-wrap:wrap;gap:10px;">
+        <div>
+          <div style="color:#c9a227;font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;">Performance Metrics</div>
+          <div class="headline text-primary-color" style="font-size:24px;font-weight:700;margin-top:2px;">Vue d'ensemble du cabinet</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-secondary">Export PDF</button>
+          <button class="btn-primary">
+            <span class="material-symbols-outlined" style="font-size:14px;">bar_chart</span>Rapport
+          </button>
+        </div>
+      </div>
+
+      <!-- KPI Cards -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;">
+        <div class="kpi-card hover-lift" style="border-left:3px solid #1B2A41;">
+          <div class="text-muted" style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px;">Avocats</div>
+          <div class="headline text-primary-color" style="font-size:24px;font-weight:700;">{{ total_avocats }}</div>
+          <div style="color:#10b981;font-size:11px;margin-top:3px;">Actifs</div>
+        </div>
+        <div class="kpi-card hover-lift" style="border-left:3px solid #c9a227;">
+          <div class="text-muted" style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px;">Assistantes</div>
+          <div class="headline text-primary-color" style="font-size:24px;font-weight:700;">{{ total_assistantes }}</div>
+          <div class="text-muted" style="font-size:11px;margin-top:3px;">En poste actif</div>
+        </div>
+        <div class="kpi-card hover-lift" style="border-left:3px solid #c9a227;">
+          <div class="text-muted" style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px;">Dossiers actifs</div>
+          <div class="headline text-primary-color" style="font-size:24px;font-weight:700;">{{ total_dossiers }}</div>
+          <div style="color:#f59e0b;font-size:11px;margin-top:3px;">{{ dossiers_ouverts }} ouverts</div>
+        </div>
+        <div class="kpi-card hover-lift" style="border-left:3px solid #10b981;">
+          <div class="text-muted" style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px;">Factures en attente</div>
+          <div class="headline text-primary-color" style="font-size:24px;font-weight:700;">{{ factures_en_attente }}</div>
+          <div style="color:#f59e0b;font-size:11px;margin-top:3px;">Sur {{ total_factures }} total</div>
+        </div>
+      </div>
+
+      <!-- Equipe + Audiences -->
+      <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:14px;margin-bottom:14px;">
+        <div class="kpi-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <div class="headline text-primary-color" style="font-size:15px;font-weight:700;">Dossiers récents</div>
+            <a href="{% url 'dossiers:liste' %}" style="font-size:10px;color:#c9a227;font-weight:700;text-decoration:none;">Voir tout →</a>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Référence</th>
+                <th>Client</th>
+                <th>Avocat</th>
+                <th>Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for dossier in recent_dossiers %}
+              <tr class="row-hover">
+                <td style="font-family:monospace;font-size:12px;color:#c9a227;font-weight:700;">
+                  <a href="{% url 'dossiers:detail' dossier.pk %}" style="text-decoration:none;color:#c9a227;">
+                    {{ dossier.reference }}
+                  </a>
+                </td>
+                <td class="text-primary-color" style="font-weight:600;">{{ dossier.client }}</td>
+                <td class="text-muted">{{ dossier.avocat_responsable.get_full_name }}</td>
+                <td>
+                  {% if dossier.statut == 'ouvert' %}
+                    <span class="status-badge badge-green">Ouvert</span>
+                  {% elif dossier.statut == 'en_cours' %}
+                    <span class="status-badge badge-gold">En cours</span>
+                  {% else %}
+                    <span class="status-badge badge-gray">Clos</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="4" class="text-muted" style="text-align:center;padding:20px;">Aucun dossier</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="kpi-card" style="padding:14px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <div class="headline text-primary-color" style="font-size:15px;font-weight:700;">Équipe avocats</div>
+            <a href="{% url 'utilisateurs:liste' %}" style="font-size:10px;color:#c9a227;font-weight:700;text-decoration:none;">Gérer →</a>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:7px;">
+            {% for avocat in equipe %}
+            <div class="team-item">
+              <div class="avatar" style="background:#1B2A41;color:#FED255;width:30px;height:30px;font-size:11px;">
+                {{ avocat.first_name|first }}{{ avocat.last_name|first }}
+              </div>
+              <div style="flex:1;">
+                <div class="text-primary-color" style="font-size:12px;font-weight:600;">{{ avocat.get_full_name }}</div>
+                <div class="text-muted" style="font-size:10px;text-transform:uppercase;letter-spacing:.07em;">Avocat</div>
+              </div>
+            </div>
+            {% empty %}
+            <div class="text-muted" style="font-size:12px;text-align:center;padding:10px;">Aucun avocat</div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Prochaines Audiences -->
+      <div class="kpi-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <div class="headline text-primary-color" style="font-size:15px;font-weight:700;">Prochaines audiences</div>
+          <a href="{% url 'audiences:liste' %}" style="font-size:10px;color:#c9a227;font-weight:700;text-decoration:none;">Voir tout →</a>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Dossier</th>
+              <th>Avocat</th>
+              <th>Tribunal</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for audience in audiences %}
+            <tr class="row-hover">
+              <td class="text-primary-color" style="font-weight:700;">
+                {{ audience.date_audience|date:"d/m/Y H:i" }}
+              </td>
+              <td>
+                <a href="{% url 'dossiers:detail' audience.dossier.pk %}" style="color:#c9a227;text-decoration:none;font-weight:700;">
+                  {{ audience.dossier.reference }}
+                </a>
+              </td>
+              <td class="text-muted">{{ audience.avocat.get_full_name }}</td>
+              <td class="text-muted">{{ audience.tribunal }}</td>
+              <td>
+                {% if audience.statut == 'programmee' %}
+                  <span class="status-badge badge-gold">Programmée</span>
+                {% elif audience.statut == 'tenue' %}
+                  <span class="status-badge badge-green">Tenue</span>
+                {% elif audience.statut == 'reportee' %}
+                  <span class="status-badge badge-gray">Reportée</span>
+                {% else %}
+                  <span class="status-badge badge-red">Annulée</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="text-muted" style="text-align:center;padding:20px;">Aucune audience</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE USERS -->
+  <div class="page fade-in" id="page-users">
+    <div class="section-pad">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <div>
+          <div class="headline text-primary-color" style="font-size:20px;font-weight:700;">Gestion des utilisateurs</div>
+          <div class="text-muted" style="font-size:12px;">Administration système</div>
+        </div>
+        <a href="{% url 'utilisateurs:creer' %}" class="btn-primary">
+          <span class="material-symbols-outlined" style="font-size:14px;">person_add</span>Ajouter
+        </a>
+      </div>
+      <div class="kpi-card" style="padding:0;overflow:hidden;">
+        <table>
+          <thead>
+            <tr>
+              <th>Utilisateur</th>
+              <th>Email</th>
+              <th>Rôle</th>
+              <th style="text-align:right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for u in utilisateurs %}
+            <tr class="row-hover">
+              <td>
+                <div style="display:flex;align-items:center;gap:9px;">
+                  <div class="avatar" style="background:#1B2A41;color:#FED255;width:28px;height:28px;font-size:10px;">
+                    {{ u.first_name|first }}{{ u.last_name|first }}
+                  </div>
+                  <div>
+                    <div class="text-primary-color" style="font-size:13px;font-weight:600;">{{ u.get_full_name }}</div>
+                    <div class="text-muted" style="font-size:11px;">@{{ u.username }}</div>
+                  </div>
+                </div>
+              </td>
+              <td class="text-muted" style="font-size:12px;">{{ u.email }}</td>
+              <td>
+                {% if u.role == 'admin' %}
+                  <span class="status-badge badge-navy">Admin</span>
+                {% elif u.role == 'avocat' %}
+                  <span class="status-badge badge-gold">Avocat</span>
+                {% else %}
+                  <span class="status-badge badge-gray">Assistante</span>
+                {% endif %}
+              </td>
+              <td style="text-align:right;">
+                <div style="display:flex;gap:3px;justify-content:flex-end;">
+                  <a href="{% url 'utilisateurs:modifier' u.pk %}" style="background:none;border:none;cursor:pointer;color:#75777e;padding:3px;">
+                    <span class="material-symbols-outlined" style="font-size:16px;">edit</span>
+                  </a>
+                  <a href="{% url 'utilisateurs:supprimer' u.pk %}" style="background:none;border:none;cursor:pointer;color:#dc2626;padding:3px;">
+                    <span class="material-symbols-outlined" style="font-size:16px;">delete</span>
+                  </a>
+                </div>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="text-muted" style="text-align:center;padding:20px;">Aucun utilisateur</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE DOSSIERS -->
+  <div class="page fade-in" id="page-dossiers">
+    <div class="section-pad">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div>
+          <div class="headline text-primary-color" style="font-size:20px;font-weight:700;">Dossiers</div>
+          <div class="text-muted" style="font-size:12px;">Archive juridique</div>
+        </div>
+        <a href="{% url 'dossiers:creer' %}" class="btn-primary">
+          <span class="material-symbols-outlined" style="font-size:14px;">add</span>Nouveau dossier
+        </a>
+      </div>
+      <div class="kpi-card" style="padding:0;overflow:hidden;">
+        <table>
+          <thead>
+            <tr>
+              <th>Référence</th>
+              <th>Titre & Client</th>
+              <th>Avocat</th>
+              <th>Statut</th>
+              <th style="text-align:right;"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for dossier in recent_dossiers %}
+            <tr class="row-hover">
+              <td style="font-family:monospace;font-size:12px;color:#c9a227;font-weight:700;">{{ dossier.reference }}</td>
+              <td>
+                <div class="text-primary-color" style="font-size:13px;font-weight:700;">{{ dossier.titre }}</div>
+                <div class="text-muted" style="font-size:11px;">{{ dossier.client }}</div>
+              </td>
+              <td class="text-muted">{{ dossier.avocat_responsable.get_full_name }}</td>
+              <td>
+                {% if dossier.statut == 'ouvert' %}
+                  <span class="status-badge badge-green">Ouvert</span>
+                {% elif dossier.statut == 'en_cours' %}
+                  <span class="status-badge badge-gold">En cours</span>
+                {% else %}
+                  <span class="status-badge badge-gray">Clos</span>
+                {% endif %}
+              </td>
+              <td style="text-align:right;">
+                <a href="{% url 'dossiers:detail' dossier.pk %}" style="color:#75777e;">
+                  <span class="material-symbols-outlined" style="font-size:16px;">arrow_forward</span>
+                </a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="text-muted" style="text-align:center;padding:20px;">Aucun dossier</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const ptitles = {
+  dashboard: ['Dashboard', "Vue d'ensemble du cabinet"],
+  users: ['Utilisateurs', 'Administration système'],
+  dossiers: ['Dossiers', 'Archive juridique'],
+  audiences: ['Audiences', 'Calendrier judiciaire'],
+  documents: ['Documents', 'Référentiel centralisé'],
+  factures: ['Factures', 'Aperçu financier'],
+  interventions: ['Interventions', 'Journal chronologique'],
+};
+
+function goTo(page, el) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (el) el.classList.add('active');
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const pg = document.getElementById('page-' + page);
+  if (pg) { pg.classList.add('active'); pg.classList.remove('fade-in'); void pg.offsetWidth; pg.classList.add('fade-in'); }
+  else { window.location.href = '/' + page + '/'; }
+  const t = ptitles[page] || [page, ''];
+  document.getElementById('page-title').textContent = t[0];
+  document.getElementById('page-sub').textContent = t[1];
+}
+
+let sidebarOpen = true;
+function toggleSidebar() {
+  sidebarOpen = !sidebarOpen;
+  document.getElementById('sidebar').classList.toggle('collapsed', !sidebarOpen);
+}
+
+let isDark = false;
+function toggleDark() {
+  isDark = !isDark;
+  document.documentElement.classList.toggle('dark', isDark);
+  ['theme-ico', 'topbar-theme'].forEach(id => document.getElementById(id).textContent = isDark ? 'light_mode' : 'dark_mode');
+  document.getElementById('theme-lbl').textContent = isDark ? 'Light Mode' : 'Dark Mode';
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+</script>
+</body>
+</html>

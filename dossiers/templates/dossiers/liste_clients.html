@@ -1,0 +1,307 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+{% include 'shared/typography.html' %}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lex Juris | Clients</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Public+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        "primary": "#05152b",
+        "primary-container": "#1b2a41",
+        "secondary": "#755b00",
+        "secondary-container": "#fed255",
+        "surface": "#f9f9f9",
+        "surface-container-lowest": "#ffffff",
+        "surface-container-low": "#f3f3f3",
+        "surface-container": "#eeeeee",
+        "surface-container-high": "#e8e8e8",
+        "surface-container-highest": "#e2e2e2",
+        "on-surface": "#1a1c1c",
+        "on-surface-variant": "#44474d",
+        "outline": "#75777e",
+        "outline-variant": "#c5c6ce",
+        "on-primary": "#ffffff",
+        "error": "#ba1a1a",
+      },
+      fontFamily: {
+        "headline": ["Newsreader", "serif"],
+        "body": ["Public Sans", "sans-serif"],
+        "label": ["Public Sans", "sans-serif"],
+      }
+    }
+  }
+}
+</script>
+<style>
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; padding: 0; }
+.material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+
+.app-layout { display: flex; height: 100vh; overflow: hidden; }
+
+/* ── Sidebar ─────────────────── */
+#sidebar {
+  width: 240px; flex-shrink: 0; height: 100vh;
+  background: #1B2A41; display: flex; flex-direction: column;
+  overflow: hidden; transition: width .25s ease;
+}
+#sidebar.collapsed { width: 0; }
+.headline { font-family: 'Newsreader', serif; }
+.nav-item {
+  display: flex; align-items: center; padding: 11px 20px;
+  color: rgba(255,255,255,.6); transition: all .2s;
+  font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+  font-weight: 500; text-decoration: none; gap: 10px;
+}
+.nav-item .material-symbols-outlined { font-size: 18px; }
+.nav-item:hover { color: #fff; background: rgba(255,255,255,.05); }
+.nav-item.active { color: #FED255 !important; background: rgba(255,255,255,.1) !important; border-left: 3px solid #FED255 !important; }
+.avatar { border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+
+/* ── Main ────────────────────── */
+#main-content { flex: 1; overflow-y: auto; background: #f9f9f9; }
+
+/* ── Cards ───────────────────── */
+.client-card {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid rgba(197,198,206,.2);
+  box-shadow: 0 1px 4px rgba(5,21,43,.05);
+  transition: all .25s ease;
+  display: flex; flex-direction: column; justify-content: space-between;
+  min-height: 220px;
+  padding: 28px;
+}
+.client-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(5,21,43,.1); background: #fafafa; }
+
+.ghost-card {
+  border: 2px dashed rgba(197,198,206,.4);
+  border-radius: 12px; min-height: 220px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  cursor: pointer; transition: all .25s ease; text-decoration: none;
+  padding: 28px;
+}
+.ghost-card:hover { border-color: #FED255; }
+.ghost-card:hover .ghost-icon { background: #fed255; }
+.ghost-card:hover .ghost-icon .material-symbols-outlined { color: #755b00; }
+.ghost-card:hover .ghost-label { color: #05152b; }
+
+.badge {
+  display: inline-flex; align-items: center; padding: 2px 10px;
+  border-radius: 20px; font-size: 9px; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase;
+}
+
+/* ── Glass header ────────────── */
+.glass-header { background: rgba(249,249,249,.9); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+
+/* ── Search ──────────────────── */
+.search-input {
+  background: transparent; border: 0; border-bottom: 2px solid rgba(197,198,206,.3);
+  padding: 8px 36px 8px 4px; font-family: 'Public Sans', sans-serif; font-size: 13px;
+  color: #05152b; outline: none; width: 220px; transition: border-color .25s;
+}
+.search-input:focus { border-bottom-color: #755b00; }
+
+/* ── Dark mode ───────────────── */
+.dark #main-content { background: #0f1929 !important; }
+.dark .client-card { background: #1a2740 !important; border-color: rgba(255,255,255,.08) !important; }
+.dark .client-card:hover { background: #1e2f4a !important; }
+.dark .glass-header { background: rgba(15,25,41,.85) !important; }
+.dark h2, .dark h3 { color: #e2e8f0 !important; }
+.dark .text-on-surface-variant { color: #94a3b8 !important; }
+</style>
+</head>
+
+<body class="font-body text-on-surface">
+<div class="app-layout">
+
+  <!-- ══════════ SIDEBAR ══════════ -->
+  {% include 'shared/sidebar.html' %}
+
+  <!-- ══════════ MAIN ══════════ -->
+  <main id="main-content">
+
+    <!-- Sticky header -->
+    <header class="glass-header sticky top-0 z-40 px-10 py-6 flex justify-between items-end" style="border-bottom:1px solid rgba(197,198,206,.2);">
+      <div>
+        <p style="font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#755b00;margin-bottom:4px;">Cabinet Juridique</p>
+        <h2 class="headline" style="font-size:2.4rem;color:#05152b;line-height:1;font-weight:600;">Clients</h2>
+      </div>
+      <div style="display:flex;align-items:center;gap:20px;">
+        <div style="position:relative;">
+          <input class="search-input" placeholder="Rechercher un client…" type="text" oninput="filterCards(this.value)" />
+          <span class="material-symbols-outlined" style="position:absolute;right:4px;bottom:8px;color:#75777e;font-size:18px;">search</span>
+        </div>
+        <a href="{% url 'dossiers:creer_client' %}"
+           style="display:inline-flex;align-items:center;gap:7px;background:#05152b;color:#fff;padding:10px 20px;border-radius:10px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;transition:background .2s;"
+           onmouseover="this.style.background='#1b2a41'" onmouseout="this.style.background='#05152b'">
+          <span class="material-symbols-outlined" style="font-size:16px;">person_add</span>
+          Nouveau Client
+        </a>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <section class="px-10 py-8">
+
+      <!-- Stats row -->
+      <div style="display:flex;gap:16px;margin-bottom:32px;">
+        <div style="background:#fff;border-radius:10px;padding:16px 24px;border:1px solid rgba(197,198,206,.2);flex:1;box-shadow:0 1px 4px rgba(5,21,43,.04);">
+          <p style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#75777e;">Total Clients</p>
+          <p class="headline" style="font-size:2rem;color:#05152b;font-weight:700;margin-top:4px;">{{ clients.count }}</p>
+        </div>
+        <div style="background:#05152b;border-radius:10px;padding:16px 24px;flex:1;">
+          <p style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(254,210,85,.7);">Actifs</p>
+          <p class="headline" style="font-size:2rem;color:#fff;font-weight:700;margin-top:4px;">{{ clients.count }}</p>
+        </div>
+        <div style="background:#fff;border-radius:10px;padding:16px 24px;border:1px solid rgba(197,198,206,.2);flex:2;box-shadow:0 1px 4px rgba(5,21,43,.04);display:flex;align-items:center;gap:12px;">
+          <span class="material-symbols-outlined" style="font-size:32px;color:#fed255;">shield_person</span>
+          <div>
+            <p style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#75777e;">Dossiers liés</p>
+            <p style="font-size:13px;font-weight:600;color:#05152b;margin-top:2px;">Chaque client est rattaché à ses dossiers juridiques</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cards grid -->
+      <div id="cards-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;">
+
+        {% for client in clients %}
+        <div class="client-card" data-name="{{ client.nom|lower }} {{ client.prenom|lower }}">
+          <div>
+            <!-- Header -->
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;">
+              <div style="display:flex;align-items:center;gap:12px;">
+                <div style="width:46px;height:46px;border-radius:50%;background:#1b2a41;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  <span class="headline" style="color:#fed255;font-size:17px;font-weight:700;">{{ client.nom|first|upper }}{{ client.prenom|first|upper }}</span>
+                </div>
+                <div>
+                  <h3 class="headline" style="font-size:1.25rem;color:#05152b;font-weight:600;line-height:1.2;">{{ client.nom }} {{ client.prenom }}</h3>
+                  {% if client.cin %}<p style="font-size:10px;color:#75777e;letter-spacing:.06em;margin-top:2px;">CIN : {{ client.cin }}</p>{% endif %}
+                </div>
+              </div>
+              <span class="badge" style="background:rgba(254,210,85,.2);color:#755b00;">Client</span>
+            </div>
+
+            <!-- Contact info -->
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              {% if client.email %}
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span class="material-symbols-outlined" style="font-size:16px;color:#75777e;">mail</span>
+                <span style="font-size:13px;color:#44474d;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ client.email }}</span>
+              </div>
+              {% endif %}
+              {% if client.telephone %}
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span class="material-symbols-outlined" style="font-size:16px;color:#75777e;">call</span>
+                <span style="font-size:13px;color:#44474d;">{{ client.telephone }}</span>
+              </div>
+              {% endif %}
+              {% if client.adresse %}
+              <div style="display:flex;align-items:flex-start;gap:8px;">
+                <span class="material-symbols-outlined" style="font-size:16px;color:#75777e;margin-top:1px;">location_on</span>
+                <span style="font-size:12px;color:#44474d;line-height:1.4;">{{ client.adresse|truncatechars:60 }}</span>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Footer actions -->
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px;padding-top:16px;border-top:1px solid rgba(197,198,206,.2);">
+            <span style="font-size:10px;color:#75777e;letter-spacing:.06em;text-transform:uppercase;">{{ client.date_creation|date:"d M Y" }}</span>
+            <div style="display:flex;gap:4px;">
+              <a href="{% url 'dossiers:detail_client' client.id %}"
+                 style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:7px;font-size:11px;font-weight:600;color:#05152b;background:rgba(5,21,43,.08);text-decoration:none;transition:background .2s;"
+                 onmouseover="this.style.background='rgba(5,21,43,.16)'" onmouseout="this.style.background='rgba(5,21,43,.08)'">
+                <span class="material-symbols-outlined" style="font-size:14px;">visibility</span>
+                Détails
+              </a>
+              <a href="{% url 'dossiers:modifier_client' client.id %}"
+                 style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:7px;font-size:11px;font-weight:600;color:#755b00;background:rgba(254,210,85,.12);text-decoration:none;transition:background .2s;"
+                 onmouseover="this.style.background='rgba(254,210,85,.25)'" onmouseout="this.style.background='rgba(254,210,85,.12)'">
+                <span class="material-symbols-outlined" style="font-size:14px;">edit</span>
+                Modifier
+              </a>
+              <a href="{% url 'dossiers:supprimer_client' client.id %}"
+                 style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:7px;font-size:11px;font-weight:600;color:#ba1a1a;background:rgba(186,26,26,.07);text-decoration:none;transition:background .2s;"
+                 onmouseover="this.style.background='rgba(186,26,26,.15)'" onmouseout="this.style.background='rgba(186,26,26,.07)'"
+                 onclick="return confirm('Supprimer ce client ?')">
+                <span class="material-symbols-outlined" style="font-size:14px;">delete</span>
+              </a>
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <!-- Empty state handled by ghost card below -->
+        {% endfor %}
+
+        <!-- Ghost "add" card -->
+        <a href="{% url 'dossiers:creer_client' %}" class="ghost-card">
+          <div class="ghost-icon" style="width:52px;height:52px;border-radius:50%;background:#eeeeee;display:flex;align-items:center;justify-content:center;margin-bottom:12px;transition:background .25s;">
+            <span class="material-symbols-outlined" style="font-size:26px;color:#75777e;transition:color .25s;">add</span>
+          </div>
+          <p class="ghost-label headline" style="font-size:1.1rem;color:#75777e;transition:color .25s;">Nouveau Client</p>
+          <p style="font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#c5c6ce;margin-top:4px;">Ajouter un dossier</p>
+        </a>
+
+      </div>
+
+      <!-- Empty state message -->
+      {% if not clients %}
+      <div style="text-align:center;padding:60px 20px;color:#75777e;">
+        <span class="material-symbols-outlined" style="font-size:64px;opacity:.2;">group</span>
+        <p class="headline" style="font-size:1.5rem;margin-top:16px;color:#05152b;">Aucun client pour le moment</p>
+        <p style="font-size:14px;margin-top:8px;">Commencez par ajouter votre premier client.</p>
+      </div>
+      {% endif %}
+
+    </section>
+  </main>
+</div>
+
+<!-- Watermark -->
+<div style="position:fixed;bottom:32px;right:32px;opacity:.03;pointer-events:none;user-select:none;">
+  <span class="material-symbols-outlined" style="font-size:200px;color:#05152b;font-variation-settings:'wght' 100;">gavel</span>
+</div>
+
+<script>
+// Active nav
+document.querySelectorAll('.nav-item').forEach(function(link) {
+  if (!link.href) return;
+  try {
+    const linkPath = new URL(link.href).pathname;
+    const currentPath = window.location.pathname;
+    if (linkPath !== '/' && currentPath.startsWith(linkPath)) link.classList.add('active');
+  } catch(e) {}
+});
+
+// Dark mode
+let isDark = false;
+function toggleDark() {
+  isDark = !isDark;
+  document.documentElement.classList.toggle('dark', isDark);
+  document.getElementById('theme-ico').textContent = isDark ? 'light_mode' : 'dark_mode';
+  document.getElementById('theme-lbl').textContent = isDark ? 'Light Mode' : 'Dark Mode';
+}
+
+// Search / filter
+function filterCards(query) {
+  const q = query.toLowerCase();
+  document.querySelectorAll('#cards-grid .client-card').forEach(function(card) {
+    const name = card.dataset.name || '';
+    card.style.display = name.includes(q) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>

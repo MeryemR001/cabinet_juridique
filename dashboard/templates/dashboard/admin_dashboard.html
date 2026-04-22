@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+{% include 'shared/typography.html' %}
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Lex Juris | Dashboard Admin</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;0,700;1,400&family=Public+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Public Sans',sans-serif;background:#f9f9f9;color:#1a1c1c;min-height:100vh;overflow:hidden;}
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;vertical-align:middle;font-size:20px;}
+.headline{font-family:'Newsreader',serif;}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-thumb{background:#c9a227;border-radius:4px;}
+
+/* Dark mode */
+.dark body{background:#0f1929;color:#e2e8f0;}
+.dark .topbar{background:rgba(26,39,64,.92)!important;border-color:#2d3f5a!important;}
+.dark .text-primary-color{color:#e2e8f0!important;}
+.dark .text-muted{color:#94a3b8!important;}
+.dark .row-hover:hover{background:#1e2f4a!important;}
+.dark .kpi-card{background:#1a2740!important;border-color:#2d3f5a!important;}
+.dark .kpi-card-dark{background:#0f1929!important;}
+.dark th{background:#162035!important;color:#94a3b8!important;}
+.dark td{border-color:#2d3f5a!important;}
+.dark .team-item{background:#1a2740!important;border-color:#2d3f5a!important;}
+.dark .audience-item{background:#1a2740!important;border-color:#2d3f5a!important;}
+.dark .search-input{background:#1a2740!important;border-color:#2d3f5a!important;color:#e2e8f0!important;}
+
+/* Layout */
+#app-wrap{display:flex;height:100vh;}
+#sidebar{width:240px;flex-shrink:0;transition:width .25s ease;overflow:hidden;}
+#sidebar.collapsed{width:0;}
+#main-area{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+
+/* Topbar */
+.topbar{background:rgba(249,249,249,.88);backdrop-filter:blur(12px);border-bottom:0.5px solid #e2e2e2;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;flex-shrink:0;}
+.search-input{background:#f3f3f3;border:0.5px solid #e2e2e2;border-radius:20px;padding:6px 12px 6px 32px;font-size:13px;outline:none;width:175px;transition:width .3s,border-color .2s;font-family:'Public Sans',sans-serif;}
+.search-input:focus{border-color:#c9a227;width:210px;}
+.search-wrap{position:relative;}
+.search-wrap .material-symbols-outlined{position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:16px;color:#75777e;pointer-events:none;}
+
+/* Nav */
+.nav-item{display:flex;align-items:center;padding:11px 20px;color:rgba(255,255,255,.6);transition:all .2s;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:500;text-decoration:none;}
+.nav-item:hover{color:#fff;background:rgba(255,255,255,.05);}
+.nav-item.active{color:#FED255;background:rgba(255,255,255,.1);border-left:3px solid #FED255;}
+.nav-item .material-symbols-outlined{margin-right:10px;font-size:18px;}
+
+/* Cards */
+.kpi-card{background:#fff;border-radius:12px;border:0.5px solid #e2e2e2;padding:18px;transition:all .3s;}
+.kpi-card-dark{background:linear-gradient(135deg,#05152b 0%,#1b2a41 100%);border-radius:12px;padding:18px;border:none;}
+.hover-lift{transition:transform .2s,box-shadow .2s;}
+.hover-lift:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(27,42,65,.08);}
+
+/* Table */
+table{width:100%;border-collapse:collapse;}
+th{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#75777e;font-weight:600;padding:11px 14px;text-align:left;background:#f3f3f3;}
+td{padding:11px 14px;font-size:13px;border-bottom:0.5px solid #e8e8e8;}
+.row-hover:hover{background:rgba(0,0,0,.02);cursor:pointer;}
+
+/* Badges */
+.status-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;}
+.badge-gold{background:#fff3cd;color:#755b00;}
+.badge-gray{background:#e8e8e8;color:#44474d;}
+.badge-green{background:#d1fae5;color:#065f46;}
+.badge-red{background:#fee2e2;color:#991b1b;}
+.badge-navy{background:#1B2A41;color:#fff;}
+
+/* Buttons */
+.btn-primary{background:#1B2A41;color:#fff;border:none;border-radius:10px;padding:8px 16px;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background .2s;font-family:'Public Sans',sans-serif;}
+.btn-primary:hover{background:#c9a227;}
+.btn-secondary{background:#f3f3f3;color:#1a1c1c;border:0.5px solid #e2e2e2;border-radius:10px;padding:8px 16px;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background .2s;font-family:'Public Sans',sans-serif;}
+.btn-secondary:hover{background:#e8e8e8;}
+
+/* Misc */
+.avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;}
+.team-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;border:0.5px solid #e2e2e2;background:#fff;transition:background .2s;}
+.team-item:hover{background:#f8fafc;}
+.audience-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;border:0.5px solid #e2e2e2;background:#fff;transition:background .2s;}
+.audience-item:hover{background:#f8fafc;}
+.notif-dot{width:7px;height:7px;background:#c9a227;border-radius:50%;position:absolute;top:-1px;right:-1px;}
+.section-pad{padding:18px 24px 40px;}
+.progress-bar{height:4px;border-radius:2px;background:#e2e2e2;overflow:hidden;}
+.progress-fill{height:100%;border-radius:2px;}
+#toast{position:fixed;bottom:22px;right:22px;background:#1B2A41;color:#FED255;padding:9px 18px;border-radius:10px;font-size:13px;font-weight:600;z-index:9999;transform:translateY(80px);opacity:0;transition:all .35s cubic-bezier(.34,1.56,.64,1);pointer-events:none;}
+#toast.show{transform:translateY(0);opacity:1;}
+.fade-in{animation:fi .25s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+/* Calendrier */
+.cal-dot{width:6px;height:6px;border-radius:50%;background:#ef4444;display:inline-block;}
+.cal-day{min-height:36px;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:4px;font-size:12px;font-weight:500;color:#44474d;cursor:default;position:relative;}
+.cal-day.today{background:#1B2A41;color:#FED255;font-weight:700;}
+.cal-day.has-audience{font-weight:700;color:#1B2A41;}
+.cal-day.empty{color:#e2e2e2;}
+</style>
+</head>
+<body>
+<div id="app-wrap">
+
+<!-- SIDEBAR -->
+<aside id="sidebar" style="background:#1B2A41;display:flex;flex-direction:column;height:100vh;">
+  <div style="padding:20px 18px 14px;border-bottom:0.5px solid rgba(255,255,255,.08);">
+    <div style="display:flex;align-items:center;gap:9px;">
+      <span class="material-symbols-outlined" style="color:#FED255;font-size:20px;">balance</span>
+      <div>
+        <div class="headline" style="color:#fff;font-size:17px;font-weight:700;">Lex Juris</div>
+        <div style="color:rgba(254,210,85,.7);font-size:9px;letter-spacing:.2em;text-transform:uppercase;">Distilled Authority</div>
+      </div>
+    </div>
+  </div>
+  <nav style="flex:1;padding:6px 0;overflow-y:auto;">
+    {% if request.user.role == 'admin' %}
+    <a href="{% url 'dashboard:admin' %}" class="nav-item active"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+    {% elif request.user.role == 'avocat' %}
+    <a href="{% url 'dashboard:avocat' %}" class="nav-item active"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+    {% else %}
+    <a href="{% url 'dashboard:assistante' %}" class="nav-item active"><span class="material-symbols-outlined">dashboard</span>Dashboard</a>
+    {% endif %}
+    <a href="{% url 'utilisateurs:liste' %}" class="nav-item"><span class="material-symbols-outlined">badge</span>Utilisateurs</a>
+    <a href="{% url 'dossiers:liste_clients' %}" class="nav-item"><span class="material-symbols-outlined">group</span>Clients</a>
+    <a href="{% url 'dossiers:liste' %}" class="nav-item"><span class="material-symbols-outlined">folder_shared</span>Dossiers</a>
+    <a href="{% url 'dossiers:liste_interventions' %}" class="nav-item"><span class="material-symbols-outlined">work_history</span>Interventions</a>
+    <a href="{% url 'audiences:liste' %}" class="nav-item"><span class="material-symbols-outlined">gavel</span>Audiences</a>
+    <a href="{% url 'factures:liste' %}" class="nav-item"><span class="material-symbols-outlined">receipt_long</span>Factures</a>
+  </nav>
+  <div style="padding:12px 10px;border-top:0.5px solid rgba(255,255,255,.08);">
+    <button onclick="toggleDark()" style="width:100%;background:rgba(255,255,255,.08);border:0.5px solid rgba(255,255,255,.12);color:#fff;border-radius:8px;padding:7px;font-size:11px;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:10px;font-family:'Public Sans',sans-serif;">
+      <span class="material-symbols-outlined" id="theme-ico" style="font-size:16px;">dark_mode</span>
+      <span id="theme-lbl">Dark Mode</span>
+    </button>
+    <div style="display:flex;align-items:center;gap:9px;padding-top:9px;border-top:0.5px solid rgba(255,255,255,.08);">
+      <div class="avatar" style="background:#c9a227;color:#fff;width:30px;height:30px;font-size:11px;">
+        {{ request.user.first_name|first }}{{ request.user.last_name|first }}
+      </div>
+      <div>
+        <div style="color:#fff;font-size:12px;font-weight:600;">{{ request.user.get_full_name }}</div>
+        <div style="color:rgba(255,255,255,.45);font-size:10px;text-transform:uppercase;letter-spacing:.07em;">Administrateur</div>
+      </div>
+    </div>
+    <a href="{% url 'utilisateurs:logout' %}" style="display:flex;align-items:center;gap:7px;margin-top:10px;color:rgba(255,255,255,.5);font-size:11px;text-decoration:none;padding:6px;border-radius:6px;transition:background .2s;" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+      <span class="material-symbols-outlined" style="font-size:16px;">logout</span>Déconnexion
+    </a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div id="main-area">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span class="material-symbols-outlined" style="cursor:pointer;color:#75777e;font-size:22px;" onclick="toggleSidebar()">menu</span>
+      <div>
+        <div class="headline text-primary-color" style="font-size:19px;font-weight:700;line-height:1.1;">Dashboard</div>
+        <div class="text-muted" style="font-size:11px;">Vue d'ensemble du cabinet</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="search-wrap">
+        <span class="material-symbols-outlined">search</span>
+        <input class="search-input" placeholder="Rechercher..." type="text"/>
+      </div>
+      <button onclick="toggleDark()" style="background:none;border:0.5px solid #e2e2e2;border-radius:50%;width:30px;height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#75777e;">
+        <span class="material-symbols-outlined" style="font-size:16px;" id="topbar-theme">dark_mode</span>
+      </button>
+      <div style="position:relative;cursor:pointer;">
+        <span class="material-symbols-outlined text-muted">notifications</span>
+        <div class="notif-dot"></div>
+      </div>
+      <div class="avatar" style="background:#1B2A41;color:#FED255;width:32px;height:32px;font-size:12px;">
+        {{ request.user.first_name|first }}{{ request.user.last_name|first }}
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div style="flex:1;overflow-y:auto;" class="fade-in">
+    <div class="section-pad">
+
+      <!-- Header -->
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+        <div>
+          <div style="color:#c9a227;font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;">Performance Metrics</div>
+          <div class="headline text-primary-color" style="font-size:24px;font-weight:700;margin-top:2px;">Vue d'ensemble du cabinet</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-secondary"><span class="material-symbols-outlined" style="font-size:14px;">download</span>Export PDF</button>
+          <button class="btn-primary"><span class="material-symbols-outlined" style="font-size:14px;">bar_chart</span>Rapport</button>
+        </div>
+      </div>
+
+      <!-- KPI CARDS — 5 colonnes -->
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px;">
+
+        <div class="kpi-card hover-lift" style="border-left:3px solid #1B2A41;">
+          <div class="text-muted" style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px;">Avocats</div>
+          <div class="headline text-primary-color" style="font-size:28px;font-weight:700;">{{ total_avocats }}</div>
+          <div style="color:#10b981;font-size:11px;margin-top:3px;display:flex;align-items:center;gap:3px;">
+            <span class="material-symbols-outlined" style="font-size:13px;">check_circle</span>Actifs
+          </div>
+        </div>
+
+        <div class="kpi-card hover-lift" style="border-left:3px solid #c9a227;">
+          <div class="text-muted" style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px;">Assistantes</div>
+          <div class="headline text-primary-color" style="font-size:28px;font-weight:700;">{{ total_assistantes }}</div>
+          <div class="text-muted" style="font-size:11px;margin-top:3px;display:flex;align-items:center;gap:3px;">
+            <span class="material-symbols-outlined" style="font-size:13px;">work</span>En poste
+          </div>
+        </div>
+
+        <div class="kpi-card hover-lift" style="border-left:3px solid #6366f1;">
+          <div class="text-muted" style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px;">Dossiers actifs</div>
+          <div class="headline text-primary-color" style="font-size:28px;font-weight:700;">{{ total_dossiers }}</div>
+          <div style="color:#f59e0b;font-size:11px;margin-top:3px;display:flex;align-items:center;gap:3px;">
+            <span class="material-symbols-outlined" style="font-size:13px;">folder_open</span>{{ dossiers_ouverts }} ouverts
+          </div>
+        </div>
+
+        <div class="kpi-card hover-lift" style="border-left:3px solid #ef4444;">
+          <div class="text-muted" style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px;">Factures en attente</div>
+          <div class="headline text-primary-color" style="font-size:28px;font-weight:700;">{{ factures_en_attente }}</div>
+          <div class="text-muted" style="font-size:11px;margin-top:3px;display:flex;align-items:center;gap:3px;">
+            <span class="material-symbols-outlined" style="font-size:13px;">receipt_long</span>Sur {{ total_factures }} total
+          </div>
+        </div>
+
+        <!-- CA Encaissé — dark card -->
+        <div class="kpi-card-dark hover-lift" style="border-left:3px solid #c9a227;">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px;color:rgba(255,255,255,.5);">CA Encaissé</div>
+          <div class="headline" style="font-size:22px;font-weight:700;color:#FED255;line-height:1.1;">
+            {{ chiffre_affaires|floatformat:0 }}
+          </div>
+          <div style="color:rgba(255,255,255,.4);font-size:11px;margin-top:3px;display:flex;align-items:center;gap:3px;">
+            <span class="material-symbols-outlined" style="font-size:13px;color:rgba(255,255,255,.4);">payments</span>MAD · Payées
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ROW 2 : Dossiers récents + Équipe + Calendrier -->
+      <div style="display:grid;grid-template-columns:1.6fr 0.9fr 1fr;gap:14px;margin-bottom:14px;">
+
+        <!-- Dossiers récents -->
+        <div class="kpi-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <div class="headline text-primary-color" style="font-size:15px;font-weight:700;">Dossiers récents</div>
+            <a href="{% url 'dossiers:liste' %}" style="font-size:10px;color:#c9a227;font-weight:700;text-decoration:none;">Voir tout →</a>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Référence</th>
+                <th>Client</th>
+                <th>Avocat</th>
+                <th>Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for dossier in recent_dossiers %}
+              <tr class="row-hover">
+                <td style="font-family:monospace;font-size:12px;color:#c9a227;font-weight:700;">
+                  <a href="{% url 'dossiers:detail' dossier.pk %}" style="text-decoration:none;color:#c9a227;">{{ dossier.reference }}</a>
+                </td>
+                <td class="text-primary-color" style="font-weight:600;">{{ dossier.client }}</td>
+                <td class="text-muted">{{ dossier.avocat_responsable.get_full_name }}</td>
+                <td>
+                  {% if dossier.statut == 'ouvert' %}<span class="status-badge badge-green">Ouvert</span>
+                  {% elif dossier.statut == 'en_cours' %}<span class="status-badge badge-gold">En cours</span>
+                  {% else %}<span class="status-badge badge-gray">Clos</span>{% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="4" class="text-muted" style="text-align:center;padding:20px;">Aucun dossier</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Équipe avocats -->
+        <div class="kpi-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <div class="headline text-primary-color" style="font-size:15px;font-weight:700;">Équipe</div>
+            <a href="{% url 'utilisateurs:liste' %}" style="font-size:10px;color:#c9a227;font-weight:700;text-decoration:none;">Gérer →</a>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:7px;">
+            {% for avocat in equipe %}
+            <div class="team-item">
+              <div class="avatar" style="background:#1B2A41;color:#FED255;width:30px;height:30px;font-size:11px;">
+                {{ avocat.first_name|first }}{{ avocat.last_name|first }}
+              </div>
+              <div style="flex:1;">
+                <div class="text-primary-color" style="font-size:12px;font-weight:600;">{{ avocat.get_full_name }}</div>
+                <div class="text-muted" style="font-size:10px;text-transform:uppercase;letter-spacing:.07em;">Avocat</div>
+              </div>
+            </div>
+            {% empty %}
+            <div class="text-muted" style="font-size:12px;text-align:center;padding:10px;">Aucun avocat</div>
+            {% endfor %}
+          </div>
+        </div>
+
+       <!-- Calendrier des audiences du mois -->
+<div class="kpi-card" style="padding:16px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+    <div class="headline text-primary-color" style="font-size:15px;font-weight:700;">Calendrier</div>
+    <span style="font-size:10px;color:#c9a227;font-weight:700;text-transform:uppercase;letter-spacing:.08em;" id="cal-month-label"></span>
+  </div>
+
+  <!-- Navigation mois -->
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+    <button onclick="changeMonth(-1)" style="background:none;border:0.5px solid #e2e2e2;border-radius:6px;padding:3px 8px;cursor:pointer;font-size:12px;">‹</button>
+    <span id="cal-nav-label" style="font-size:12px;font-weight:700;color:#1B2A41;"></span>
+    <button onclick="changeMonth(1)" style="background:none;border:0.5px solid #e2e2e2;border-radius:6px;padding:3px 8px;cursor:pointer;font-size:12px;">›</button>
+  </div>
+
+  <!-- Jours semaine -->
+  <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px;">
+    {% for j in "LMMJVSD" %}
+    <div style="text-align:center;font-size:9px;font-weight:700;color:#75777e;padding:3px;">{{ j }}</div>
+    {% endfor %}
+  </div>
+
+  <!-- Grille -->
+  <div id="cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;"></div>
+
+  <!-- Légende -->
+  <div style="display:flex;align-items:center;gap:12px;margin-top:10px;padding-top:10px;border-top:0.5px solid #e2e2e2;">
+    <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:#75777e;">
+      <div style="width:8px;height:8px;border-radius:50%;background:#ef4444;"></div>Audience
+    </div>
+    <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:#75777e;">
+      <div style="width:8px;height:8px;border-radius:50%;background:#1B2A41;"></div>Aujourd'hui
+    </div>
+  </div>
+</div>
+
+      </div>
+
+      <!-- ROW 3 : Prochaines audiences -->
+      <div class="kpi-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+          <div class="headline text-primary-color" style="font-size:15px;font-weight:700;">Prochaines audiences</div>
+          <a href="{% url 'audiences:liste' %}" style="font-size:10px;color:#c9a227;font-weight:700;text-decoration:none;">Voir tout →</a>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          {% for audience in audiences %}
+          <div class="audience-item">
+            <!-- Point couleur selon statut -->
+            <div style="width:9px;height:9px;border-radius:50%;flex-shrink:0;
+              background:{% if audience.statut == 'programmee' %}#ef4444{% elif audience.statut == 'tenue' %}#10b981{% elif audience.statut == 'reportee' %}#f59e0b{% else %}#75777e{% endif %};">
+            </div>
+            <!-- Date -->
+            <div style="font-weight:700;font-size:12px;color:#1B2A41;min-width:110px;flex-shrink:0;">
+              {{ audience.date_audience|date:"d/m/Y à H:i" }}
+            </div>
+            <!-- Dossier -->
+            <div style="flex:1;">
+              <a href="{% url 'dossiers:detail' audience.dossier.pk %}" style="color:#c9a227;text-decoration:none;font-weight:700;font-size:12px;">
+                {{ audience.dossier.reference }}
+              </a>
+              <span style="color:#75777e;font-size:11px;margin-left:6px;">{{ audience.tribunal }}</span>
+            </div>
+            <!-- Avocat -->
+            <div style="font-size:11px;color:#75777e;min-width:100px;text-align:right;">
+              {{ audience.avocat.get_full_name }}
+            </div>
+            <!-- Statut -->
+            <div style="min-width:90px;text-align:right;">
+              {% if audience.statut == 'programmee' %}<span class="status-badge badge-gold">Programmée</span>
+              {% elif audience.statut == 'tenue' %}<span class="status-badge badge-green">Tenue</span>
+              {% elif audience.statut == 'reportee' %}<span class="status-badge badge-gray">Reportée</span>
+              {% else %}<span class="status-badge badge-red">Annulée</span>{% endif %}
+            </div>
+          </div>
+          {% empty %}
+          <div style="text-align:center;color:#75777e;font-size:13px;padding:20px;">Aucune audience à venir</div>
+          {% endfor %}
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+</div>
+
+<div id="toast"></div>
+<script id="audience-days-data" type="application/json">
+[
+{% for a in audiences_mois %}
+"{{ a.date_audience|date:'Y-m-d' }}"{% if not forloop.last %},{% endif %}
+{% endfor %}
+]
+</script>
+<script>
+// ── Sidebar ──────────────────────────────────────────
+let sidebarOpen = true;
+function toggleSidebar() {
+  sidebarOpen = !sidebarOpen;
+  document.getElementById('sidebar').classList.toggle('collapsed', !sidebarOpen);
+}
+
+// ── Dark mode ────────────────────────────────────────
+let isDark = false;
+function toggleDark() {
+  isDark = !isDark;
+  document.documentElement.classList.toggle('dark', isDark);
+  ['theme-ico','topbar-theme'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = isDark ? 'light_mode' : 'dark_mode';
+  });
+  document.getElementById('theme-lbl').textContent = isDark ? 'Light Mode' : 'Dark Mode';
+}
+
+// ── Toast ────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ── Nav active ───────────────────────────────────────
+document.querySelectorAll('.nav-item').forEach(link => {
+  if (!link.href) return;
+  const p = new URL(link.href).pathname;
+  if (p !== '/' && window.location.pathname.startsWith(p)) link.classList.add('active');
+});
+
+// ── Calendrier dynamique ─────────────────────────────
+ const dataEl = document.getElementById('audience-days-data');
+
+let audienceDates = [];
+
+if (dataEl) {
+  try {
+    audienceDates = JSON.parse(dataEl.textContent);
+  } catch (e) {
+    console.error("Erreur JSON :", e);
+  }
+}
+// audienceDates = liste de "YYYY-MM-DD"
+
+let calYear, calMonth;
+const now = new Date();
+calYear  = now.getFullYear();
+calMonth = now.getMonth(); // 0-indexed
+
+const monthNames = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+
+function buildCalendar() {
+  const grid = document.getElementById('cal-grid');
+  const label = document.getElementById('cal-nav-label');
+  if (!grid) return;
+
+  label.textContent = monthNames[calMonth] + ' ' + calYear;
+
+  const firstDay = new Date(calYear, calMonth, 1);
+  const lastDay  = new Date(calYear, calMonth + 1, 0);
+  let startDow   = firstDay.getDay();
+  startDow = (startDow === 0) ? 6 : startDow - 1; // lundi=0
+
+  grid.innerHTML = '';
+
+  // Cellules vides
+  for (let i = 0; i < startDow; i++) {
+    const cell = document.createElement('div');
+    cell.style.cssText = 'min-height:32px;';
+    grid.appendChild(cell);
+  }
+
+  for (let d = 1; d <= lastDay.getDate(); d++) {
+    const dateStr = calYear + '-' +
+      String(calMonth + 1).padStart(2,'0') + '-' +
+      String(d).padStart(2,'0');
+
+    const isToday     = (d === now.getDate() && calMonth === now.getMonth() && calYear === now.getFullYear());
+    const todayStr = new Date().toISOString().split('T')[0];
+
+const hasAudience =
+  audienceDates.includes(dateStr) &&
+  dateStr >= todayStr;
+
+    const cell = document.createElement('div');
+    cell.style.cssText = `
+      min-height:32px;border-radius:8px;display:flex;flex-direction:column;
+      align-items:center;justify-content:center;font-size:12px;font-weight:500;
+      cursor:default;position:relative;padding:3px;
+      ${isToday ? 'background:#1B2A41;color:#FED255;font-weight:700;' : ''}
+      ${hasAudience && !isToday ? 'border:2px solid #ef4444;background:#fff;color:#ef4444;font-weight:700;' : ''}
+      ${!isToday && !hasAudience ? 'color:#44474d;' : ''}
+    `;
+
+    cell.innerHTML = `<span>${d}</span>`;
+
+    if (hasAudience) {
+      const dot = document.createElement('div');
+      dot.style.cssText = 'width:5px;height:5px;border-radius:50%;background:#ef4444;margin-top:1px;';
+      cell.appendChild(dot);
+    }
+
+    grid.appendChild(cell);
+  }
+}
+
+function changeMonth(dir) {
+  calMonth += dir;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  if (calMonth < 0)  { calMonth = 11; calYear--; }
+  buildCalendar();
+}
+
+buildCalendar();
+</script>
+
+</body>
+</html>

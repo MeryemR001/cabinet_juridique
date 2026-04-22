@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+{% load permissions_tags %}
+<html lang="fr">
+<head>
+{% include 'shared/typography.html' %}
+    <meta charset="UTF-8">
+    <title>Lex Juris | Factures</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;0,700;1,400&family=Public+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script>
+        tailwind.config = {
+            theme: { extend: {
+                colors: {
+                    "primary":"#05152b","primary-container":"#1b2a41","on-primary":"#ffffff","on-primary-container":"#8291ad",
+                    "secondary":"#755b00","secondary-container":"#fed255","on-secondary-container":"#735a00","secondary-fixed-dim":"#ecc246",
+                    "surface":"#f9f9f9","surface-container":"#eeeeee","surface-container-low":"#f3f3f3","surface-container-high":"#e8e8e8",
+                    "surface-container-lowest":"#ffffff","surface-container-highest":"#e2e2e2",
+                    "on-surface":"#1a1c1c","on-surface-variant":"#44474d",
+                    "outline":"#75777e","outline-variant":"#c5c6ce",
+                    "error":"#ba1a1a","error-container":"#ffdad6","on-error-container":"#93000a",
+                    "on-secondary-fixed":"#241a00","on-secondary":"#ffffff","background":"#f9f9f9",
+                },
+                fontFamily: { "headline":["Newsreader"], "body":["Public Sans"], "label":["Public Sans"] },
+                borderRadius: { "DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem" },
+            }}
+        }
+    </script>
+    <style>
+        #sidebar{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 240px;
+  height: 100vh;
+  position: fixed;
+height: 100vh;
+}
+        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; vertical-align:middle; }
+        body { font-family:'Public Sans',sans-serif; }
+        .glass { background:rgba(249,249,249,0.85); backdrop-filter:blur(20px); }
+        body{margin:0;font-family:'Public Sans',sans-serif;background:#f9f9f9;}
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;vertical-align:middle;font-size:20px;}
+#app{display:flex;height:100vh;}
+
+#sidebar.collapsed{width:0;}
+.headline{font-family:'Newsreader',serif;}
+.avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;}
+
+/* nav-item : on retire cursor:pointer pour les vrais liens */
+.nav-item{
+  display:flex;align-items:center;padding:11px 20px;
+  color:rgba(255,255,255,.6);transition:all .2s;
+  font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  font-weight:500;text-decoration:none;
+}
+.nav-item .material-symbols-outlined{margin-right:10px;font-size:18px;}
+.nav-item:hover{color:#fff;background:rgba(255,255,255,.05);}
+.nav-item.active{color:#FED255;background:rgba(255,255,255,.1);border-left:3px solid #FED255;}
+.dark body {
+  background: #0f1929 !important;
+  color: #e2e8f0 !important;
+}
+
+.dark .bg-white {
+  background: #1a2740 !important;
+}
+
+.dark .text-gray-500,
+.dark .text-gray-600 {
+  color: #94a3b8 !important;
+}
+
+.dark table {
+  color: #e2e8f0;
+}
+
+.dark th {
+  background: #162035 !important;
+  color: #94a3b8 !important;
+}
+
+.dark td {
+  border-color: #2d3f5a !important;
+}
+/* main */
+#main{
+  margin-left: 240px;
+  min-height: 100vh;
+  overflow-y: auto;
+}
+input,select{width:100%;padding:8px;border:1px solid #ddd;border-radius:8px;font-family:'Public Sans',sans-serif;}
+label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#75777e;display:block;margin-bottom:4px;}
+    </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen">
+    <div id="app">
+{% include 'shared/sidebar.html' %}
+
+
+<main id="main">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-40 px-12 py-8 glass flex justify-between items-end border-b border-outline-variant/10">
+        <div>
+            <span class="font-label text-[10px] tracking-[0.3em] uppercase text-on-surface-variant mb-2 block">Vue Financière</span>
+            <h2 class="font-headline text-4xl text-primary italic">Factures & Facturation</h2>
+        </div>
+        <div class="flex gap-4 items-center">
+            {% if request.user|role_is:'admin,avocat' %}
+            <a href="{% url 'factures:creer' %}"
+               class="px-6 py-3 rounded-xl font-label text-xs font-bold tracking-widest uppercase flex items-center gap-2 hover:brightness-105 transition-all active:scale-95"
+               style="background:#fed255; color:#241a00;">
+                <span class="material-symbols-outlined text-sm">add</span>
+                Nouvelle Facture
+            </a>
+            {% endif %}
+            <span class="font-['Public_Sans'] text-xs text-outline">
+                {{ request.user.get_full_name|default:request.user.username }}
+                <span class="ml-2 bg-surface-container text-on-surface-variant text-[10px] px-2 py-0.5 rounded-full uppercase tracking-widest">{{ request.user|role_label }}</span>
+            </span>
+        </div>
+    </header>
+
+    <div class="px-12 py-10 space-y-12">
+     <!-- Stats Strip — fixed counting -->
+        <section class="grid grid-cols-3 gap-6">
+            <div class="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant/10 shadow-sm">
+                <p class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-2">Total Factures</p>
+                <p class="font-headline text-4xl text-primary">{{ factures|length }}</p>
+            </div>
+            <div class="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant/10 shadow-sm">
+                <p class="font-label text-[10px] uppercase tracking-widest text-secondary mb-2">Payées</p>
+                <p class="font-headline text-4xl text-primary">{{ factures_payees_count|default:"—" }}</p>
+            </div>
+            <!-- Chiffre d'affaires: single number, sum of all montant_ttc -->
+            <div class="rounded-xl p-6 text-white" style="background: linear-gradient(135deg, #05152b 0%, #1b2a41 100%);">
+                <p class="font-label text-[10px] uppercase tracking-widest mb-2" style="color:rgba(255,255,255,0.5);">Chiffre d'Affaires</p>
+                <p class="font-headline text-3xl" style="color:#FED255;">
+                    <!-- Pass total_ttc from view -->
+                    {{ chiffre_affaires|floatformat:2|default:"0.00" }} MAD
+                </p>
+            </div>
+        </section>
+
+        <!-- Table -->
+        <section class="space-y-6">
+            <div class="flex justify-between items-center px-2">
+                <span class="font-label text-xs tracking-widest uppercase border-b-2 border-secondary pb-2 text-primary">Toutes les Factures</span>
+            </div>
+
+            <div class="bg-surface-container-lowest rounded-xl shadow-[0_40px_60px_-15px_rgba(5,21,43,0.05)] overflow-hidden border border-outline-variant/10">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-surface-container-low">
+                            <th class="px-8 py-5 font-label text-[10px] tracking-widest uppercase text-on-surface-variant">N° Facture</th>
+                            <th class="px-8 py-5 font-label text-[10px] tracking-widest uppercase text-on-surface-variant">Client</th>
+                            <th class="px-8 py-5 font-label text-[10px] tracking-widest uppercase text-on-surface-variant">Avocat</th>
+                            <th class="px-8 py-5 font-label text-[10px] tracking-widest uppercase text-on-surface-variant text-right">Montant TTC</th>
+                            <th class="px-8 py-5 font-label text-[10px] tracking-widest uppercase text-on-surface-variant">Échéance</th>
+                            <th class="px-8 py-5 font-label text-[10px] tracking-widest uppercase text-on-surface-variant">Statut</th>
+                            <th class="px-8 py-5 font-label text-[10px] tracking-widest uppercase text-on-surface-variant text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-surface-container-high">
+                        {% for facture in factures %}
+                        <tr class="hover:bg-surface-container-low transition-colors group">
+                            <td class="px-8 py-6 text-sm font-semibold font-body text-primary">{{ facture.numero }}</td>
+                            <td class="px-8 py-6">
+                                <div class="flex flex-col">
+                                    <span class="text-sm font-semibold">{{ facture.client }}</span>
+                                    <span class="text-[10px] text-on-surface-variant uppercase tracking-wider">{{ facture.dossier }}</span>
+                                </div>
+                            </td>
+                            <td class="px-8 py-6 text-sm text-on-surface-variant">{{ facture.avocat|default:"—" }}</td>
+                            <td class="px-8 py-6 text-right text-sm font-bold text-primary">{{ facture.montant_ttc|floatformat:2 }} MAD</td>
+                            <td class="px-8 py-6 text-sm text-on-surface-variant">{{ facture.date_echeance|date:"d M Y" }}</td>
+                            <td class="px-8 py-6">
+                                {% if facture.statut == 'brouillon' %}
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full bg-surface-container text-on-surface-variant text-[10px] font-bold uppercase tracking-wider">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-outline mr-2"></span>Brouillon
+                                    </span>
+                                {% elif facture.statut == 'envoyee' %}
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full bg-secondary-container/30 text-secondary text-[10px] font-bold uppercase tracking-wider">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-secondary mr-2"></span>Envoyée
+                                    </span>
+                                {% elif facture.statut == 'payee' %}
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 text-[10px] font-bold uppercase tracking-wider">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-green-600 mr-2"></span>Payée
+                                    </span>
+                                {% elif facture.statut == 'annulee' %}
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full bg-error-container/30 text-error text-[10px] font-bold uppercase tracking-wider">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-error mr-2"></span>Annulée
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="px-8 py-6">
+                                <div class="flex gap-3 justify-center">
+                                    <a href="{% url 'factures:detail' facture.pk %}" class="text-outline hover:text-primary transition-colors" title="Voir">
+                                        <span class="material-symbols-outlined">visibility</span>
+                                    </a>
+                                    {% if request.user|role_is:'admin,avocat' %}
+                                    <a href="{% url 'factures:modifier' facture.pk %}" class="text-outline hover:text-secondary transition-colors" title="Modifier">
+                                        <span class="material-symbols-outlined">edit</span>
+                                    </a>
+                                    <a href="{% url 'factures:imprimer' facture.pk %}" class="text-outline hover:text-primary transition-colors" title="Imprimer" target="_blank">
+                                        <span class="material-symbols-outlined">print</span>
+                                    </a>
+                                    {% endif %}
+                                    {% if request.user|role_is:'admin' %}
+                                    <a href="{% url 'factures:supprimer' facture.pk %}"
+                                       onclick="return confirm('Supprimer cette facture ?');"
+                                       class="text-outline hover:text-error transition-colors" title="Supprimer">
+                                        <span class="material-symbols-outlined">delete</span>
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="px-8 py-20 text-center">
+                                <span class="material-symbols-outlined text-6xl block mb-4 opacity-20 text-primary">receipt_long</span>
+                                <p class="font-headline text-2xl text-on-surface-variant">Aucune facture disponible.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Watermark -->
+        <div class="flex justify-center items-center gap-12 opacity-5 select-none pointer-events-none mt-8">
+            <span class="font-headline text-8xl italic text-primary">Lex Juris</span>
+            <span class="text-xs tracking-[1em] uppercase text-primary -mt-4">Private Practice</span>
+        </div>
+    </div>
+</main>
+</div>
+</div>
+{% if request.user|role_is:'admin,avocat' %}
+<a href="{% url 'factures:creer' %}" class="fixed bottom-8 right-8 w-14 h-14 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all z-50" style="background:#fed255; color:#241a00;" title="Nouvelle facture">
+    <span class="material-symbols-outlined">add</span>
+</a>
+{% endif %}
+<script>
+    // ── Sidebar active auto ──────────────────────────────
+
+// ── Sidebar active auto ──────────────────────────────
+document.querySelectorAll('.nav-item').forEach(function(link) {
+  if (!link.href) return;
+  const linkPath = new URL(link.href).pathname;
+  const currentPath = window.location.pathname;
+  if (linkPath !== '/' && currentPath.startsWith(linkPath)) {
+    link.classList.add('active');
+  }
+});
+
+// ── Sidebar toggle ───────────────────────────────────
+let sidebarOpen = true;
+function toggleSidebar() {
+  sidebarOpen = !sidebarOpen;
+  document.getElementById('sidebar').classList.toggle('collapsed', !sidebarOpen);
+}
+
+// ── Dark mode ────────────────────────────────────────
+let isDark = false;
+function toggleDark() {
+  isDark = !isDark;
+  document.documentElement.classList.toggle('dark', isDark);
+  document.getElementById('theme-ico').textContent = isDark ? 'light_mode' : 'dark_mode';
+  document.getElementById('theme-lbl').textContent = isDark ? 'Light Mode' : 'Dark Mode';
+}
+
+</script>
+</body>
+</html>

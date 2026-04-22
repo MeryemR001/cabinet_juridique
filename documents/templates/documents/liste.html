@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+{% load permissions_tags %}
+<html lang="fr">
+<head>
+{% include 'shared/typography.html' %}
+    <meta charset="UTF-8">
+    <title>Documents — {{ dossier }} | Lex Juris</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Public+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script>
+        tailwind.config = {
+            theme: { extend: {
+                colors: {
+                    "primary":"#05152b","primary-container":"#1b2a41","on-primary":"#ffffff","on-primary-container":"#8291ad",
+                    "secondary":"#755b00","secondary-container":"#fed255","on-secondary-container":"#735a00","secondary-fixed-dim":"#ecc246",
+                    "surface":"#f9f9f9","surface-container":"#eeeeee","surface-container-low":"#f3f3f3","surface-container-high":"#e8e8e8",
+                    "surface-container-lowest":"#ffffff","surface-container-highest":"#e2e2e2","surface-variant":"#e2e2e2",
+                    "on-surface":"#1a1c1c","on-surface-variant":"#44474d",
+                    "outline":"#75777e","outline-variant":"#c5c6ce","background":"#f9f9f9",
+                    "error":"#ba1a1a","error-container":"#ffdad6","on-error-container":"#93000a",
+                },
+                fontFamily: { "headline":["Newsreader"], "body":["Public Sans"], "label":["Public Sans"] },
+                borderRadius: { "DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem" },
+            }}
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+        body { font-family:'Public Sans',sans-serif; }
+        ::-webkit-scrollbar { width:6px; }
+        ::-webkit-scrollbar-track { background:transparent; }
+        ::-webkit-scrollbar-thumb { background:#e2e2e2; border-radius:10px; }
+    </style>
+</head>
+<body class="bg-background font-body text-on-surface flex min-h-screen">
+
+{% include 'shared/sidebar.html' %}
+
+<main class="flex-1 flex flex-col min-h-screen">
+
+    <!-- Top Bar -->
+    <header class="flex justify-between items-center px-12 py-5 w-full bg-slate-50/80 backdrop-blur-xl top-0 z-40 sticky border-b border-outline-variant/10">
+        <div class="flex items-center gap-3">
+            <a href="{% url 'dossiers:detail' dossier.pk %}" class="text-outline hover:text-primary transition-colors">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </a>
+            <span class="font-['Newsreader'] italic text-2xl tracking-tight text-slate-900">Document Repository</span>
+            <span class="text-outline mx-2">—</span>
+            <span class="text-sm text-on-surface-variant font-semibold">{{ dossier }}</span>
+        </div>
+        <div class="flex items-center gap-6">
+            <div class="relative">
+                <input class="bg-surface-container-low border-none focus:ring-1 focus:ring-secondary text-sm px-4 py-2 w-56 rounded-xl outline-none" placeholder="Rechercher..." type="text"/>
+                <span class="material-symbols-outlined absolute right-3 top-2 text-slate-400 text-lg">search</span>
+            </div>
+            <span class="font-['Public_Sans'] text-xs text-outline">
+                {{ request.user.get_full_name|default:request.user.username }}
+                <span class="ml-2 bg-surface-container text-on-surface-variant text-[10px] px-2 py-0.5 rounded-full uppercase tracking-widest">{{ request.user.role }}</span>
+            </span>
+            <a href="{% url 'dossiers:detail' dossier.pk %}" class="text-xs font-bold uppercase tracking-widest text-primary hover:opacity-80">Dossier</a>
+            <a href="{% url 'dossiers:detail_client' dossier.client.pk %}" class="text-xs font-bold uppercase tracking-widest text-primary hover:opacity-80">Client</a>
+            <a href="{% url 'dossiers:liste_interventions' %}" class="text-xs font-bold uppercase tracking-widest text-primary hover:opacity-80">Interventions</a>
+        </div>
+    </header>
+
+    <div class="p-12 space-y-10">
+
+        <!-- Hero / Actions -->
+        <section class="flex flex-col md:flex-row md:items-end justify-between gap-8">
+            <div>
+                <p class="font-label text-[10px] uppercase tracking-[0.2em] text-secondary font-bold mb-2">Dossier — {{ dossier }}</p>
+                <h2 class="font-headline text-4xl text-primary italic">Documents</h2>
+                <p class="text-on-surface-variant text-sm mt-2">{{ documents|length }} fichier{% if documents|length != 1 %}s{% endif %} dans ce dossier</p>
+            </div>
+            <div class="flex flex-wrap gap-3">
+                <a href="{% url 'dossiers:detail' dossier.pk %}"
+                   class="bg-surface-container-low text-primary px-6 py-3 rounded-xl font-bold text-xs tracking-widest uppercase flex items-center gap-2 border border-outline-variant/30 hover:bg-surface-container transition-all">
+                    <span class="material-symbols-outlined text-sm">folder_shared</span>
+                    Ouvrir le Dossier
+                </a>
+                {% if request.user|role_is:'admin,avocat,assistante' %}
+                <a href="{% url 'dossiers:ajouter_intervention' dossier.pk %}"
+                   class="bg-surface-container-low text-primary px-6 py-3 rounded-xl font-bold text-xs tracking-widest uppercase flex items-center gap-2 border border-outline-variant/30 hover:bg-surface-container transition-all">
+                    <span class="material-symbols-outlined text-sm">add</span>
+                    Ajouter Intervention
+                </a>
+                {% endif %}
+                {% if request.user|role_is:'admin,assistante' %}
+                <a href="{% url 'documents:upload' dossier.pk %}"
+                   class="bg-primary text-on-primary px-8 py-4 rounded-xl font-bold text-xs tracking-widest uppercase flex items-center gap-2 shadow-lg hover:opacity-90 active:scale-[0.98] transition-all">
+                    <span class="material-symbols-outlined text-sm">upload_file</span>
+                    Téléverser un Document
+                </a>
+                {% endif %}
+            </div>
+        </section>
+
+        <!-- Document Table -->
+        <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden border border-outline-variant/10">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-surface-container-low">
+                        <th class="px-8 py-4 text-[10px] uppercase tracking-widest text-slate-500 font-semibold">Fichier</th>
+                        <th class="px-8 py-4 text-[10px] uppercase tracking-widest text-slate-500 font-semibold">Type</th>
+                        <th class="px-8 py-4 text-[10px] uppercase tracking-widest text-slate-500 font-semibold">Uploadé par</th>
+                        <th class="px-8 py-4 text-[10px] uppercase tracking-widest text-slate-500 font-semibold">Date</th>
+                        <th class="px-8 py-4 text-[10px] uppercase tracking-widest text-slate-500 font-semibold text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-surface-variant/50">
+                    {% for doc in documents %}
+                    <tr class="hover:bg-surface-container-low/50 transition-colors group">
+                        <td class="px-8 py-5">
+                            <div class="flex items-center gap-4">
+                                {% with ext=doc.fichier.name|slice:"-3:" %}
+                                {% if ext == 'pdf' %}
+                                    <span class="material-symbols-outlined text-red-600 bg-red-50 p-2 rounded-lg">picture_as_pdf</span>
+                                {% elif ext == 'ocx' or ext == 'doc' %}
+                                    <span class="material-symbols-outlined text-blue-600 bg-blue-50 p-2 rounded-lg">description</span>
+                                {% else %}
+                                    <span class="material-symbols-outlined text-slate-500 bg-slate-100 p-2 rounded-lg">insert_drive_file</span>
+                                {% endif %}
+                                {% endwith %}
+                                <div>
+                                    <p class="font-semibold text-primary">{{ doc.titre }}</p>
+                                    <p class="text-xs text-slate-400">{{ doc.fichier.name|slice:"10:" }}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-8 py-5">
+                            <span class="bg-surface-container text-on-surface-variant px-3 py-1 rounded-full text-[10px] font-bold tracking-tight uppercase">
+                                {{ doc.get_type_document_display }}
+                            </span>
+                        </td>
+                        <td class="px-8 py-5">
+                            <p class="text-sm text-slate-600">{{ doc.uploade_par|default:"—" }}</p>
+                        </td>
+                        <td class="px-8 py-5">
+                            <p class="text-sm text-slate-600">{{ doc.date_upload|date:"d M Y" }}</p>
+                            <p class="text-[10px] text-slate-400 uppercase">{{ doc.date_upload|time:"H:i" }}</p>
+                        </td>
+                        <td class="px-8 py-5 text-right">
+                            <div class="flex gap-3 justify-end">
+                                <a href="{% url 'documents:telecharger' doc.pk %}"
+                                   class="text-outline hover:text-primary transition-colors" title="Télécharger">
+                                    <span class="material-symbols-outlined">download</span>
+                                </a>
+                                {% if request.user|role_is:'admin,assistante' %}
+                                <a href="{% url 'documents:supprimer' doc.pk %}"
+                                   onclick="return confirm('Supprimer ce document ?');"
+                                   class="text-outline hover:text-error transition-colors" title="Supprimer">
+                                    <span class="material-symbols-outlined">delete</span>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-8 py-20 text-center">
+                            <span class="material-symbols-outlined text-6xl block mb-4 opacity-20 text-primary">folder_open</span>
+                            <p class="font-headline text-2xl text-on-surface-variant">Aucun document dans ce dossier.</p>
+                            {% if request.user|role_is:'admin,assistante' %}
+                            <a href="{% url 'documents:upload' dossier.pk %}"
+                               class="inline-flex items-center gap-2 mt-6 bg-primary text-on-primary px-6 py-3 rounded-xl font-bold text-xs tracking-widest uppercase">
+                                <span class="material-symbols-outlined text-sm">upload_file</span>
+                                Téléverser le premier document
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            {% if documents %}
+            <div class="px-8 py-4 bg-surface-container-low border-t border-surface-variant flex items-center justify-between">
+                <p class="text-xs text-slate-500">{{ documents|length }} document{% if documents|length != 1 %}s{% endif %}</p>
+                <div class="flex gap-2">
+                    <button class="p-2 hover:bg-surface-container-highest rounded-lg transition-colors text-slate-400">
+                        <span class="material-symbols-outlined">chevron_left</span>
+                    </button>
+                    <button class="p-2 hover:bg-surface-container-highest rounded-lg transition-colors text-slate-400">
+                        <span class="material-symbols-outlined">chevron_right</span>
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Stats Strip -->
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="bg-surface-container-low p-8 rounded-xl border-l-4 border-secondary">
+                <span class="material-symbols-outlined text-secondary mb-4" style="font-variation-settings:'FILL' 1;">security</span>
+                <h5 class="font-headline text-xl mb-2">Statut de Conformité</h5>
+                <p class="text-on-surface-variant text-sm mb-4">Tous les dossiers actifs sont synchronisés et prêts pour audit.</p>
+                <div class="h-1.5 w-full bg-surface-container-high rounded-full overflow-hidden">
+                    <div class="h-full bg-secondary rounded-full" style="width:92%"></div>
+                </div>
+            </div>
+            <div class="bg-surface-container-low p-8 rounded-xl border-l-4 border-primary">
+                <span class="material-symbols-outlined text-primary mb-4">storage</span>
+                <h5 class="font-headline text-xl mb-2">Stockage Cabinet</h5>
+                <p class="text-on-surface-variant text-sm mb-4">{{ documents|length }} fichier{% if documents|length != 1 %}s{% endif %} dans ce dossier. Optimisation recommandée si > 100 fichiers.</p>
+                <div class="h-1.5 w-full bg-surface-container-high rounded-full overflow-hidden">
+                    <div class="h-full bg-primary rounded-full" style="width:42%"></div>
+                </div>
+            </div>
+            <div class="relative bg-surface-container-low p-8 rounded-xl overflow-hidden">
+                <span class="material-symbols-outlined absolute -right-4 -bottom-4 text-primary opacity-[0.03] text-[120px]">gavel</span>
+                <div class="relative z-10">
+                    <span class="material-symbols-outlined text-primary mb-4">history</span>
+                    <h5 class="font-headline text-xl mb-2">Activité Récente</h5>
+                    <ul class="text-xs space-y-3">
+                        {% for doc in documents|slice:":3" %}
+                        <li class="flex justify-between border-b border-surface-variant pb-2">
+                            <span class="text-on-surface-variant">{{ doc.titre|truncatechars:28 }}</span>
+                            <span class="text-slate-400">{{ doc.date_upload|timesince }} ago</span>
+                        </li>
+                        {% empty %}
+                        <li class="text-on-surface-variant italic">Aucune activité récente.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+
+{% if request.user|role_is:'admin,assistante' %}
+<a href="{% url 'documents:upload' dossier.pk %}"
+   class="fixed bottom-8 right-8 bg-primary text-on-primary w-14 h-14 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all z-50" title="Téléverser">
+    <span class="material-symbols-outlined">upload_file</span>
+</a>
+{% endif %}
+
+</body>
+</html>

@@ -1,0 +1,193 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+{% include 'shared/typography.html' %}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lex Juris | {% if form.instance.pk %}Modifier{% else %}Nouveau{% endif %} Client</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Public+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+tailwind.config = {
+  darkMode: "class",
+  theme: { extend: { colors: { "primary":"#05152b","primary-container":"#1b2a41","secondary":"#755b00","secondary-container":"#fed255","surface":"#f9f9f9","surface-container-lowest":"#ffffff","surface-container-low":"#f3f3f3","surface-container":"#eeeeee","surface-container-high":"#e8e8e8","outline-variant":"#c5c6ce","on-surface":"#1a1c1c","on-surface-variant":"#44474d","outline":"#75777e" }, fontFamily:{"headline":["Newsreader","serif"],"body":["Public Sans","sans-serif"],"label":["Public Sans","sans-serif"]} } }
+}
+</script>
+<style>
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; padding: 0; }
+.material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+.app-layout { display: flex; height: 100vh; overflow: hidden; }
+#sidebar { width: 240px; flex-shrink: 0; height: 100vh; background: #1B2A41; display: flex; flex-direction: column; overflow: hidden; transition: width .25s; }
+#sidebar.collapsed { width: 0; }
+.headline { font-family: 'Newsreader', serif; }
+.nav-item { display: flex; align-items: center; padding: 11px 20px; color: rgba(255,255,255,.6); transition: all .2s; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; font-weight: 500; text-decoration: none; gap: 10px; }
+.nav-item .material-symbols-outlined { font-size: 18px; }
+.nav-item:hover { color: #fff; background: rgba(255,255,255,.05); }
+.nav-item.active { color: #FED255 !important; background: rgba(255,255,255,.1) !important; border-left: 3px solid #FED255 !important; }
+.avatar { border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+#main-content { flex: 1; overflow-y: auto; background: #f9f9f9; }
+
+/* ── Ghost inputs ─── */
+.ghost-field { position: relative; margin-bottom: 8px; }
+.ghost-field label { font-family: 'Public Sans', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: #75777e; display: block; margin-bottom: 4px; }
+.ghost-field input, .ghost-field select, .ghost-field textarea {
+  width: 100%; background: transparent; border: 0;
+  border-bottom: 2px solid rgba(197,198,206,.35);
+  padding: 10px 0; font-family: 'Newsreader', serif; font-size: 1.1rem;
+  color: #05152b; outline: none; transition: border-color .25s;
+  border-radius: 0; box-shadow: none !important;
+}
+.ghost-field input:focus, .ghost-field select:focus, .ghost-field textarea:focus { border-bottom-color: #755b00; }
+.ghost-field textarea { font-family: 'Public Sans', sans-serif; font-size: .95rem; background: #f3f3f3; border: 0; border-radius: 10px; padding: 14px 16px; resize: none; }
+.ghost-field textarea:focus { background: rgba(243,243,243,.7); }
+.ghost-field select { appearance: none; cursor: pointer; }
+.select-wrap::after { content: 'expand_more'; font-family: 'Material Symbols Outlined'; position: absolute; right: 0; bottom: 10px; color: #44474d; pointer-events: none; font-size: 1.1rem; }
+
+/* ── Django form overrides ─── */
+.ghost-field p { margin: 0; }
+.ghost-field p input, .ghost-field p select, .ghost-field p textarea {
+  width: 100%; background: transparent; border: 0;
+  border-bottom: 2px solid rgba(197,198,206,.35);
+  padding: 10px 0; font-family: 'Newsreader', serif; font-size: 1.1rem;
+  color: #05152b; outline: none; transition: border-color .25s;
+  border-radius: 0; box-shadow: none !important;
+}
+.ghost-field p input:focus, .ghost-field p select:focus { border-bottom-color: #755b00; }
+.ghost-field p textarea { font-family: 'Public Sans', sans-serif; font-size:.95rem; background:#f3f3f3; border:0; border-radius:10px; padding:14px 16px; resize:none; }
+
+/* errorlist */
+.errorlist { list-style: none; margin: 4px 0 0; padding: 0; }
+.errorlist li { font-size: 11px; color: #ba1a1a; }
+
+.dark #main-content { background: #0f1929 !important; }
+</style>
+</head>
+<body class="font-body text-on-surface">
+<div class="app-layout">
+
+  <!-- ══════════ SIDEBAR ══════════ -->
+  {% include 'shared/sidebar.html' %}
+
+  <!-- ══════════ MAIN ══════════ -->
+  <main id="main-content">
+    <div style="max-width:860px;margin:0 auto;padding:48px 40px 80px;">
+
+      <!-- Breadcrumb -->
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:32px;">
+        <a href="{% url 'dossiers:liste_clients' %}" style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#75777e;text-decoration:none;transition:color .2s;" onmouseover="this.style.color='#05152b'" onmouseout="this.style.color='#75777e'">Clients</a>
+        <span class="material-symbols-outlined" style="font-size:14px;color:#c5c6ce;">chevron_right</span>
+        <span style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#05152b;">{% if form.instance.pk %}Modifier{% else %}Nouveau{% endif %}</span>
+      </div>
+
+      <!-- Page title -->
+      <div style="margin-bottom:40px;position:relative;">
+        <span class="material-symbols-outlined" style="position:absolute;left:-8px;top:-10px;font-size:120px;color:#05152b;opacity:.03;pointer-events:none;font-variation-settings:'wght' 100;">person</span>
+        <h2 class="headline" style="font-size:2.8rem;color:#05152b;font-weight:600;line-height:1.1;position:relative;">
+          {% if form.instance.pk %}Modifier le Client{% else %}Nouveau Client{% endif %}
+        </h2>
+        <p style="font-size:13px;color:#75777e;margin-top:8px;position:relative;">Remplissez les informations du client. Les champs marqués sont requis.</p>
+      </div>
+
+      <!-- Form card -->
+      <form method="post">
+        {% csrf_token %}
+
+        <div style="background:#fff;border-radius:16px;padding:40px;box-shadow:0 2px 16px rgba(5,21,43,.07);border:1px solid rgba(197,198,206,.15);margin-bottom:24px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:32px;padding-bottom:20px;border-bottom:1px solid #eeeeee;">
+            <span style="height:1px;width:28px;background:#fed255;display:inline-block;"></span>
+            <h3 style="font-family:'Public Sans',sans-serif;font-size:10px;font-weight:800;letter-spacing:.3em;text-transform:uppercase;color:#05152b;">Identité &amp; Contact</h3>
+          </div>
+
+          <!-- Grid 2 cols -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 40px;">
+
+            <!-- Nom -->
+            <div class="ghost-field">
+              <label>{{ form.nom.label }}</label>
+              {{ form.nom }}
+              {% if form.nom.errors %}<ul class="errorlist">{% for e in form.nom.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <!-- Prénom -->
+            <div class="ghost-field">
+              <label>{{ form.prenom.label }}</label>
+              {{ form.prenom }}
+              {% if form.prenom.errors %}<ul class="errorlist">{% for e in form.prenom.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <!-- Email -->
+            <div class="ghost-field">
+              <label>{{ form.email.label }}</label>
+              {{ form.email }}
+              {% if form.email.errors %}<ul class="errorlist">{% for e in form.email.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <!-- Téléphone -->
+            <div class="ghost-field">
+              <label>{{ form.telephone.label }}</label>
+              {{ form.telephone }}
+              {% if form.telephone.errors %}<ul class="errorlist">{% for e in form.telephone.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+            <!-- CIN -->
+            <div class="ghost-field">
+              <label>{{ form.cin.label }}</label>
+              {{ form.cin }}
+              {% if form.cin.errors %}<ul class="errorlist">{% for e in form.cin.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+
+          </div>
+
+          <!-- Adresse (full width) -->
+          <div class="ghost-field" style="margin-top:16px;">
+            <label>{{ form.adresse.label }}</label>
+            {{ form.adresse }}
+            {% if form.adresse.errors %}<ul class="errorlist">{% for e in form.adresse.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+          </div>
+
+        </div>
+
+        <!-- Action footer -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding-top:8px;">
+          <a href="{% url 'dossiers:liste_clients' %}"
+             style="font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#75777e;text-decoration:underline;text-underline-offset:5px;text-decoration-color:rgba(197,198,206,.5);transition:color .2s;"
+             onmouseover="this.style.color='#05152b'" onmouseout="this.style.color='#75777e'">
+            Annuler
+          </a>
+          <button type="submit"
+            style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#05152b,#1b2a41);color:#fff;padding:13px 32px;border-radius:12px;font-family:'Public Sans',sans-serif;font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;border:none;cursor:pointer;box-shadow:0 6px 20px rgba(5,21,43,.25);transition:transform .2s,box-shadow .2s;"
+            onmouseover="this.style.transform='scale(1.04)';this.style.boxShadow='0 10px 28px rgba(5,21,43,.32)'"
+            onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 6px 20px rgba(5,21,43,.25)'">
+            <span class="material-symbols-outlined" style="font-size:16px;">{% if form.instance.pk %}save{% else %}person_add{% endif %}</span>
+            {% if form.instance.pk %}Enregistrer les modifications{% else %}Créer le Client{% endif %}
+            <span class="material-symbols-outlined" style="font-size:16px;">arrow_forward</span>
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </main>
+</div>
+
+<script>
+document.querySelectorAll('.nav-item').forEach(function(link) {
+  if (!link.href) return;
+  try {
+    const lp = new URL(link.href).pathname;
+    const cp = window.location.pathname;
+    if (lp !== '/' && cp.startsWith(lp)) link.classList.add('active');
+  } catch(e) {}
+});
+let isDark = false;
+function toggleDark() {
+  isDark = !isDark;
+  document.documentElement.classList.toggle('dark', isDark);
+  document.getElementById('theme-ico').textContent = isDark ? 'light_mode' : 'dark_mode';
+  document.getElementById('theme-lbl').textContent = isDark ? 'Light Mode' : 'Dark Mode';
+}
+</script>
+</body>
+</html>

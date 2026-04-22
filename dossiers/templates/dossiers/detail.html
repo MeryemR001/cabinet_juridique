@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+{% load permissions_tags %}
+<html lang="fr">
+<head>
+{% include 'shared/typography.html' %}
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>{{ dossier.reference }} | Lex Juris</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Public+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;}body{margin:0;font-family:'Public Sans',sans-serif;background:#f9f9f9;}
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24;vertical-align:middle;}
+.nav-item{display:flex;align-items:center;padding:11px 20px;color:rgba(255,255,255,.6);transition:all .2s;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:500;text-decoration:none;gap:10px;}
+.nav-item .material-symbols-outlined{font-size:18px;}
+.nav-item:hover{color:#fff;background:rgba(255,255,255,.05);}
+.nav-item.active{color:#FED255;background:rgba(255,255,255,.1);border-left:3px solid #FED255;}
+.section-card{background:#fff;border-radius:16px;border:1.5px solid rgba(197,198,206,.3);overflow:hidden;margin-bottom:20px;}
+.section-header{padding:16px 24px;border-bottom:1px solid rgba(197,198,206,.2);display:flex;align-items:center;justify-content:space-between;}
+.section-title{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#75777e;display:flex;align-items:center;gap:8px;}
+table{width:100%;border-collapse:collapse;}
+th{text-align:left;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#75777e;padding:10px 20px;}
+td{padding:14px 20px;font-size:13px;border-bottom:.5px solid rgba(197,198,206,.15);}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:rgba(5,21,43,.02);}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;}
+.badge-ouvert{background:#d1fae5;color:#065f46;}
+.badge-en-cours{background:#fff3cd;color:#755b00;}
+.badge-clos{background:#e8e8e8;color:#44474d;}
+.dark body{background:#0f1929!important;color:#e2e8f0!important;}
+.dark .section-card{background:#1a2740!important;border-color:#2d3f5a!important;}
+</style>
+</head>
+<body>
+<div style="display:flex;height:100vh;overflow:hidden;">
+
+{% include 'shared/sidebar.html' %}
+
+<div style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
+
+  <header style="flex-shrink:0;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 32px;background:rgba(249,249,249,.9);backdrop-filter:blur(16px);border-bottom:1px solid rgba(197,198,206,.3);">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <a href="{% url 'dossiers:liste' %}" style="color:#75777e;text-decoration:none;display:flex;align-items:center;gap:4px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;" onmouseover="this.style.color='#05152b'" onmouseout="this.style.color='#75777e'">
+        <span class="material-symbols-outlined" style="font-size:16px;">arrow_back</span>Dossiers
+      </a>
+      <span style="color:#c5c6ce;font-size:14px;">›</span>
+      <span style="font-size:11px;font-weight:700;color:#05152b;text-transform:uppercase;letter-spacing:.08em;">{{ dossier.reference }}</span>
+    </div>
+    <div style="display:flex;gap:10px;">
+      {% if request.user|role_is:'admin,assistante' %}
+      <a href="{% url 'dossiers:modifier' dossier.pk %}" style="display:inline-flex;align-items:center;gap:6px;padding:7px 16px;background:#fff;border:1.5px solid rgba(197,198,206,.5);border-radius:8px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#05152b;text-decoration:none;transition:all .2s;" onmouseover="this.style.borderColor='#05152b'" onmouseout="this.style.borderColor='rgba(197,198,206,.5)'">
+        <span class="material-symbols-outlined" style="font-size:15px;">edit</span>Modifier
+      </a>
+      {% endif %}
+      {% if request.user|role_is:'admin,assistante,avocat' %}
+      <a href="{% url 'dossiers:ajouter_intervention' dossier.pk %}" style="display:inline-flex;align-items:center;gap:6px;padding:7px 16px;background:#05152b;color:#fff;border-radius:8px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;transition:opacity .2s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+        <span class="material-symbols-outlined" style="font-size:15px;">add</span>Intervention
+      </a>
+      {% endif %}
+      {% if request.user|role_is:'admin,assistante' %}
+      <a href="{% url 'documents:upload' dossier.pk %}" style="display:inline-flex;align-items:center;gap:6px;padding:7px 16px;background:#fed255;color:#241a00;border-radius:8px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;transition:opacity .2s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+        <span class="material-symbols-outlined" style="font-size:15px;">upload_file</span>Document
+      </a>
+      {% endif %}
+    </div>
+  </header>
+
+  <main style="flex:1;overflow-y:auto;padding:28px 32px;">
+
+    <!-- Hero -->
+    <div style="margin-bottom:28px;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+        <div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+            <span style="font-family:'Public Sans',sans-serif;font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#755b00;">{{ dossier.reference }}</span>
+            {% if dossier.statut == 'ouvert' %}
+            <span class="badge badge-ouvert"><span style="width:5px;height:5px;border-radius:50%;background:#10b981;"></span>Ouvert</span>
+            {% elif dossier.statut == 'en_cours' %}
+            <span class="badge badge-en-cours"><span style="width:5px;height:5px;border-radius:50%;background:#c9a227;"></span>En cours</span>
+            {% else %}
+            <span class="badge badge-clos"><span style="width:5px;height:5px;border-radius:50%;background:#75777e;"></span>Clos</span>
+            {% endif %}
+          </div>
+          <h1 style="font-family:'Newsreader',serif;font-size:2.2rem;color:#05152b;font-weight:600;margin:0 0 6px;line-height:1.15;">{{ dossier.titre }}</h1>
+          {% if dossier.description %}
+          <p style="font-size:13px;color:#75777e;margin:0;max-width:600px;line-height:1.6;">{{ dossier.description }}</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Info strip -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;">
+      <div style="background:#fff;border-radius:14px;border:1.5px solid rgba(197,198,206,.3);padding:18px 20px;">
+        <p style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#75777e;margin:0 0 6px;">Client</p>
+        <p style="font-size:15px;font-weight:600;color:#05152b;margin:0;">{{ dossier.client }}</p>
+      </div>
+      <div style="background:#fff;border-radius:14px;border:1.5px solid rgba(197,198,206,.3);padding:18px 20px;">
+        <p style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#75777e;margin:0 0 6px;">Avocat Responsable</p>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="width:26px;height:26px;border-radius:50%;background:#1b2a41;color:#fed255;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">{{ dossier.avocat_responsable.first_name|first|upper }}{{ dossier.avocat_responsable.last_name|first|upper }}</div>
+          <p style="font-size:14px;font-weight:600;color:#05152b;margin:0;">{{ dossier.avocat_responsable.get_full_name }}</p>
+        </div>
+      </div>
+      <div style="background:#fff;border-radius:14px;border:1.5px solid rgba(197,198,206,.3);padding:18px 20px;">
+        <p style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#75777e;margin:0 0 6px;">Date d'Ouverture</p>
+        <p style="font-size:15px;font-weight:600;color:#05152b;margin:0;">{{ dossier.date_ouverture|date:"d M Y" }}</p>
+      </div>
+    </div>
+
+    <!-- Interventions -->
+    <div class="section-card">
+      <div class="section-header">
+        <span class="section-title"><span class="material-symbols-outlined" style="font-size:16px;">handshake</span>Interventions ({{ interventions|length }})</span>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <a href="{% url 'dossiers:liste_interventions' %}" style="display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#75777e;text-decoration:none;">
+            <span class="material-symbols-outlined" style="font-size:14px;">list</span>Tout voir
+          </a>
+          {% if request.user|role_is:'admin,assistante,avocat' %}
+          <a href="{% url 'dossiers:ajouter_intervention' dossier.pk %}" style="display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#755b00;text-decoration:none;">
+            <span class="material-symbols-outlined" style="font-size:14px;">add</span>Ajouter
+          </a>
+          {% endif %}
+        </div>
+      </div>
+      {% if interventions %}
+      <table>
+        <thead><tr><th>Date</th><th>Avocat</th><th>Description</th><th>Heures</th><th style="text-align:right;"></th></tr></thead>
+        <tbody>
+          {% for i in interventions %}
+          <tr>
+            <td style="white-space:nowrap;font-size:12px;">{{ i.date|date:"d M Y" }}<br><span style="color:#75777e;font-size:10px;">{{ i.date|time:"H:i" }}</span></td>
+            <td style="font-weight:500;">{{ i.avocat.get_full_name }}</td>
+            <td style="color:#44474d;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ i.description }}</td>
+            <td style="font-weight:700;color:#755b00;">{{ i.heures_travaillees }}h</td>
+            <td style="text-align:right;">
+              <a href="{% url 'dossiers:detail_intervention' i.pk %}" style="color:#75777e;font-size:11px;text-decoration:none;" onmouseover="this.style.color='#05152b'" onmouseout="this.style.color='#75777e'">
+                <span class="material-symbols-outlined" style="font-size:16px;">open_in_new</span>
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div style="text-align:center;padding:40px;color:#75777e;">
+        <span class="material-symbols-outlined" style="font-size:28px;display:block;margin-bottom:8px;opacity:.4;">handshake</span>
+        <p style="font-size:13px;margin:0;">Aucune intervention enregistrée.</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Documents -->
+    <div class="section-card">
+      <div class="section-header">
+        <span class="section-title"><span class="material-symbols-outlined" style="font-size:16px;">description</span>Documents ({{ documents|length }})</span>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <a href="{% url 'documents:liste' dossier.pk %}" style="display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#75777e;text-decoration:none;">
+            <span class="material-symbols-outlined" style="font-size:14px;">folder_open</span>Dépôt
+          </a>
+          {% if request.user|role_is:'admin,assistante' %}
+          <a href="{% url 'documents:upload' dossier.pk %}" style="display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#755b00;text-decoration:none;">
+            <span class="material-symbols-outlined" style="font-size:14px;">upload</span>Uploader
+          </a>
+          {% endif %}
+        </div>
+      </div>
+      {% if documents %}
+      <table>
+        <thead><tr><th>Titre</th><th>Type</th><th>Uploadé par</th><th>Date</th><th style="text-align:right;">Actions</th></tr></thead>
+        <tbody>
+          {% for doc in documents %}
+          <tr>
+            <td style="font-weight:600;color:#05152b;">{{ doc.titre }}</td>
+            <td><span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding:2px 8px;background:#eeeeee;border-radius:999px;color:#44474d;">{{ doc.get_type_document_display }}</span></td>
+            <td style="color:#75777e;font-size:12px;">{{ doc.uploade_par|default:"—" }}</td>
+            <td style="font-size:12px;color:#75777e;">{{ doc.date_upload|date:"d M Y" }}</td>
+            <td style="text-align:right;">
+              <a href="{% url 'documents:telecharger' doc.pk %}" style="color:#755b00;text-decoration:none;" title="Télécharger">
+                <span class="material-symbols-outlined" style="font-size:16px;">download</span>
+              </a>
+              {% if request.user|role_is:'admin,assistante' %}
+              <a href="{% url 'documents:supprimer' doc.pk %}" onclick="return confirm('Supprimer ce document ?');" style="color:#ba1a1a;text-decoration:none;margin-left:8px;" title="Supprimer">
+                <span class="material-symbols-outlined" style="font-size:16px;">delete</span>
+              </a>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div style="text-align:center;padding:40px;color:#75777e;">
+        <span class="material-symbols-outlined" style="font-size:28px;display:block;margin-bottom:8px;opacity:.4;">description</span>
+        <p style="font-size:13px;margin:0;">Aucun document associé à ce dossier.</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Audiences -->
+    <div class="section-card">
+      <div class="section-header">
+        <span class="section-title"><span class="material-symbols-outlined" style="font-size:16px;">gavel</span>Audiences ({{ audiences|length }})</span>
+        {% if request.user|role_is:'admin,avocat' %}
+        <a href="{% url 'audiences:creer' %}" style="display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#755b00;text-decoration:none;">
+          <span class="material-symbols-outlined" style="font-size:14px;">add</span>Planifier
+        </a>
+        {% endif %}
+      </div>
+      {% if audiences %}
+      <table>
+        <thead><tr><th>Date</th><th>Tribunal</th><th>Avocat</th><th>Statut</th><th style="text-align:right;"></th></tr></thead>
+        <tbody>
+          {% for a in audiences %}
+          <tr>
+            <td style="font-weight:600;white-space:nowrap;">{{ a.date_audience|date:"d M Y" }}<br><span style="color:#75777e;font-size:10px;">{{ a.date_audience|time:"H:i" }}</span></td>
+            <td style="color:#44474d;">{{ a.tribunal }}</td>
+            <td style="color:#75777e;font-size:12px;">{{ a.avocat.get_full_name }}</td>
+            <td>
+              {% if a.statut == 'programmee' %}<span style="font-size:10px;font-weight:700;text-transform:uppercase;padding:2px 8px;border-radius:999px;background:#fff3cd;color:#755b00;">Programmée</span>
+              {% elif a.statut == 'tenue' %}<span style="font-size:10px;font-weight:700;text-transform:uppercase;padding:2px 8px;border-radius:999px;background:#d1fae5;color:#065f46;">Tenue</span>
+              {% elif a.statut == 'reportee' %}<span style="font-size:10px;font-weight:700;text-transform:uppercase;padding:2px 8px;border-radius:999px;background:#eeeeee;color:#44474d;">Reportée</span>
+              {% else %}<span style="font-size:10px;font-weight:700;text-transform:uppercase;padding:2px 8px;border-radius:999px;background:#ffdad6;color:#93000a;">Annulée</span>{% endif %}
+            </td>
+            <td style="text-align:right;">
+              <a href="{% url 'audiences:detail' a.pk %}" style="color:#75777e;text-decoration:none;" onmouseover="this.style.color='#05152b'" onmouseout="this.style.color='#75777e'">
+                <span class="material-symbols-outlined" style="font-size:16px;">open_in_new</span>
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div style="text-align:center;padding:40px;color:#75777e;">
+        <span class="material-symbols-outlined" style="font-size:28px;display:block;margin-bottom:8px;opacity:.4;">gavel</span>
+        <p style="font-size:13px;margin:0;">Aucune audience programmée.</p>
+      </div>
+      {% endif %}
+    </div>
+
+    {% if request.user|role_is:'admin' %}
+    <div style="display:flex;justify-content:flex-end;padding-top:8px;">
+      <a href="{% url 'dossiers:supprimer' dossier.pk %}" onclick="return confirm('Supprimer définitivement ce dossier ?');" style="display:inline-flex;align-items:center;gap:6px;padding:8px 18px;background:transparent;border:1.5px solid #ba1a1a;color:#ba1a1a;border-radius:8px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;transition:all .2s;" onmouseover="this.style.background='#ffdad6'" onmouseout="this.style.background='transparent'">
+        <span class="material-symbols-outlined" style="font-size:15px;">delete</span>Supprimer le Dossier
+      </a>
+    </div>
+    {% endif %}
+  </main>
+</div>
+</div>
+<script>
+let isDark=false;
+function toggleDark(){isDark=!isDark;document.documentElement.classList.toggle('dark',isDark);document.getElementById('theme-ico').textContent=isDark?'light_mode':'dark_mode';document.getElementById('theme-lbl').textContent=isDark?'Light Mode':'Dark Mode';}
+</script>
+</body>
+</html>
