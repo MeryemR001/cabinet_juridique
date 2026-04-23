@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from django.db.models import Sum
+from django.db.models import Count, Q, Sum
+from django.db.models.functions import ExtractYear, ExtractMonth
 from django.utils import timezone
 
 from utilisateurs.decorators import permission_required
@@ -39,6 +40,36 @@ def _audience_metrics(audiences_queryset):
 @permission_required('dashboard.admin')
 def admin_dashboard(request):
     aujourd_hui = timezone.now().date()
+    current_year = aujourd_hui.year
+
+    annual_revenue_rows = (
+        Facture.objects.filter(statut='payee', date_emission__year=current_year)
+        .annotate(month=ExtractMonth('date_emission'))
+        .values('month')
+        .annotate(total=Sum('montant_ttc'))
+        .order_by('month')
+    )
+
+    revenue_by_avocat_rows = (
+        Facture.objects.filter(statut='payee', avocat__isnull=False)
+        .values('avocat__first_name', 'avocat__last_name')
+        .annotate(total=Sum('montant_ttc'))
+        .order_by('-total', 'avocat__last_name', 'avocat__first_name')
+    )
+
+    revenue_by_avocat_total = sum(float(row['total'] or 0) for row in revenue_by_avocat_rows)
+
+    clients_by_avocat_rows = (
+        Dossier.objects.filter(avocat_responsable__isnull=False)
+        .values('avocat_responsable__first_name', 'avocat_responsable__last_name')
+        .annotate(total_clients=Count('client', distinct=True))
+        .order_by('-total_clients', 'avocat_responsable__last_name', 'avocat_responsable__first_name')
+    )
+
+    # Monthly revenue labels and values
+    month_names = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc']
+    annual_revenue_labels = [month_names[row['month'] - 1] for row in annual_revenue_rows if row['month'] is not None]
+    annual_revenue_values = [float(row['total'] or 0) for row in annual_revenue_rows if row['month'] is not None]
 
     context = {
         'total_avocats': User.objects.filter(role='avocat').count(),
@@ -62,6 +93,24 @@ def admin_dashboard(request):
         'chiffre_affaires': Facture.objects.filter(statut='payee').aggregate(
             total=Sum('montant_ttc')
         )['total'] or 0,
+
+        'annual_revenue_labels': annual_revenue_labels,
+        'annual_revenue_values': annual_revenue_values,
+        'revenue_avocat_labels': [
+            f"{row['avocat__first_name']} {row['avocat__last_name']}".strip()
+            for row in revenue_by_avocat_rows
+        ],
+        'revenue_avocat_values': [float(row['total'] or 0) for row in revenue_by_avocat_rows],
+        'revenue_avocat_percentages': [
+            round((float(row['total'] or 0) / revenue_by_avocat_total) * 100, 1)
+            if revenue_by_avocat_total else 0
+            for row in revenue_by_avocat_rows
+        ],
+        'clients_avocat_labels': [
+            f"{row['avocat_responsable__first_name']} {row['avocat_responsable__last_name']}".strip()
+            for row in clients_by_avocat_rows
+        ],
+        'clients_avocat_values': [row['total_clients'] for row in clients_by_avocat_rows],
 
         'recent_dossiers': Dossier.objects.order_by('-date_ouverture')[:5],
         'utilisateurs': User.objects.all().order_by('role'),

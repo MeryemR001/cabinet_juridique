@@ -97,25 +97,6 @@ html, body { height: 100%; margin: 0; padding: 0; }
 
     <section class="px-10 py-8">
 
-      <!-- Stats row -->
-      <div style="display:flex;gap:16px;margin-bottom:32px;flex-wrap:wrap;">
-        <div style="background:#fff;border-radius:10px;padding:16px 24px;border:1px solid rgba(197,198,206,.2);flex:1;min-width:120px;box-shadow:0 1px 4px rgba(5,21,43,.04);">
-          <p style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#75777e;">Total</p>
-          <p class="headline" style="font-size:2rem;color:#05152b;font-weight:700;margin-top:4px;">{{ dossiers|length }}</p>
-        </div>
-        <div style="background:#fff;border-radius:10px;padding:16px 24px;border:1px solid rgba(34,197,94,.2);flex:1;min-width:120px;box-shadow:0 1px 4px rgba(5,21,43,.04);">
-          <p style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#166534;">Ouverts</p>
-          <p class="headline" style="font-size:2rem;color:#166534;font-weight:700;margin-top:4px;">{{ dossiers|length }}</p>
-        </div>
-        <div style="background:#05152b;border-radius:10px;padding:16px 24px;flex:2;min-width:180px;display:flex;align-items:center;gap:12px;">
-          <span class="material-symbols-outlined" style="font-size:30px;color:#fed255;">folder_shared</span>
-          <div>
-            <p style="font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(254,210,85,.7);">Dossiers Actifs</p>
-            <p style="font-size:13px;font-weight:600;color:#fff;margin-top:2px;">Suivez l'avancement de vos affaires</p>
-          </div>
-        </div>
-      </div>
-
       <!-- Tabs -->
       <div style="display:flex;gap:0;margin-bottom:28px;border-bottom:1px solid rgba(197,198,206,.25);">
         <button onclick="filterStatus('all',this)" class="tab-btn active-tab" style="padding:10px 20px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:none;border:none;border-bottom:2px solid #fed255;color:#05152b;cursor:pointer;transition:all .2s;margin-bottom:-1px;">Tous</button>

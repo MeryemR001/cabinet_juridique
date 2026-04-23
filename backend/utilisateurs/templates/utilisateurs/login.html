@@ -124,8 +124,10 @@ body { font-family:'DM Sans',sans-serif; background:var(--navy); color:var(--whi
           <div class="error-msg show">{{ message }}</div>
         {% endfor %}
       {% endif %}
-      <form method="POST" action="" id="login-form">
-  {% csrf_token %}
+        <form method="POST" action="" id="login-form">
+      {% csrf_token %}
+    <input type="hidden" name="next" value="{{ next_url }}">
+      <input type="hidden" name="next" value="{{ next_url }}">
 
   <div class="welcome-label"><span>Se connecter</span></div>
   <div class="form-title">Bienvenue <em>!</em></div>

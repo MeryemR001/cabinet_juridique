@@ -570,7 +570,7 @@ footer {
     <a href="#features">Plateforme</a>
     <a href="#contact">Contact</a>
   </div>
-<a href="{% url 'utilisateurs:login' %}" class="nav-cta">Accès Cabinet</a>
+<a href="{{ cabinet_access_url }}" class="nav-cta">Accès Cabinet</a>
 </nav>
 
 <!-- HERO -->
@@ -599,7 +599,7 @@ footer {
     </p>
 
     <div class="hero-actions">
-      <a href="{% url 'utilisateurs:login' %}" class="btn-hero-primary">
+      <a href="{{ cabinet_access_url }}" class="btn-hero-primary">
         Accéder à votre espace
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
       </a>
@@ -614,22 +614,24 @@ footer {
 
   <div class="hero-stats">
     <div class="hero-stat">
-      <div class="hero-stat-num">2<span>+</span></div>
+      <div class="hero-stat-num">{{ total_avocats }}<span>+</span></div>
       <div class="hero-stat-label">Avocats associés</div>
     </div>
     <div class="hero-stats-divider"></div>
     <div class="hero-stat">
-      <div class="hero-stat-num">3<span>+</span></div>
+      <div class="hero-stat-num">{{ dossiers_resolus }}<span>+</span></div>
       <div class="hero-stat-label">Dossiers résolus</div>
     </div>
     <div class="hero-stats-divider"></div>
     <div class="hero-stat">
-      <div class="hero-stat-num">94<span>%</span></div>
+      <div class="hero-stat-num">{{ taux_succes }}<span>%</span></div>
       <div class="hero-stat-label">Taux de succès</div>
     </div>
     <div class="hero-stats-divider"></div>
     <div class="hero-stat">
-     
+      <div class="hero-stat-num">{{ total_clients }}<span>+</span></div>
+      <div class="hero-stat-label">Clients accompagnés</div>
+    </div>
   </div>
 </section>
 
@@ -666,7 +668,7 @@ footer {
       </div>
       <h3 class="service-title">Gestion des Dossiers</h3>
       <p class="service-desc">Suivi complet de chaque affaire, de l'ouverture à la clôture. Assignation d'avocats, jalons, documents — tout centralisé.</p>
-      <a href="#" class="service-link">En savoir plus →</a>
+      <a href="{{ dossiers_url }}" class="service-link">En savoir plus →</a>
     </div>
     <div class="service-card">
       <div class="service-num">02</div>
@@ -675,7 +677,7 @@ footer {
       </div>
       <h3 class="service-title">Calendrier Judiciaire</h3>
       <p class="service-desc">Planification intelligente des audiences, rendez-vous et délais. Notifications automatiques pour ne jamais manquer une échéance.</p>
-      <a href="#" class="service-link">En savoir plus →</a>
+      <a href="{{ audiences_url }}" class="service-link">En savoir plus →</a>
     </div>
     <div class="service-card">
       <div class="service-num">03</div>
@@ -684,7 +686,7 @@ footer {
       </div>
       <h3 class="service-title">Gestion Clients</h3>
       <p class="service-desc">Annuaire complet de vos clients avec historique d'affaires, coordonnées et suivi de la relation clientèle.</p>
-      <a href="#" class="service-link">En savoir plus →</a>
+      <a href="{{ clients_url }}" class="service-link">En savoir plus →</a>
     </div>
     <div class="service-card">
       <div class="service-num">04</div>
@@ -693,7 +695,7 @@ footer {
       </div>
       <h3 class="service-title">Référentiel Documents</h3>
       <p class="service-desc">Stockage sécurisé, versionné et indexé de tous vos documents juridiques. Accès instantané, conformité garantie.</p>
-      <a href="#" class="service-link">En savoir plus →</a>
+      <a href="{{ documents_url }}" class="service-link">En savoir plus →</a>
     </div>
     <div class="service-card">
       <div class="service-num">05</div>
@@ -702,7 +704,7 @@ footer {
       </div>
       <h3 class="service-title">Facturation</h3>
       <p class="service-desc">Génération et suivi de factures, gestion des paiements, rapports financiers détaillés pour votre cabinet.</p>
-      <a href="#" class="service-link">En savoir plus →</a>
+      <a href="{{ factures_url }}" class="service-link">En savoir plus →</a>
     </div>
     <div class="service-card">
       <div class="service-num">06</div>
@@ -711,7 +713,7 @@ footer {
       </div>
       <h3 class="service-title">Tableau de Bord</h3>
       <p class="service-desc">Analytics en temps réel : performances du cabinet, taux de succès, capacité des équipes, santé financière.</p>
-      <a href="#" class="service-link">En savoir plus →</a>
+      <a href="{{ cabinet_access_url }}" class="service-link">En savoir plus →</a>
     </div>
   </div>
 </section>
@@ -723,19 +725,19 @@ footer {
       <!-- Floating cards -->
       <div class="feat-card feat-card-main">
         <div class="feat-tag">Taux de succès — Trimestre</div>
-        <div class="feat-val">94.2%</div>
-        <div class="feat-sub">+3.1% vs. trimestre précédent</div>
-        <div class="feat-bar"><div class="feat-bar-fill" style="width:94%"></div></div>
+        <div class="feat-val">{{ taux_succes }}%</div>
+        <div class="feat-sub">{{ dossiers_resolus }} dossiers clôturés</div>
+        <div class="feat-bar"><div class="feat-bar-fill" style="width:{{ taux_succes }}%"></div></div>
       </div>
       <div class="feat-card feat-card-secondary">
         <div class="feat-tag" style="color:var(--gold);">Dossiers actifs</div>
-        <div class="feat-val">347</div>
-        <div class="feat-sub" style="color:rgba(255,255,255,.4);">8 urgents ce mois</div>
+        <div class="feat-val">{{ dossiers_actifs }}</div>
+        <div class="feat-sub" style="color:rgba(255,255,255,.4);">{{ dossiers_ouverts }} ouverts</div>
       </div>
       <div class="feat-card" style="position:absolute;top:50%;right:20px;transform:translateY(-50%);width:180px;background:var(--gold);border-color:var(--gold);animation:float1 7s 3s ease-in-out infinite;">
-        <div class="feat-tag" style="color:rgba(13,27,46,.6);">Score santé</div>
-        <div class="feat-val" style="color:var(--navy);font-size:28px;">A+</div>
-        <div class="feat-sub" style="color:rgba(13,27,46,.5);">14 KPIs analysés</div>
+        <div class="feat-tag" style="color:rgba(13,27,46,.6);">Chiffre d'affaires</div>
+        <div class="feat-val" style="color:var(--navy);font-size:28px;">{{ chiffre_affaires|floatformat:0 }}</div>
+        <div class="feat-sub" style="color:rgba(13,27,46,.5);">MAD encaissés</div>
       </div>
     </div>
 
@@ -791,7 +793,7 @@ footer {
     <p>Rejoignez les cabinets qui font confiance à Lex Juris pour leur gestion quotidienne.</p>
   </div>
   <div class="cta-actions">
-    <a href="{% url 'utilisateurs:login' %}" class="btn-cta-dark">Accéder à la plateforme</a>
+    <a href="{{ cabinet_access_url }}" class="btn-cta-dark">Accéder à la plateforme</a>
     <a href="#" class="btn-cta-ghost">Demander une démo</a>
   </div>
 </section>

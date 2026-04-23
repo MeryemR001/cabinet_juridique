@@ -240,6 +240,48 @@ td{padding:11px 14px;font-size:13px;border-bottom:0.5px solid #e8e8e8;}
 
       </div>
 
+      <!-- Charts -->
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:14px;align-items:stretch;">
+        <div class="kpi-card" style="min-height:360px;display:flex;flex-direction:column;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:14px;gap:10px;">
+            <div>
+              <div class="text-muted" style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;">Revenu mensuel</div>
+              <div class="headline text-primary-color" style="font-size:18px;font-weight:700;margin-top:4px;">Chiffre d'affaires par mois</div>
+            </div>
+            <div class="text-muted" style="font-size:11px;">Montants TTC</div>
+          </div>
+          <div style="flex:1;min-height:280px;position:relative;">
+            <canvas id="annualRevenueChart"></canvas>
+          </div>
+        </div>
+
+        <div class="kpi-card" style="min-height:360px;display:flex;flex-direction:column;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:14px;gap:10px;">
+            <div>
+              <div class="text-muted" style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;">CA par avocat</div>
+              <div class="headline text-primary-color" style="font-size:18px;font-weight:700;margin-top:4px;">Part de chacun</div>
+            </div>
+            <div class="text-muted" style="font-size:11px;">Répartition</div>
+          </div>
+          <div style="flex:1;min-height:280px;position:relative;">
+            <canvas id="revenueShareChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="kpi-card" style="min-height:330px;margin-bottom:14px;display:flex;flex-direction:column;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:14px;gap:10px;">
+          <div>
+            <div class="text-muted" style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;">Clients par avocat</div>
+            <div class="headline text-primary-color" style="font-size:18px;font-weight:700;margin-top:4px;">Total clients gérés</div>
+          </div>
+          <div class="text-muted" style="font-size:11px;">Clients distincts</div>
+        </div>
+        <div style="flex:1;min-height:250px;position:relative;">
+          <canvas id="clientsPerAvocatChart"></canvas>
+        </div>
+      </div>
+
       <!-- ROW 2 : Dossiers récents + Équipe + Calendrier -->
       <div style="display:grid;grid-template-columns:1.6fr 0.9fr 1fr;gap:14px;margin-bottom:14px;">
 
@@ -387,12 +429,136 @@ td{padding:11px 14px;font-size:13px;border-bottom:0.5px solid #e8e8e8;}
 </div>
 
 <div id="toast"></div>
-<script id="audience-days-data" type="application/json">
-[
-{% for a in audiences_mois %}
-"{{ a.date_audience|date:'Y-m-d' }}"{% if not forloop.last %},{% endif %}
-{% endfor %}
-]
+
+{{ annual_revenue_labels|json_script:"annual-revenue-labels" }}
+{{ annual_revenue_values|json_script:"annual-revenue-values" }}
+{{ revenue_avocat_labels|json_script:"revenue-avocat-labels" }}
+{{ revenue_avocat_values|json_script:"revenue-avocat-values" }}
+{{ revenue_avocat_percentages|json_script:"revenue-avocat-percentages" }}
+{{ clients_avocat_labels|json_script:"clients-avocat-labels" }}
+{{ clients_avocat_values|json_script:"clients-avocat-values" }}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+const formatCurrency = (value) => new Intl.NumberFormat('fr-FR', {
+  style: 'currency',
+  currency: 'MAD',
+  maximumFractionDigits: 0,
+}).format(value || 0);
+
+function readJsonScript(id) {
+  const element = document.getElementById(id);
+  return element ? JSON.parse(element.textContent) : [];
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  if (!window.Chart) return;
+
+  const annualLabels = readJsonScript('annual-revenue-labels');
+  const annualValues = readJsonScript('annual-revenue-values');
+  const revenueLabels = readJsonScript('revenue-avocat-labels');
+  const revenueValues = readJsonScript('revenue-avocat-values');
+  const revenuePercentages = readJsonScript('revenue-avocat-percentages');
+  const clientLabels = readJsonScript('clients-avocat-labels');
+  const clientValues = readJsonScript('clients-avocat-values');
+
+  const annualCanvas = document.getElementById('annualRevenueChart');
+  if (annualCanvas) {
+    new Chart(annualCanvas, {
+      type: 'bar',
+      data: {
+        labels: annualLabels,
+        datasets: [{
+          label: 'CA mensuel',
+          data: annualValues,
+          backgroundColor: '#1B2A41',
+          hoverBackgroundColor: '#c9a227',
+          borderRadius: 10,
+          maxBarThickness: 54,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label(context) { return ` ${formatCurrency(context.raw)}`; } } },
+        },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#75777e' } },
+          y: { beginAtZero: true, ticks: { color: '#75777e', callback(value) { return formatCurrency(value); } }, grid: { color: 'rgba(197,198,206,.2)' } },
+        },
+      },
+    });
+  }
+
+  const revenueCanvas = document.getElementById('revenueShareChart');
+  if (revenueCanvas) {
+    const colors = ['#1B2A41', '#c9a227', '#10b981', '#3b82f6', '#755b00', '#64748b', '#f59e0b', '#0f766e'];
+    const revenuePieLabels = revenueLabels.map((label, index) => `${label} (${revenuePercentages[index] || 0}%)`);
+    new Chart(revenueCanvas, {
+      type: 'doughnut',
+      data: {
+        labels: revenuePieLabels,
+        datasets: [{
+          data: revenueValues,
+          backgroundColor: revenueLabels.map((_, index) => colors[index % colors.length]),
+          borderColor: '#ffffff',
+          borderWidth: 2,
+          hoverOffset: 8,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '62%',
+        plugins: {
+          legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 10, color: '#44474d' } },
+          tooltip: {
+            callbacks: {
+              label(context) {
+                const value = revenueValues[context.dataIndex] || 0;
+                const percentage = revenuePercentages[context.dataIndex] || 0;
+                return ` ${context.label}: ${formatCurrency(value)} (${percentage}%)`;
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
+  const clientsCanvas = document.getElementById('clientsPerAvocatChart');
+  if (clientsCanvas) {
+    new Chart(clientsCanvas, {
+      type: 'bar',
+      data: {
+        labels: clientLabels,
+        datasets: [{
+          label: 'Clients distincts',
+          data: clientValues,
+          backgroundColor: '#755b00',
+          hoverBackgroundColor: '#c9a227',
+          borderRadius: 10,
+          maxBarThickness: 26,
+        }],
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label(context) { return ` ${context.raw} clients`; } } },
+        },
+        scales: {
+          x: { beginAtZero: true, ticks: { color: '#75777e', precision: 0 }, grid: { color: 'rgba(197,198,206,.2)' } },
+          y: { ticks: { color: '#75777e' }, grid: { display: false } },
+        },
+      },
+    });
+  }
+});
 </script>
 <script>
 // ── Sidebar ──────────────────────────────────────────

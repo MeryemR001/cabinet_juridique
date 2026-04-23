@@ -236,6 +236,14 @@ label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08
                         </div>
                     </section>
 
+                    <!-- Decision -->
+                    <section id="decision-section" class="field-wrapper" style="display:none;">
+                        <label class="block font-['Public_Sans'] text-[10px] uppercase tracking-[0.1em] text-on-surface-variant mb-2 font-bold">{{ form.decision.label }}</label>
+                        <div class="select-wrap">{{ form.decision }}</div>
+                        {% if form.decision.errors %}<p class="text-error text-xs mt-2">{{ form.decision.errors|join:", " }}</p>{% endif %}
+                        <p class="text-xs text-on-surface-variant mt-2">Visible uniquement lorsque le statut de l'audience est Tenue.</p>
+                    </section>
+
                     <!-- Date -->
                     <section>
                         <div class="field-wrapper">
@@ -385,6 +393,29 @@ function toggleDark() {
   document.getElementById('theme-ico').textContent = isDark ? 'light_mode' : 'dark_mode';
   document.getElementById('theme-lbl').textContent = isDark ? 'Light Mode' : 'Dark Mode';
 }
+
+function toggleDecisionField() {
+    const statutSelect = document.getElementById('id_statut');
+    const decisionSection = document.getElementById('decision-section');
+    if (!statutSelect || !decisionSection) return;
+
+    const showDecision = statutSelect.value === 'tenue';
+    decisionSection.style.display = showDecision ? '' : 'none';
+
+    if (!showDecision) {
+        const decisionInput = document.getElementById('id_decision');
+        if (decisionInput) {
+            decisionInput.value = '';
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const statutSelect = document.getElementById('id_statut');
+    if (!statutSelect) return;
+    statutSelect.addEventListener('change', toggleDecisionField);
+    toggleDecisionField();
+});
 </script>
 
 </body>

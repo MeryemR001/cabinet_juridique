@@ -11,6 +11,11 @@ class Audience(models.Model):
         ('annulee', 'Annulée'),
     ]
 
+    DECISIONS = [
+        ('gagnee', 'Gagnée'),
+        ('perdue', 'Perdue'),
+    ]
+
     dossier = models.ForeignKey(
         Dossier,
         on_delete=models.CASCADE,
@@ -25,6 +30,7 @@ class Audience(models.Model):
     date_audience = models.DateTimeField()
     tribunal = models.CharField(max_length=200)
     statut = models.CharField(max_length=20, choices=STATUTS, default='programmee')
+    decision = models.CharField(max_length=20, choices=DECISIONS, blank=True, default='')
     observations = models.TextField(blank=True)
     resultat = models.TextField(blank=True)
     date_creation = models.DateTimeField(auto_now_add=True)

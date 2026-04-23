@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.utils.http import url_has_allowed_host_and_scheme
 
 from .forms import LoginForm, UserCreateForm, UserUpdateForm
 from .models import User
@@ -11,7 +12,9 @@ from .decorators import role_required
 # 🔥 LOGIN PROPRE (SANS ROLE FORM)
 def login_view(request):
     if request.user.is_authenticated:
-        return redirect_by_role(request.user)
+        return _redirect_after_login(request, request.user)
+
+    next_url = request.POST.get('next') or request.GET.get('next', '')
 
     if request.method == 'POST':
         form = LoginForm(request.POST)
@@ -24,13 +27,27 @@ def login_view(request):
 
             if user is not None:
                 login(request, user)
-                return redirect_by_role(user)
+                return _redirect_after_login(request, user)
             else:
                 messages.error(request, "Nom d'utilisateur ou mot de passe incorrect.")
     else:
         form = LoginForm()
 
-    return render(request, 'utilisateurs/login.html', {'form': form})
+    return render(request, 'utilisateurs/login.html', {
+        'form': form,
+        'next_url': next_url,
+    })
+
+
+def _redirect_after_login(request, user):
+    next_url = request.POST.get('next') or request.GET.get('next')
+    if next_url and url_has_allowed_host_and_scheme(
+        next_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return redirect(next_url)
+    return redirect_by_role(user)
 
 
 # 🔥 REDIRECTION SELON ROLE

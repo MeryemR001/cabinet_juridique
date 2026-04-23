@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.db.models import Count
 from utilisateurs.decorators import permission_required
 from .models import Audience
 from .forms import AudienceForm
@@ -13,7 +14,19 @@ def liste_audiences(request):
     else:
         # Admin et assistante voient tout
         audiences = Audience.objects.all().order_by('date_audience')
-    return render(request, 'audiences/liste.html', {'audiences': audiences})
+
+    audience_status_rows = (
+        audiences.values('statut')
+        .annotate(total=Count('id'))
+        .order_by('statut')
+    )
+    audience_status_map = {row['statut']: row['total'] for row in audience_status_rows}
+
+    return render(request, 'audiences/liste.html', {
+        'audiences': audiences,
+        'audience_status_labels': [label for _, label in Audience.STATUTS],
+        'audience_status_values': [audience_status_map.get(code, 0) for code, _ in Audience.STATUTS],
+    })
 
 
 @login_required

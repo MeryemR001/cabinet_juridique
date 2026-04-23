@@ -214,6 +214,8 @@
         .dark td { border-color: #2d3f5a !important; }
 
         .dark .text-primary { color: #b8c7e5 !important; }
+        .chart-card { background: #fff; border-radius: 12px; border: 0.5px solid #e2e2e2; }
+        .dark .chart-card { background: #1a2740 !important; border-color: #2d3f5a !important; }
     </style>
 </head>
 <body class="bg-background text-on-surface min-h-screen">
@@ -273,6 +275,29 @@
                 <p class="text-[10px] uppercase tracking-widest mt-4 opacity-60">En attente</p>
             </div>
         </section>
+
+        <!-- Audience Chart -->
+        <section class="mb-14">
+            <div class="chart-card p-8">
+                <div class="flex justify-between items-end gap-6 mb-6 flex-wrap">
+                    <div>
+                        <p class="font-['Public_Sans'] text-[10px] font-bold text-secondary uppercase tracking-widest mb-2">Statut des audiences</p>
+                        <h3 class="font-['Newsreader'] text-2xl font-semibold text-primary">Répartition des audiences</h3>
+                        <p class="text-on-surface-variant text-sm mt-2">Programmée, tenue, reportée ou annulée selon les enregistrements du cabinet.</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-['Public_Sans'] text-[10px] uppercase tracking-widest text-outline">Total</p>
+                        <p class="font-['Newsreader'] text-3xl text-primary font-bold">{{ audiences|length }}</p>
+                    </div>
+                </div>
+                <div style="height:320px;position:relative;">
+                    <canvas id="audienceStatusChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        {{ audience_status_labels|json_script:"audience-status-labels" }}
+        {{ audience_status_values|json_script:"audience-status-values" }}
 
         <!-- Table Section -->
         <section class="space-y-12">
@@ -380,7 +405,57 @@
     <span class="material-symbols-outlined">add_task</span>
 </a>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
+    const formatCount = (value) => new Intl.NumberFormat('fr-FR').format(value || 0);
+
+    function readJsonScript(id) {
+        const element = document.getElementById(id);
+        return element ? JSON.parse(element.textContent) : [];
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        if (!window.Chart) return;
+
+        const statusLabels = readJsonScript('audience-status-labels');
+        const statusValues = readJsonScript('audience-status-values');
+        const statusCanvas = document.getElementById('audienceStatusChart');
+
+        if (statusCanvas) {
+            new Chart(statusCanvas, {
+                type: 'doughnut',
+                data: {
+                    labels: statusLabels,
+                    datasets: [{
+                        data: statusValues,
+                        backgroundColor: ['#c9a227', '#10b981', '#64748b', '#ba1a1a'],
+                        borderColor: '#ffffff',
+                        borderWidth: 2,
+                        hoverOffset: 8,
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '62%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { usePointStyle: true, boxWidth: 10, color: '#44474d' },
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label(context) {
+                                    return ` ${context.label}: ${formatCount(context.raw)}`;
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+        }
+    });
+
     /* ── Active nav ───────────────────────────────── */
     document.querySelectorAll('.nav-item').forEach(function(link) {
         if (!link.href) return;

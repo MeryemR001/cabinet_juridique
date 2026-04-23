@@ -8,9 +8,12 @@ from dossiers.models import Dossier
 class AudienceForm(forms.ModelForm):
     class Meta:
         model = Audience
+        labels = {
+            'decision': 'Décision',
+        }
         fields = [
             'dossier', 'avocat', 'date_audience',
-            'tribunal', 'statut', 'observations', 'resultat'
+            'tribunal', 'statut', 'decision', 'observations', 'resultat'
         ]
         widgets = {
             'dossier': forms.Select(),
@@ -21,6 +24,7 @@ class AudienceForm(forms.ModelForm):
             ),
             'tribunal': forms.TextInput(attrs={'placeholder': 'Ex: Tribunal de Commerce Casablanca'}),
             'statut': forms.Select(),
+            'decision': forms.Select(),
             'observations': forms.Textarea(attrs={'placeholder': 'Observations...', 'rows': 3}),
             'resultat': forms.Textarea(attrs={'placeholder': 'Résultat de l audience...', 'rows': 3}),
         }
@@ -39,3 +43,15 @@ class AudienceForm(forms.ModelForm):
             self.fields['dossier'].queryset = Dossier.objects.filter(
                 avocat_responsable=self.user
             )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        statut = cleaned_data.get('statut')
+        decision = cleaned_data.get('decision')
+
+        if statut == 'tenue' and not decision:
+            self.add_error('decision', 'Choisissez gagnée ou perdue.')
+        if statut != 'tenue':
+            cleaned_data['decision'] = ''
+
+        return cleaned_data
